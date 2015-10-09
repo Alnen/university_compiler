@@ -1,0 +1,18 @@
+set(SOURCE
+   ${SOURCE} 
+   PARENT_SCOPE
+)
+
+set(HEADERS
+   ${HEADERS}
+   ${CMAKE_CURRENT_SOURCE_DIR}/include/
+   PARENT_SCOPE
+)
+
+set(TEST_SOURCES
+   ${TEST_SOURCES}
+   ${CMAKE_CURRENT_SOURCE_DIR}/test/Map_test.cpp
+   PARENT_SCOPE
+)
+
+message(STATUS "child :" ${SOURCE} ${HEADERS} ${TEST_SOURCES})
