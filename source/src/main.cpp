@@ -4,6 +4,7 @@
 
 #include "Map.h"
 #include "DFA.h"
+#include "RegexAST.h"
 
 int main (int argc, char** argv)
 {

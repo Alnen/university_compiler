@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (Compilel)
+project (Compiler)
 
 set(G_TEST_SOURCE_DIR "external_libs/googletest/googletest/include")
 set(G_TEST_DIR "external_libs/googletest/googletest")
@@ -30,4 +30,3 @@ add_executable(compiler ${PROGRAM_MAIN} ${SOURCE})
 add_executable(gtest_exec ${TEST_MAIN} ${TEST_SOURCES}  ${SOURCE})
 target_link_libraries(gtest_exec gtest)
 target_link_libraries(gtest_exec pthread)
-#target_link_libraries(compiler ${G_TEST_DIR}/my_build/libgtest-main.a)
