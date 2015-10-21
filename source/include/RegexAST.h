@@ -3,9 +3,11 @@
 
 #include <iosfwd>
 #include <iomanip>
+#include <list>
 #include <memory>
 #include <string>
-#include <list>
+#include <vector>
+
 
 namespace Lexer {
 namespace RegexAST {
@@ -26,6 +28,15 @@ struct BasicNode
     BasicNode(RegexASTType type): m_type(type) {}
     virtual void print(std::ostream& out, size_t offset) = 0;
     virtual ~BasicNode() {}
+};
+
+struct BasicLeaf : public BasicNode
+{
+    using LeafId = int;
+
+    LeafId m_id;
+
+    BasicLeaf(RegexASTType type, LeafId id): BasicNode(type), m_id(id) {}
 };
 
 std::ostream& operator<<(std::ostream& out, BasicNode& elem);
@@ -83,11 +94,12 @@ struct CatNode : public BasicNode
     }
 };
 
-struct CharCheckNode : public BasicNode
+struct CharCheckNode : public BasicLeaf
 {
     char m_elem;
-    CharCheckNode(char elem):
-        BasicNode(RegexASTType::SINGLE_CHAR),
+
+    CharCheckNode(LeafId id, char elem):
+        BasicLeaf(RegexASTType::SINGLE_CHAR, id),
         m_elem(elem)
     {}
 
@@ -97,35 +109,29 @@ struct CharCheckNode : public BasicNode
     }
 };
 
-struct CharClassCheckNode : public BasicNode
+struct CharClassCheckNode : public BasicLeaf
 {
-    std::unique_ptr<BasicNode> m_elem;
+    using CharRange = std::pair<char, char>;
+    std::vector<char> m_charChecks;
+    std::vector<CharRange> m_charRangeChecks;
 
-    CharClassCheckNode(std::unique_ptr<BasicNode>&& elem):
-        BasicNode(RegexASTType::CHAR_CLASS),
-        m_elem(std::move(elem))
+    CharClassCheckNode(LeafId id):
+        BasicLeaf(RegexASTType::CHAR_CLASS, id)
     {}
 
     void print(std::ostream& out, size_t offset)
     {
         out << std::string(offset, ' ') << "CharClassCheckNode"  << std::endl;
-        m_elem.get()->print(out, offset+4);
     }
-};
 
-struct CharRangeCheckNode : public BasicNode
-{
-    char m_from;
-    char m_to;
-    CharRangeCheckNode(char from, char to):
-        BasicNode(RegexASTType::CHAR_RANGE),
-        m_from(from),
-        m_to(to)
-    {}
-
-    void print(std::ostream& out, size_t offset)
+    void addChar(char sybmol)
     {
-        out << std::string(offset, ' ') << "CharClassCheckNode : " << m_from << '-' << m_to << std::endl;
+        m_charChecks.push_back(sybmol);
+    }
+
+    void addCharRange(char from, char to)
+    {
+        m_charRangeChecks.emplace_back(from, to);
     }
 };
 
@@ -167,8 +173,8 @@ struct parse_asnswer_t
     parse_asnswer_t& operator=(const parse_asnswer_t&) = delete;
 };
 
-parse_asnswer_t parse_char_sequence_element(const std::string& regex, size_t offset);
-parse_asnswer_t parse_char_sequence(const std::string& regex, size_t offset);
+parse_asnswer_t parse_char_sequence_element(const std::string& regex, size_t offset, CharClassCheckNode& node);
+parse_asnswer_t parse_char_sequence(const std::string& regex, size_t offset, CharClassCheckNode& node);
 parse_asnswer_t parse_char_class(const std::string& regex, size_t offset);
 parse_asnswer_t parse_char(const std::string& regex, size_t offset);
 parse_asnswer_t parse_group(const std::string& regex, size_t offset);
