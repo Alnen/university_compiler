@@ -8,15 +8,39 @@
 
 using namespace Lexer::RegexAST;
 
-class RegexASTTest : public testing::Test
+class RegexToASTParserTest : public RegexToASTParser
 {
+public:
+    void resetIdGenerator() { m_idGenerator = 0; }
+
+    parse_asnswer_t parse_char_sequence_element(const std::string& regex, size_t offset, CharClassCheckNode& node) { return RegexToASTParser::parse_char_sequence_element(regex, offset, node); }
+    parse_asnswer_t parse_char_sequence(const std::string& regex, size_t offset, CharClassCheckNode& node) { return RegexToASTParser::parse_char_sequence(regex, offset, node); }
+    parse_asnswer_t parse_char_class(const std::string& regex, size_t offset) { return RegexToASTParser::parse_char_class(regex, offset); }
+    parse_asnswer_t parse_char(const std::string& regex, size_t offset) { return RegexToASTParser::parse_char(regex, offset); }
+    parse_asnswer_t parse_group(const std::string& regex, size_t offset) { return RegexToASTParser::parse_group(regex, offset); }
+    parse_asnswer_t parse_single_element(const std::string& regex, size_t offset) { return RegexToASTParser::parse_single_element(regex, offset); }
+    parse_asnswer_t parse_zero_or_more(const std::string& regex, size_t offset) { return RegexToASTParser::parse_zero_or_more(regex, offset); }
+    parse_asnswer_t parse_sequence(const std::string& regex, size_t offset) { return RegexToASTParser::parse_sequence(regex, offset); }
+    parse_asnswer_t parse_or(const std::string& regex, size_t offset) { return RegexToASTParser::parse_or(regex, offset); }
+
 
 };
 
-//parse_asnswer_t parse_char(const std::string& regex, size_t offset);
+class RegexASTTest : public testing::Test
+{
+protected:
+    virtual void SetUp()
+    {
+        parser.resetIdGenerator();
+    }
+
+    RegexToASTParserTest parser;
+};
+
+//RegexToASTParser::parse_asnswer_t RegexToASTParser::parse_char(const std::string& regex, size_t offset);
 TEST_F(RegexASTTest, parseChar_ifPassedSingleCharShouldSuccess)
 {
-    parse_asnswer_t result = parse_char("a", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char("a", 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(1, result.m_offset);
     CharCheckNode* ast = dynamic_cast<CharCheckNode*>(result.m_ast.get());
@@ -26,15 +50,15 @@ TEST_F(RegexASTTest, parseChar_ifPassedSingleCharShouldSuccess)
 
 TEST_F(RegexASTTest, parseChar_ifPassedEmptyStringShouldFail)
 {
-    parse_asnswer_t result = parse_char("", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char("", 0);
     EXPECT_FALSE(result.m_success);
     EXPECT_EQ(0, result.m_offset);
 }
 
-//parse_asnswer_t parse_char_sequence_element(const std::string& regex, size_t offset);
+//RegexToASTParser::parse_asnswer_t parse_char_sequence_element(const std::string& regex, size_t offset);
 TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedSingleCharShouldSuccess)
 {
-    parse_asnswer_t result = parse_char("a", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char("a", 0);
     EXPECT_TRUE(result.m_success);
     CharCheckNode* ast = dynamic_cast<CharCheckNode*>(result.m_ast.get());
     EXPECT_NE(nullptr, ast);
@@ -46,7 +70,7 @@ TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedCharRangeShouldSuccess)
 {
     std::string regex("a-z");
     std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
-    parse_asnswer_t result = parse_char_sequence_element("a-z", 0, *char_class.get());
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char_sequence_element("a-z", 0, *char_class.get());
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(regex.size(), result.m_offset);
     EXPECT_EQ(0, char_class->m_charChecks.size());
@@ -60,7 +84,7 @@ TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedEscapedCharShouldSuccess)
 {
     std::string regex("\\]");
     std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
-    parse_asnswer_t result = parse_char_sequence_element(regex, 0, *char_class.get());
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char_sequence_element(regex, 0, *char_class.get());
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(regex.size(), result.m_offset);
     EXPECT_EQ(1, char_class->m_charChecks.size());
@@ -72,19 +96,19 @@ TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedEmptyStringShouldFail)
 {
     std::string regex("");
     std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
-    parse_asnswer_t result = parse_char_sequence_element(regex, 0, *char_class.get());
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char_sequence_element(regex, 0, *char_class.get());
     EXPECT_FALSE(result.m_success);
     EXPECT_EQ(0, result.m_offset);
     EXPECT_EQ(0, char_class->m_charChecks.size());
     ASSERT_EQ(0, char_class->m_charRangeChecks.size());
 }
 
-//parse_asnswer_t parse_char_sequence(const std::string& regex, size_t offset);
+//RegexToASTParser::parse_asnswer_t parse_char_sequence(const std::string& regex, size_t offset);
 TEST_F(RegexASTTest, parseCharSequence_ifPassedSingleCharAndCharRangeShouldSuccess)
 {
     std::string regex("ab-z");
     std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
-    parse_asnswer_t result = parse_char_sequence("ab-z", 0, *char_class.get());
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char_sequence("ab-z", 0, *char_class.get());
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(regex.size(), result.m_offset);
     EXPECT_EQ(1, char_class->m_charChecks.size());
@@ -98,15 +122,15 @@ TEST_F(RegexASTTest, parseCharSequence_ifPassedSingleCharAndCharRangeShouldSucce
 TEST_F(RegexASTTest, parseCharSequence_ifPassedEmptyStringShouldFail)
 {
     std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
-    parse_asnswer_t result = parse_char_sequence("", 0, *char_class.get());
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char_sequence("", 0, *char_class.get());
     EXPECT_FALSE(result.m_success);
     EXPECT_EQ(0, result.m_offset);
 }
 
-//parse_asnswer_t parse_char_class(const std::string& regex, size_t offset);
+//RegexToASTParser::parse_asnswer_t parse_char_class(const std::string& regex, size_t offset);
 TEST_F(RegexASTTest, parseCharClass_ifPassedSingleCharAndCharRangeShouldSuccess)
 {
-    parse_asnswer_t result = parse_char_class("[ab-z]", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char_class("[ab-z]", 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(6, result.m_offset);
     CharClassCheckNode* char_class = dynamic_cast<CharClassCheckNode*>(result.m_ast.get());
@@ -121,18 +145,18 @@ TEST_F(RegexASTTest, parseCharClass_ifPassedSingleCharAndCharRangeShouldSuccess)
 
 TEST_F(RegexASTTest, parseCharClass_ifPassedEmptyStringShouldFail)
 {
-    parse_asnswer_t result = parse_char_class("", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_char_class("", 0);
     EXPECT_FALSE(result.m_success);
     EXPECT_EQ(0, result.m_offset);
 }
 
-//parse_asnswer_t parse_group(const std::string& regex, size_t offset);
+//RegexToASTParser::parse_asnswer_t parse_group(const std::string& regex, size_t offset);
 // TODO
 
-//parse_asnswer_t parse_single_element(const std::string& regex, size_t offset);
+//RegexToASTParser::parse_asnswer_t parse_single_element(const std::string& regex, size_t offset);
 TEST_F(RegexASTTest, parseSingleElement_ifPassedSingleCharShouldSuccess)
 {
-    parse_asnswer_t result = parse_single_element("a", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_single_element("a", 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(1, result.m_offset);
     CharCheckNode* repeated_base_ast = dynamic_cast<CharCheckNode*>(result.m_ast.get());
@@ -142,7 +166,7 @@ TEST_F(RegexASTTest, parseSingleElement_ifPassedSingleCharShouldSuccess)
 
 TEST_F(RegexASTTest, parseSingleElement_ifPassedCharClassShouldSuccess)
 {
-    parse_asnswer_t result = parse_single_element("[ab-z]", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_single_element("[ab-z]", 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(6, result.m_offset);
     CharClassCheckNode* char_class = dynamic_cast<CharClassCheckNode*>(result.m_ast.get());
@@ -156,7 +180,7 @@ TEST_F(RegexASTTest, parseSingleElement_ifPassedCharClassShouldSuccess)
 
 TEST_F(RegexASTTest, parseSingleElement_ifPassedEscapedCharClassShouldSuccesss)
 {
-    parse_asnswer_t result = parse_single_element("\\n", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_single_element("\\n", 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(2, result.m_offset);
     CharCheckNode* repeated_base_ast = dynamic_cast<CharCheckNode*>(result.m_ast.get());
@@ -166,15 +190,15 @@ TEST_F(RegexASTTest, parseSingleElement_ifPassedEscapedCharClassShouldSuccesss)
 
 TEST_F(RegexASTTest, parseSingleElement_ifPassedEmptyStringShouldFail)
 {
-    parse_asnswer_t result = parse_single_element("", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_single_element("", 0);
     EXPECT_FALSE(result.m_success);
     EXPECT_EQ(0, result.m_offset);
 }
 
-//parse_asnswer_t parse_zero_or_more(const std::string& regex, size_t offset);
+//RegexToASTParser::parse_asnswer_t parse_zero_or_more(const std::string& regex, size_t offset);
 TEST_F(RegexASTTest, parseZeroOrMore_ifPassedSingleCharShouldSuccess)
 {
-    parse_asnswer_t result = parse_zero_or_more("a*", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_zero_or_more("a*", 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(2, result.m_offset);
     StarNode* base_ast = dynamic_cast<StarNode*>(result.m_ast.get());
@@ -186,7 +210,7 @@ TEST_F(RegexASTTest, parseZeroOrMore_ifPassedSingleCharShouldSuccess)
 
 TEST_F(RegexASTTest, parseZeroOrMore_ifPassedCharClassShouldSuccess)
 {
-    parse_asnswer_t result = parse_zero_or_more("[ab-z]*", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_zero_or_more("[ab-z]*", 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(7, result.m_offset);
     StarNode* base_ast = dynamic_cast<StarNode*>(result.m_ast.get());
@@ -203,16 +227,16 @@ TEST_F(RegexASTTest, parseZeroOrMore_ifPassedCharClassShouldSuccess)
 
 TEST_F(RegexASTTest, parseZeroOrMore_ifPassedEmptyStringShouldFail)
 {
-    parse_asnswer_t result = parse_zero_or_more("", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_zero_or_more("", 0);
     EXPECT_FALSE(result.m_success);
     EXPECT_EQ(0, result.m_offset);
 }
 
-//parse_asnswer_t parse_sequence(const std::string& regex, size_t offset);
+//RegexToASTParser::parse_asnswer_t parse_sequence(const std::string& regex, size_t offset);
 
 TEST_F(RegexASTTest, parseSequence_ifPassedCorrectSequenceShouldSuccess)
 {
-    parse_asnswer_t result = parse_sequence("a[ab-z]*d", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_sequence("a[ab-z]*d", 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(9, result.m_offset);
     CatNode* top_base_ast = dynamic_cast<CatNode*>(result.m_ast.get());
@@ -241,16 +265,16 @@ TEST_F(RegexASTTest, parseSequence_ifPassedCorrectSequenceShouldSuccess)
 
 TEST_F(RegexASTTest, parseSequence_ifPassedEmptyStringShouldFail)
 {
-    parse_asnswer_t result = parse_sequence("", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_sequence("", 0);
     EXPECT_FALSE(result.m_success);
     EXPECT_EQ(0, result.m_offset);
 }
 #include <iostream>
-//parse_asnswer_t parse_or(const std::string& regex, size_t offset);
+//RegexToASTParser::parse_asnswer_t parse_or(const std::string& regex, size_t offset);
 TEST_F(RegexASTTest, parseOr_ifPassedCharClassShouldSuccess)
 {
     std::string regex("(a[ab-z]*d|d)");
-    parse_asnswer_t result = parse_or(regex, 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_or(regex, 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(regex.size(), result.m_offset);
     OrNode* topmost_base_ast = dynamic_cast<OrNode*>(result.m_ast.get());
@@ -282,16 +306,16 @@ TEST_F(RegexASTTest, parseOr_ifPassedCharClassShouldSuccess)
 
 TEST_F(RegexASTTest, parseOr_ifPassedEmptyStringShouldFail)
 {
-    parse_asnswer_t result = parse_or("", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_or("", 0);
     EXPECT_FALSE(result.m_success);
     EXPECT_EQ(0, result.m_offset);
 }
 
-//parse_asnswer_t parse_regex(const std::string& regex);
+//RegexToASTParser::parse_asnswer_t parse_regex(const std::string& regex);
 TEST_F(RegexASTTest, parseRegex_ifPassedCharClassShouldSuccess)
 {
     std::string regex("[a-zA-Z][a-zA-Z0-9]*");
-    parse_asnswer_t result = parse_or(regex, 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_or(regex, 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(regex.size(), result.m_offset);
 }
@@ -299,7 +323,7 @@ TEST_F(RegexASTTest, parseRegex_ifPassedCharClassShouldSuccess)
 TEST_F(RegexASTTest, parseRegex_ifPassedCharClassShouldSuccess1)
 {
     std::string regex("[a-zA-Z][a-zA-Z0-9]*");
-    parse_asnswer_t result = parse_or(regex, 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_or(regex, 0);
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(regex.size(), result.m_offset);
 }
@@ -307,7 +331,7 @@ TEST_F(RegexASTTest, parseRegex_ifPassedCharClassShouldSuccess1)
 
 TEST_F(RegexASTTest, parseRegex_ifPassedEmptyStringShouldFail)
 {
-    parse_asnswer_t result = parse_or("", 0);
+    RegexToASTParser::parse_asnswer_t result = parser.parse_or("", 0);
     EXPECT_FALSE(result.m_success);
     EXPECT_EQ(0, result.m_offset);
 }
