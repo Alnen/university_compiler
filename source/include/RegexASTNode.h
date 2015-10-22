@@ -1,13 +1,11 @@
-#ifndef REGEXAST_H
-#define REGEXAST_H
+#ifndef REGEXASTNODE_H
+#define REGEXASTNODE_H
 
 #include <iosfwd>
 #include <iomanip>
-#include <list>
 #include <memory>
 #include <string>
 #include <vector>
-
 
 namespace Lexer {
 namespace RegexAST {
@@ -133,71 +131,8 @@ struct CharClassCheckNode : public BasicLeaf
     }
 };
 
-class RegexToASTParser
-{
-public:
-    struct parse_asnswer_t
-    {
-        bool m_success;
-        std::unique_ptr<BasicNode> m_ast;
-        size_t m_offset;
-
-        parse_asnswer_t(size_t offset = 0):
-            m_success(false),
-            m_ast(),
-            m_offset(offset)
-        {
-        }
-
-        parse_asnswer_t(bool success, std::unique_ptr<BasicNode>&& ast, size_t offset):
-            m_success(success),
-            m_ast(std::move(ast)),
-            m_offset(offset)
-        {
-        }
-
-        parse_asnswer_t(parse_asnswer_t&& rhs):
-            m_success(rhs.m_success),
-            m_ast(std::move(rhs.m_ast)),
-            m_offset(rhs.m_offset)
-        {
-        }
-
-        void operator=(parse_asnswer_t&& rhs)
-        {
-            m_success = rhs.m_success;
-            m_ast = std::move(rhs.m_ast);
-            m_offset = rhs.m_offset;
-        }
-
-        parse_asnswer_t(const parse_asnswer_t&) = delete;
-        parse_asnswer_t& operator=(const parse_asnswer_t&) = delete;
-    };
-
-    parse_asnswer_t parse(const std::string& regex);
-
-protected:
-    parse_asnswer_t parse_char_sequence_element(const std::string& regex, size_t offset, CharClassCheckNode& node);
-    parse_asnswer_t parse_char_sequence(const std::string& regex, size_t offset, CharClassCheckNode& node);
-    parse_asnswer_t parse_char_class(const std::string& regex, size_t offset);
-    parse_asnswer_t parse_char(const std::string& regex, size_t offset);
-    parse_asnswer_t parse_group(const std::string& regex, size_t offset);
-    parse_asnswer_t parse_single_element(const std::string& regex, size_t offset);
-    parse_asnswer_t parse_zero_or_more(const std::string& regex, size_t offset);
-    parse_asnswer_t parse_sequence(const std::string& regex, size_t offset);
-    parse_asnswer_t parse_or(const std::string& regex, size_t offset);
-
-    BasicLeaf::LeafId m_idGenerator = 0;
-};
-
-
-
-
-
-
-
 std::ostream& operator<<(std::ostream& out, BasicNode& elem);
 }
 }
 
-#endif // REGEXAST_H
+#endif // REGEXASTNODE_H
