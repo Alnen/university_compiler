@@ -16,21 +16,26 @@ enum class RegexASTType
     OR,
     STAR,
     SINGLE_CHAR,
-    CHAR_CLASS,
-    CHAR_RANGE
+    CHAR_CLASS
 };
 
 struct BasicNode
-{
-    const RegexASTType m_type;
+{  
+    using IndexType = int;
+
     BasicNode(RegexASTType type): m_type(type) {}
     virtual void print(std::ostream& out, size_t offset) = 0;
     virtual ~BasicNode() {}
+
+    const RegexASTType m_type;
+    std::vector<IndexType>  m_firstpos;
+    std::vector<IndexType>  m_lastpos;
+    bool                    m_nullable = false;
 };
 
 struct BasicLeaf : public BasicNode
 {
-    using LeafId = int;
+    using LeafId = BasicNode::IndexType;
 
     LeafId m_id;
 
@@ -133,6 +138,7 @@ struct CharClassCheckNode : public BasicLeaf
 
 std::ostream& operator<<(std::ostream& out, BasicNode& elem);
 }
+
 }
 
 #endif // REGEXASTNODE_H

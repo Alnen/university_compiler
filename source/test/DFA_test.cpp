@@ -9,11 +9,11 @@
 class DFATest : public testing::Test
 {
 protected:
-std::unique_ptr<DFA<int, char>> pDFA;
+std::unique_ptr<DFA<int, int>> pDFA;
 
 
 virtual void SetUp() {
-    pDFA.reset(new DFA<int, char>());
+    pDFA.reset(new DFA<int, int>());
 }
 
 virtual void TearDown()

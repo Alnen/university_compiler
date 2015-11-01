@@ -231,6 +231,7 @@ RegexToASTParser::parse_asnswer_t RegexToASTParser::parse_or(const std::string& 
 
 RegexToASTParser::parse_asnswer_t RegexToASTParser::parse(const std::string& regex)
 {
+    m_offset = 0;
     return parse_or(regex);
 }
 

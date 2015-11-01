@@ -38,7 +38,7 @@ virtual void TearDown()
 
 };
 
-TEST_F(MapTest, MappingSouldWork)
+/*TEST_F(MapTest, MappingSouldWork)
 {
     std::vector<int> keys = {10, 20, 30};
     std::vector<int> values = {1, 2, 3};
@@ -64,7 +64,7 @@ TEST_F(MapTest, SizeOfBothVectorsShouldBeEqual)\
     EXPECT_EQ(1, pMap->size());
     EXPECT_EQ(1, pMap->value_size());
     EXPECT_EQ(1, pMap->key_size());
-}
+}*/
 
 
 #endif // MAP_TEST_CPP
