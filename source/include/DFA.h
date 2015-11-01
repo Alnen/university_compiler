@@ -143,7 +143,8 @@ void DFA<State, Checker>::print_plantuml(std::ostream& out)
             out << boost::get<0>(from_state) << " -->" << boost::get<1>(input_mapping) << ":";
             boost::get<0>(input_mapping).get()->print(out);
             out << "\n";
-            if (std::find(m_finalStates.begin(), m_finalStates.end(), boost::get<1>(input_mapping)) != m_finalStates.end())
+            if ( boost::get<0>(from_state) != boost::get<1>(input_mapping) &&
+                 std::find(m_finalStates.begin(), m_finalStates.end(), boost::get<1>(input_mapping)) != m_finalStates.end())
             {
                 out << boost::get<1>(input_mapping) << " --> [*] : Success\n";
             }

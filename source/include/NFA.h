@@ -160,7 +160,9 @@ DFA<State, Checker> NFA<State, Checker>::convert()
                     Utility::set_union(nextState.first, boost::get<1>(input));
                     for (auto it2 = ++currentState.first.begin(); it2 != currentState.first.end(); ++it2)
                     {
+                        if (m_STM[*it2] == nullptr) continue;
                         auto& input_seq = (*m_STM[*it2]);
+
                         if (std::find_if(input_seq.key_begin(), input_seq.key_end(), [&input](const auto& inputInCont){ return boost::get<0>(input) == inputInCont; }) != input_seq.key_end())
                         {
                             Utility::set_union(nextState.first, (*m_STM[*it2])[boost::get<0>(input)]);
