@@ -26,6 +26,15 @@ public:
     virtual TokenPtr operator()(TokenPtr token) = 0;
 };
 
+class IDHandler : public TokenHandler
+{
+public:
+    virtual TokenPtr operator()(TokenPtr a) override
+    {
+        return a;
+    }
+};
+
 class DefaultErrorHandler : public TokenHandler
 {
 public:
