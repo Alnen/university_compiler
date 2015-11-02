@@ -9,56 +9,23 @@
 #include "Map.h"
 #include "RegexASTAnnotationEvaluator.h"
 
+#include <boost/container/flat_map.hpp>
+
 template <class State, class _Checker>
 class DFA
 {
 public:     
     using StateType = State;
     using CheckerType = _Checker;
-    using InputChecker = Lexer::IInputChecker;
-    using InputCollection = Map<CheckerType, State>;
-    using StateTransitionTable = Map<State, std::shared_ptr<InputCollection>>;
+    using InputCollection = boost::container::flat_map<CheckerType, State>;
+    using StateTransitionTable = boost::container::flat_map<State, std::shared_ptr<InputCollection>>;
 
-protected:
-    class Walker
-    {
-        void reset();
-        bool goNextState(char input);
-
-        StateType getCurrentState() const;
-        bool isCurrentStateFinal() const;
-
-        Walker(const Walker&) = delete;
-        Walker& operator=(const Walker&) = delete;
-
-    protected:
-        Walker(DFA* pDFA);
-
-        DFA* m_pDFA;
-        StateType m_currentState;
-    };
-
-public:
     DFA();
+    DFA(DFA&& rhs);
+    DFA& operator=(DFA&& rhs);
+
     DFA(const DFA&) = delete;
     DFA& operator=(const DFA&) = delete;
-
-    DFA(DFA&& rhs):
-        m_startingState(rhs.m_startingState),
-        m_states(std::move(rhs.m_states)),
-        m_finalStates(std::move(rhs.m_finalStates)),
-        m_STM(std::move(rhs.m_STM))
-    {
-    }
-
-    DFA& operator=(DFA&& rhs)
-    {
-        m_startingState = rhs.m_startingState;
-        m_states = std::move(rhs.m_states);
-        m_finalStates = std::move(rhs.m_finalStates);
-        m_STM = std::move(rhs.m_STM);
-        return *this;
-    }
 
     void setStartState(StateType state);
     void addState(StateType state);
@@ -66,15 +33,13 @@ public:
     bool addStateTransition(StateType begin_state, CheckerType&& value, StateType end_state);
     bool addStateTransition(StateType begin_state, CheckerType&  value, StateType end_state);
     
-    std::ostream& operator<<(std::ostream& out);
-    void print_plantuml(std::ostream& out);
+    void print(std::ostream& out) const;
+    void print_plantuml(std::ostream& out) const;
+    StateType startState() const { return m_startingState; }
 
-    Walker getWalker() const;
-    //combine operators
-    
+    std::pair<const InputCollection*, bool> operator[](State state) const;
+
 protected:
-    void print(std::ostream& out);
-
     StateType                   m_startingState;
     std::vector<StateType>      m_states;
     std::vector<StateType>      m_finalStates;
@@ -84,23 +49,35 @@ protected:
 
 //DFA
 template <class State, class Checker>
-std::ostream& operator<<(std::ostream& out, DFA<State, Checker>& dfa)
+DFA<State, Checker>::DFA(DFA&& rhs):
+    m_startingState(std::move(rhs.m_startingState)),
+    m_states(std::move(rhs.m_states)),
+    m_finalStates(std::move(rhs.m_finalStates)),
+    m_STM(std::move(rhs.m_STM))
 {
-    dfa << out;
+}
+
+template <class State, class Checker>
+DFA<State, Checker>&
+DFA<State, Checker>::operator=(DFA&& rhs)
+{
+    m_startingState = rhs.m_startingState;
+    m_states = std::move(rhs.m_states);
+    m_finalStates = std::move(rhs.m_finalStates);
+    m_STM = std::move(rhs.m_STM);
+    return *this;
+}
+
+template <class State, class Checker>
+std::ostream&
+operator<<(std::ostream& out, const DFA<State, Checker>& dfa)
+{
+    dfa.print(out);
     return  out;
 }
 
-
 template <class State, class Checker>
-std::ostream& DFA<State, Checker>::operator<<(std::ostream& out)
-{
-    print(out);
-    return  out;
-}
-
-
-template <class State, class Checker>
-void DFA<State, Checker>::print(std::ostream& out)
+void DFA<State, Checker>::print(std::ostream& out) const
 {
     out << "Starting state: " << m_startingState << std::endl;
     //
@@ -121,32 +98,32 @@ void DFA<State, Checker>::print(std::ostream& out)
     out << "STM" << std::endl;
     for (const auto& from_state : m_STM)
     {
-        out << boost::get<0>(from_state) << " =>" << std::endl;
-        for (const auto& input_mapping : *boost::get<1>(from_state))
+        out << from_state.first << " =>" << std::endl;
+        for (const auto& input_mapping : *from_state.second)
         {
             out << std::string(4, ' ');
-            boost::get<0>(input_mapping).get()->print(out);
-            out <<  " =>" << boost::get<1>(input_mapping) <<  std::endl;
+            input_mapping.first->print(out);
+            out <<  " =>" << input_mapping.second <<  std::endl;
         }
     }
 }
 
 template <class State, class Checker>
-void DFA<State, Checker>::print_plantuml(std::ostream& out)
+void DFA<State, Checker>::print_plantuml(std::ostream& out) const
 {
     out << "@startuml\n";
     out << "[*] --> 0\n";
     for (const auto& from_state : m_STM)
     {
-        for (const auto& input_mapping : *boost::get<1>(from_state))
+        for (const auto& input_mapping : *from_state.second)
         {
-            out << boost::get<0>(from_state) << " -->" << boost::get<1>(input_mapping) << ":";
-            boost::get<0>(input_mapping).get()->print(out);
+            out << from_state.first << " -->" << input_mapping.second << ":";
+            input_mapping.first->print(out);
             out << "\n";
-            if ( boost::get<0>(from_state) != boost::get<1>(input_mapping) &&
-                 std::find(m_finalStates.begin(), m_finalStates.end(), boost::get<1>(input_mapping)) != m_finalStates.end())
+            if ( from_state.first != input_mapping.second &&
+                 std::find(m_finalStates.begin(), m_finalStates.end(), input_mapping.second) != m_finalStates.end())
             {
-                out << boost::get<1>(input_mapping) << " --> [*] : Success\n";
+                out << input_mapping.second << " --> [*] : Success\n";
             }
         }
     }
@@ -202,45 +179,18 @@ DFA<State, Checker>::addStateTransition(StateType begin_state, CheckerType& valu
     return true;
 }
 
-
 template <class State, class Checker>
-typename
-DFA<State, Checker>::Walker DFA<State, Checker>::getWalker() const
+std::pair<const typename DFA<State, Checker>::InputCollection*, bool>
+DFA<State, Checker>::operator[](State state) const
 {
-    return Walker(this);
+    const InputCollection* input_mapping = m_STM[state].get();
+    if (input_mapping == nullptr)
+    {
+        return std::make_pair(input_mapping, false);
+    }
+    else
+    {
+        return std::make_pair(input_mapping, true);
+    }
 }
-
-// DFA::WALKER
-template <class State, class Checker>
-void
-DFA<State, Checker>::Walker::reset()
-{
-    m_currentState = m_pDFA->m_startingState;
-}
-
-template <class State, class Checker>
-bool
-DFA<State, Checker>::Walker::goNextState(char input)
-{
-
-    State next_state = (*m_pDFA).m_STM[m_currentState];
-    m_currentState = next_state;
-    return true;
-}
-
-template <class State, class Checker>
-typename DFA<State, Checker>::StateType
-DFA<State, Checker>::Walker::getCurrentState() const
-{
-    return m_currentState;
-}
-
-template <class State, class Checker>
-bool
-DFA<State, Checker>::Walker::isCurrentStateFinal() const
-{
-    auto position = std::find((*m_pDFA).m_finalStateList.begin(), (*m_pDFA).m_finalStateList.end(), m_currentState);
-    return (position != (*m_pDFA).m_finalStateList.end());
-}
-
 #endif /* DFA_h */
