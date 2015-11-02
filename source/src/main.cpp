@@ -117,7 +117,7 @@ int main (int argc, char** argv)
 
     rules.emplace_back(TokenType::OPPLUS, std::string("+#"), std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::OPMINUS, std::string("-#"), std::move(std::make_unique<IDHandler>()));
-    rules.emplace_back(TokenType::OPMUL, std::string("\*#"), std::move(std::make_unique<IDHandler>()));
+    rules.emplace_back(TokenType::OPMUL, std::string("\\*#"), std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::OPDIV, std::string("/#"), std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::OPGT, std::string(">#"), std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::OPLT, std::string("<#"), std::move(std::make_unique<IDHandler>()));
@@ -135,8 +135,8 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::SRSM, std::string(";#"), std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::SRCN, std::string(":#"), std::move(std::make_unique<IDHandler>()));
 
-    rules.emplace_back(TokenType::SRSP, std::string("\.#"), std::move(std::make_unique<IDHandler>()));
-    rules.emplace_back(TokenType::SRDP, std::string("\.\.#"), std::move(std::make_unique<IDHandler>()));
+    rules.emplace_back(TokenType::SRSP, std::string(".#"), std::move(std::make_unique<IDHandler>()));
+    rules.emplace_back(TokenType::SRDP, std::string("..#"), std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::SRCA, std::string(",#"), std::move(std::make_unique<IDHandler>()));
 
     rules.emplace_back(TokenType::RWDN, std::string(".denominator#"), std::move(std::make_unique<IDHandler>()));
