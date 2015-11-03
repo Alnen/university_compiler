@@ -2,11 +2,13 @@
 #define REGEXASTANNOTATIONEVALUATOR_TEST_CPP
 
 #include "gtest/gtest.h"
-#include "RegexASTAnnotationEvaluator.h"
-#include "RegexASTParser.h"
-#include "RegexASTNode.h"
+
 #include <memory>
 
+#include "RegexAST/RegexASTAnnotationEvaluator.h"
+#include "RegexAST/RegexASTParser.h"
+#include "RegexAST/RegexASTNode.h"
+#include "InputChecker/InputHandler.h"
 #include <Utility.h>
 
 using namespace Lexer::RegexAST;

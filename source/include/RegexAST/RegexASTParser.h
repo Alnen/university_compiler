@@ -48,8 +48,8 @@ public:
     parse_asnswer_t parse(const std::string& regex);
 
 protected:
-    bool            parse_char_sequence_element(const std::string& regex, CharClassCheckNode& node);
-    bool            parse_char_sequence(const std::string& regex, CharClassCheckNode& node);
+    bool            parse_char_sequence_element(const std::string& regex, CharClassCheckLeaf& node);
+    bool            parse_char_sequence(const std::string& regex, CharClassCheckLeaf& node);
     parse_asnswer_t parse_char_class(const std::string& regex);
     parse_asnswer_t parse_char(const std::string& regex);
     parse_asnswer_t parse_group(const std::string& regex);

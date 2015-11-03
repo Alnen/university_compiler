@@ -2,12 +2,15 @@
 #define REGEXASTTONFA_TEST_CPP
 
 #include "gtest/gtest.h"
-#include "RegexASTToNFA.h"
-#include "RegexASTAnnotationEvaluator.h"
-#include "RegexASTParser.h"
-#include "RegexASTNode.h"
-#include "NFA.h"
+
 #include <memory>
+
+#include "RegexAST/RegexASTToNFA.h"
+#include "RegexAST/RegexASTAnnotationEvaluator.h"
+#include "RegexAST/RegexASTParser.h"
+#include "RegexAST/RegexASTNode.h"
+#include "FiniteAutomata/NFA.h"
+#include "InputChecker/InputHandler.h"
 
 using namespace Lexer::RegexAST;
 using namespace Lexer;

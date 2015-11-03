@@ -1,7 +1,8 @@
 #include <memory>
 #include <boost/bimap.hpp>
 
-#include "Lexer.h"
+#include "Lexer/Lexer.h"
+#include "Lexer/TokenHandler.h"
 
 enum class TokenType
 {
@@ -71,10 +72,17 @@ enum class TokenType
     SRCA
 };
 
+class IDHandler : public Lexer::TokenHandler<TokenType>
+{
+public:
+    virtual TokenPtr operator()(TokenPtr a) override
+    {
+        return a;
+    }
+};
+
 int main (int argc, char** argv)
 {
-    using Lexer::IDHandler;
-
     // reserwed words map
     std::vector<boost::bimap<std::string, TokenType>::value_type> reserved_words_map_items =
     {

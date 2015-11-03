@@ -1,9 +1,9 @@
-#include "RegexASTParser.h"
+#include "RegexAST/RegexASTParser.h"
 
 namespace Lexer {
 namespace RegexAST {
 
-bool RegexToASTParser::parse_char_sequence_element(const std::string& regex, CharClassCheckNode& node)
+bool RegexToASTParser::parse_char_sequence_element(const std::string& regex, CharClassCheckLeaf& node)
 {
     if (m_offset+1 < regex.size() && regex[m_offset] == '\\')
     {
@@ -33,7 +33,7 @@ bool RegexToASTParser::parse_char_sequence_element(const std::string& regex, Cha
     }
 }
 
-bool RegexToASTParser::parse_char_sequence(const std::string& regex, CharClassCheckNode& node)
+bool RegexToASTParser::parse_char_sequence(const std::string& regex, CharClassCheckLeaf& node)
 {
     if (!parse_char_sequence_element(regex, node))
     {
@@ -56,7 +56,7 @@ RegexToASTParser::parse_asnswer_t RegexToASTParser::parse_char_class(const std::
         return parse_asnswer_t();
     }
 
-    std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( ++m_idGenerator );
+    std::unique_ptr<CharClassCheckLeaf> char_class = std::make_unique<CharClassCheckLeaf>( ++m_idGenerator );
     if (!parse_char_sequence(regex, *char_class.get()))
     {
         return parse_asnswer_t();
@@ -78,7 +78,7 @@ RegexToASTParser::parse_asnswer_t RegexToASTParser::parse_char(const std::string
 
     if (m_offset < regex.size())
     {
-        parse_asnswer_t answer(true, std::make_unique<CharCheckNode>(++m_idGenerator, regex[m_offset]));
+        parse_asnswer_t answer(true, std::make_unique<CharCheckLeaf>(++m_idGenerator, regex[m_offset]));
         m_offset += 1;
         return answer;
     }

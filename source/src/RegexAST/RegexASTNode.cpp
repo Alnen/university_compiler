@@ -1,4 +1,4 @@
-#include "RegexASTNode.h"
+#include "RegexAST/Node/BasicNode.h"
 
 namespace Lexer {
 namespace RegexAST {

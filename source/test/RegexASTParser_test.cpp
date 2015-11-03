@@ -2,7 +2,7 @@
 #define REGEXASTPARSER_TEST_CPP
 
 #include "gtest/gtest.h"
-#include "RegexASTParser.h"
+#include "RegexAST/RegexASTParser.h"
 
 #include <memory>
 
@@ -15,8 +15,8 @@ public:
     void resetOffset() { m_offset = 0; }
     size_t offset() { return m_offset; }
 
-    bool parse_char_sequence_element(const std::string& regex, CharClassCheckNode& node) { return RegexToASTParser::parse_char_sequence_element(regex, node); }
-    bool parse_char_sequence(const std::string& regex, CharClassCheckNode& node) { return RegexToASTParser::parse_char_sequence(regex, node); }
+    bool parse_char_sequence_element(const std::string& regex, CharClassCheckLeaf& node) { return RegexToASTParser::parse_char_sequence_element(regex, node); }
+    bool parse_char_sequence(const std::string& regex, CharClassCheckLeaf& node) { return RegexToASTParser::parse_char_sequence(regex, node); }
     parse_asnswer_t parse_char_class(const std::string& regex) { return RegexToASTParser::parse_char_class(regex); }
     parse_asnswer_t parse_char(const std::string& regex) { return RegexToASTParser::parse_char(regex); }
     parse_asnswer_t parse_group(const std::string& regex) { return RegexToASTParser::parse_group(regex); }
@@ -44,7 +44,7 @@ TEST_F(RegexASTTest, parseChar_ifPassedSingleCharShouldSuccess)
     RegexToASTParser::parse_asnswer_t result = parser.parse_char("a");
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(1, parser.offset());
-    CharCheckNode* ast = dynamic_cast<CharCheckNode*>(result.m_ast.get());
+    CharCheckLeaf* ast = dynamic_cast<CharCheckLeaf*>(result.m_ast.get());
     EXPECT_NE(nullptr, ast);
     EXPECT_EQ('a', ast->m_elem);
 }
@@ -61,7 +61,7 @@ TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedSingleCharShouldSuccess)
 {
     RegexToASTParser::parse_asnswer_t result = parser.parse_char("a");
     EXPECT_TRUE(result.m_success);
-    CharCheckNode* ast = dynamic_cast<CharCheckNode*>(result.m_ast.get());
+    CharCheckLeaf* ast = dynamic_cast<CharCheckLeaf*>(result.m_ast.get());
     EXPECT_NE(nullptr, ast);
     EXPECT_EQ('a', ast->m_elem);
     EXPECT_EQ(1, parser.offset());
@@ -70,7 +70,7 @@ TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedSingleCharShouldSuccess)
 TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedCharRangeShouldSuccess)
 {
     std::string regex("a-z");
-    std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
+    std::unique_ptr<CharClassCheckLeaf> char_class = std::make_unique<CharClassCheckLeaf>( 0 );
     EXPECT_TRUE(parser.parse_char_sequence_element("a-z", *char_class.get()));
     EXPECT_EQ(regex.size(), parser.offset());
     EXPECT_EQ(0, char_class->m_charChecks.size());
@@ -83,7 +83,7 @@ TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedCharRangeShouldSuccess)
 TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedEscapedCharShouldSuccess)
 {
     std::string regex("\\]");
-    std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
+    std::unique_ptr<CharClassCheckLeaf> char_class = std::make_unique<CharClassCheckLeaf>( 0 );
     EXPECT_TRUE(parser.parse_char_sequence_element(regex, *char_class.get()));
     EXPECT_EQ(regex.size(), parser.offset());
     EXPECT_EQ(1, char_class->m_charChecks.size());
@@ -94,7 +94,7 @@ TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedEscapedCharShouldSuccess)
 TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedEmptyStringShouldFail)
 {
     std::string regex("");
-    std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
+    std::unique_ptr<CharClassCheckLeaf> char_class = std::make_unique<CharClassCheckLeaf>( 0 );
     EXPECT_FALSE(parser.parse_char_sequence_element(regex, *char_class.get()));
     EXPECT_EQ(0, parser.offset());
     EXPECT_EQ(0, char_class->m_charChecks.size());
@@ -105,7 +105,7 @@ TEST_F(RegexASTTest, parseCharSequenceElement_ifPassedEmptyStringShouldFail)
 TEST_F(RegexASTTest, parseCharSequence_ifPassedSingleCharAndCharRangeShouldSuccess)
 {
     std::string regex("ab-z");
-    std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
+    std::unique_ptr<CharClassCheckLeaf> char_class = std::make_unique<CharClassCheckLeaf>( 0 );
     EXPECT_TRUE(parser.parse_char_sequence("ab-z", *char_class.get()));
     EXPECT_EQ(regex.size(), parser.offset());
     EXPECT_EQ(1, char_class->m_charChecks.size());
@@ -118,7 +118,7 @@ TEST_F(RegexASTTest, parseCharSequence_ifPassedSingleCharAndCharRangeShouldSucce
 
 TEST_F(RegexASTTest, parseCharSequence_ifPassedEmptyStringShouldFail)
 {
-    std::unique_ptr<CharClassCheckNode> char_class = std::make_unique<CharClassCheckNode>( 0 );
+    std::unique_ptr<CharClassCheckLeaf> char_class = std::make_unique<CharClassCheckLeaf>( 0 );
     EXPECT_FALSE(parser.parse_char_sequence("", *char_class.get()));
     EXPECT_EQ(0, parser.offset());
 }
@@ -129,7 +129,7 @@ TEST_F(RegexASTTest, parseCharClass_ifPassedSingleCharAndCharRangeShouldSuccess)
     RegexToASTParser::parse_asnswer_t result = parser.parse_char_class("[ab-z]");
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(6, parser.offset());
-    CharClassCheckNode* char_class = dynamic_cast<CharClassCheckNode*>(result.m_ast.get());
+    CharClassCheckLeaf* char_class = dynamic_cast<CharClassCheckLeaf*>(result.m_ast.get());
     ASSERT_NE(nullptr, char_class);
     EXPECT_EQ(1, char_class->m_charChecks.size());
     ASSERT_EQ(1, char_class->m_charRangeChecks.size());
@@ -155,7 +155,7 @@ TEST_F(RegexASTTest, parseSingleElement_ifPassedSingleCharShouldSuccess)
     RegexToASTParser::parse_asnswer_t result = parser.parse_single_element("a");
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(1, parser.offset());
-    CharCheckNode* repeated_base_ast = dynamic_cast<CharCheckNode*>(result.m_ast.get());
+    CharCheckLeaf* repeated_base_ast = dynamic_cast<CharCheckLeaf*>(result.m_ast.get());
     ASSERT_NE(nullptr, repeated_base_ast);
     EXPECT_EQ('a', repeated_base_ast->m_elem);
 }
@@ -165,7 +165,7 @@ TEST_F(RegexASTTest, parseSingleElement_ifPassedCharClassShouldSuccess)
     RegexToASTParser::parse_asnswer_t result = parser.parse_single_element("[ab-z]");
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(6, parser.offset());
-    CharClassCheckNode* char_class = dynamic_cast<CharClassCheckNode*>(result.m_ast.get());
+    CharClassCheckLeaf* char_class = dynamic_cast<CharClassCheckLeaf*>(result.m_ast.get());
     ASSERT_NE(nullptr, char_class);
     EXPECT_EQ(1, char_class->m_charChecks.size());
     ASSERT_EQ(1, char_class->m_charRangeChecks.size());
@@ -179,7 +179,7 @@ TEST_F(RegexASTTest, parseSingleElement_ifPassedEscapedCharClassShouldSuccesss)
     RegexToASTParser::parse_asnswer_t result = parser.parse_single_element("\\n");
     EXPECT_TRUE(result.m_success);
     EXPECT_EQ(2, parser.offset());
-    CharCheckNode* repeated_base_ast = dynamic_cast<CharCheckNode*>(result.m_ast.get());
+    CharCheckLeaf* repeated_base_ast = dynamic_cast<CharCheckLeaf*>(result.m_ast.get());
     ASSERT_NE(nullptr, repeated_base_ast);
     EXPECT_EQ('n', repeated_base_ast->m_elem);
 }
@@ -199,7 +199,7 @@ TEST_F(RegexASTTest, parseZeroOrMore_ifPassedSingleCharShouldSuccess)
     EXPECT_EQ(2, parser.offset());
     StarNode* base_ast = dynamic_cast<StarNode*>(result.m_ast.get());
     ASSERT_NE(nullptr, base_ast);
-    CharCheckNode* repeated_base_ast = dynamic_cast<CharCheckNode*>(base_ast->m_elem.get());
+    CharCheckLeaf* repeated_base_ast = dynamic_cast<CharCheckLeaf*>(base_ast->m_elem.get());
     ASSERT_NE(nullptr, repeated_base_ast);
     EXPECT_EQ('a', repeated_base_ast->m_elem);
 }
@@ -211,7 +211,7 @@ TEST_F(RegexASTTest, parseZeroOrMore_ifPassedCharClassShouldSuccess)
     EXPECT_EQ(7, parser.offset());
     StarNode* base_ast = dynamic_cast<StarNode*>(result.m_ast.get());
     ASSERT_NE(nullptr, base_ast);
-    CharClassCheckNode* char_class = dynamic_cast<CharClassCheckNode*>(base_ast->m_elem.get());
+    CharClassCheckLeaf* char_class = dynamic_cast<CharClassCheckLeaf*>(base_ast->m_elem.get());
     ASSERT_NE(nullptr, char_class);
     EXPECT_EQ(1, char_class->m_charChecks.size());
     ASSERT_EQ(1, char_class->m_charRangeChecks.size());
@@ -240,13 +240,13 @@ TEST_F(RegexASTTest, parseSequence_ifPassedCorrectSequenceShouldSuccess)
     CatNode* bottom_base_ast = dynamic_cast<CatNode*>(top_base_ast->m_lhsElem.get());
     ASSERT_NE(nullptr, bottom_base_ast);
     //first
-    CharCheckNode* first_check = dynamic_cast<CharCheckNode*>(bottom_base_ast->m_lhsElem.get());
+    CharCheckLeaf* first_check = dynamic_cast<CharCheckLeaf*>(bottom_base_ast->m_lhsElem.get());
     ASSERT_NE(nullptr, first_check);
     EXPECT_EQ('a', first_check->m_elem);
     //2nd
     StarNode* second_check = dynamic_cast<StarNode*>(bottom_base_ast->m_rhsElem.get());
     ASSERT_NE(nullptr, second_check);
-    CharClassCheckNode* char_class = dynamic_cast<CharClassCheckNode*>(second_check->m_elem.get());
+    CharClassCheckLeaf* char_class = dynamic_cast<CharClassCheckLeaf*>(second_check->m_elem.get());
     ASSERT_NE(nullptr, char_class);
     EXPECT_EQ(1, char_class->m_charChecks.size());
     ASSERT_EQ(1, char_class->m_charRangeChecks.size());
@@ -254,7 +254,7 @@ TEST_F(RegexASTTest, parseSequence_ifPassedCorrectSequenceShouldSuccess)
     EXPECT_EQ('b', char_class->m_charRangeChecks[0].first);
     EXPECT_EQ('z', char_class->m_charRangeChecks[0].second);
     //
-    CharCheckNode* third_check = dynamic_cast<CharCheckNode*>(top_base_ast->m_rhsElem.get());
+    CharCheckLeaf* third_check = dynamic_cast<CharCheckLeaf*>(top_base_ast->m_rhsElem.get());
     ASSERT_NE(nullptr, third_check);
     EXPECT_EQ('d', third_check->m_elem);
 }
@@ -281,13 +281,13 @@ TEST_F(RegexASTTest, parseOr_ifPassedCharClassShouldSuccess)
     CatNode* bottom_base_ast = dynamic_cast<CatNode*>(top_base_ast->m_lhsElem.get());
     ASSERT_NE(nullptr, bottom_base_ast);
     //first
-    CharCheckNode* first_check = dynamic_cast<CharCheckNode*>(bottom_base_ast->m_lhsElem.get());
+    CharCheckLeaf* first_check = dynamic_cast<CharCheckLeaf*>(bottom_base_ast->m_lhsElem.get());
     ASSERT_NE(nullptr, first_check);
     EXPECT_EQ('a', first_check->m_elem);
     //second
     StarNode* second_check = dynamic_cast<StarNode*>(bottom_base_ast->m_rhsElem.get());
     ASSERT_NE(nullptr, second_check);
-    CharClassCheckNode* char_class = dynamic_cast<CharClassCheckNode*>(second_check->m_elem.get());
+    CharClassCheckLeaf* char_class = dynamic_cast<CharClassCheckLeaf*>(second_check->m_elem.get());
     ASSERT_NE(nullptr, char_class);
     EXPECT_EQ(1, char_class->m_charChecks.size());
     ASSERT_EQ(1, char_class->m_charRangeChecks.size());
@@ -295,7 +295,7 @@ TEST_F(RegexASTTest, parseOr_ifPassedCharClassShouldSuccess)
     EXPECT_EQ('b', char_class->m_charRangeChecks[0].first);
     EXPECT_EQ('z', char_class->m_charRangeChecks[0].second);
     //third
-    CharCheckNode* third_check = dynamic_cast<CharCheckNode*>(top_base_ast->m_rhsElem.get());
+    CharCheckLeaf* third_check = dynamic_cast<CharCheckLeaf*>(top_base_ast->m_rhsElem.get());
     ASSERT_NE(nullptr, third_check);
     EXPECT_EQ('d', third_check->m_elem);
 }

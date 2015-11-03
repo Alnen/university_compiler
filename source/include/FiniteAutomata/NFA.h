@@ -2,17 +2,18 @@
 #define NFA_h
 
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
-#include <iosfwd>
-
-#include "Utility.h"
-#include "RegexASTAnnotationEvaluator.h"
-#include <iostream>
-#include "DFA.h"
 
 #include <boost/container/flat_map.hpp>
+
+#include "DFA.h"
+#include "RegexAST/RegexASTAnnotationEvaluator.h"
+#include "Utility.h"
+
+
 
 template <class State, class _Checker>
 class NFA
@@ -48,7 +49,6 @@ protected:
     StateTransitionTable        m_STM;
 };
 
-
 //NFA
 template <class State, class Checker>
 std::ostream& operator<<(std::ostream& out, NFA<State, Checker>& nfa)
@@ -56,7 +56,6 @@ std::ostream& operator<<(std::ostream& out, NFA<State, Checker>& nfa)
     nfa.print(out);
     return  out;
 }
-
 
 template <class State, class Checker>
 void NFA<State, Checker>::print(std::ostream& out)
@@ -215,8 +214,6 @@ NFA<State, _Checker>::NFA(NFA&& rhs):
 {
 }
 
-
-
 template <class State, class _Checker>
 NFA<State, _Checker>::NFA()
 {
@@ -257,12 +254,9 @@ template <class State, class Checker>
 bool
 NFA<State, Checker>::addStateTransition(StateType begin_state, const Checker& value, StateType end_state)
 {
-    //std::cout << begin_state << end_state << std::endl;
     auto& input = m_STM[begin_state];
     if (input.get() == nullptr) input.reset(new InputCollection);
-    //std::cout << (*input).size() << std::endl;
     auto& val = (*input)[value];
-    //std::cout << begin_state << end_state << std::endl;
     val.push_back(end_state);
     return true;
 }

@@ -2,7 +2,7 @@
 #define DFA_TEST_CPP
 
 #include "gtest/gtest.h"
-#include "DFA.h"
+#include "FiniteAutomata/DFA.h"
 
 #include <memory>
 

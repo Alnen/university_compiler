@@ -1,8 +1,8 @@
 set(SOURCE
     ${SOURCE}
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/RegexASTNode.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/RegexASTParser.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/RegexASTAnnotationEvaluator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/RegexAST/RegexASTNode.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/RegexAST/RegexASTParser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/RegexAST/RegexASTAnnotationEvaluator.cpp
     PARENT_SCOPE
 )
 

@@ -171,9 +171,7 @@ DFA<State, Checker>::addStateTransition(StateType begin_state, const CheckerType
 {
     auto& input = m_STM[begin_state];
     if (input.get() == nullptr) input.reset(new InputCollection);
-    //std::cout << (*input).size() << std::endl;
     auto& val = (*input)[value];
-    //std::cout << begin_state << end_state << std::endl;
     val = (end_state);
     return true;
 }

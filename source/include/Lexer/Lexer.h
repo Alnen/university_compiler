@@ -1,101 +1,40 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "DFA.h"
-#include "NFA.h"
-
-#include "RegexASTParser.h"
-#include "RegexASTAnnotationEvaluator.h"
-#include "RegexASTToNFA.h"
-#include "NFAtoDFA.h"
-#include "Utility.h"
-
 #include <memory>
 #include <utility>
 
 #include <boost/container/flat_map.hpp>
 
+#include "Token.h"
+#include "RuleImpl.h"
+#include "TokenHandler.h"
+#include "DefaultErrorHandler.h"
+
+#include "FiniteAutomata/DFA.h"
+#include "FiniteAutomata/NFA.h"
+
+#include "RegexAST/RegexASTParser.h"
+#include "RegexAST/RegexASTAnnotationEvaluator.h"
+#include "RegexAST/RegexASTToNFA.h"
+#include "Utility.h"
+
 namespace Lexer
 {
-
-class Token;
-
-class TokenHandler
-{
-public:
-    using TokenPtr = std::unique_ptr<Token>;
-    virtual TokenPtr operator()(TokenPtr token) = 0;
-};
-
-class IDHandler : public TokenHandler
-{
-public:
-    virtual TokenPtr operator()(TokenPtr a) override
-    {
-        return a;
-    }
-};
-
-class DefaultErrorHandler : public TokenHandler
-{
-public:
-    virtual TokenPtr operator()(TokenPtr token) override
-    {
-        return token;
-    }
-};
-
-template <class _TokenType, class HandlerPtr = std::unique_ptr<TokenHandler>>
-struct RuleImpl
-{
-    RuleImpl() = default;
-    RuleImpl(_TokenType type, std::string regex, HandlerPtr&& handlerPtr):
-        m_type(type),
-        m_regex(regex),
-        m_handlerPtr(std::move(handlerPtr))
-    {
-
-    }
-
-
-    RuleImpl(RuleImpl&& rhs):
-        m_type(rhs.m_type),
-        m_regex(rhs.m_regex),
-        m_handlerPtr(std::move(rhs.m_handlerPtr))
-    {
-
-    }
-
-    RuleImpl& operator=(RuleImpl&& rhs)
-    {
-        m_type = rhs.m_type;
-        m_regex = rhs.m_regex;
-        m_handlerPtr = std::move(rhs.m_handlerPtr);
-    }
-
-    RuleImpl(const RuleImpl&) = delete;
-    RuleImpl& operator=(const RuleImpl&) = delete;
-
-
-    _TokenType m_type;
-    std::string m_regex;
-    HandlerPtr m_handlerPtr;
-};
-
 
 template <class _TokenType, class _State = int>
 class Lexer
 {
 public:
-    using TokenPtr = std::unique_ptr<Token>;
     using TokenType = _TokenType;
-    using HandlerPtr = std::unique_ptr<TokenHandler>;
+    using TokenPtr = std::unique_ptr<Token<TokenType>>;
+    using HandlerPtr = std::unique_ptr<TokenHandler<TokenType>>;
     using State = _State;
     using FinalStates = std::vector<_State>;
     using TokenInfo = std::pair<TokenType, HandlerPtr>;
     using Rule = RuleImpl<TokenType, HandlerPtr>;
 
-    Lexer(std::vector<Rule> rules, std::string inputFile, HandlerPtr&& error_heandler = std::make_unique<DefaultErrorHandler>()/*, std::string serialize_path*/);
+    Lexer(std::vector<Rule> rules, std::string inputFile, HandlerPtr&& error_heandler = std::make_unique<DefaultErrorHandler<TokenType>>()/*, std::string serialize_path*/);
     TokenPtr getToken();
 
 protected:
@@ -159,15 +98,7 @@ Lexer<_TokenType, State>::Lexer(std::vector<Rule> rules, std::string inputFile, 
     std::cout << std::endl;
     std::cout << std::endl;
     m_DFA.print_plantuml(std::cout);
-    // TODO: Optimize
 }
-
-/*template <class _TokenType, class _State>
-bool
-Lexer<_TokenType, _State>::regexASTToDFA(RegexAST::BasicNode* ast, Map<std::unique_ptr<IInputChecker>, std::vector<BasicLeaf::LeafId>>)
-{
-
-}*/
 
 template <class _TokenType, class _State>
 typename Lexer<_TokenType, _State>::TokenPtr

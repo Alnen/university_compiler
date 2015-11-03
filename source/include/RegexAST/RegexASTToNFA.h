@@ -2,7 +2,7 @@
 #define REGEXASTTONFA_H
 
 #include "RegexASTNode.h"
-#include "NFA.h"
+#include "FiniteAutomata/NFA.h"
 #include <boost/container/flat_map.hpp>
 #include "RegexASTAnnotationEvaluator.h"
 

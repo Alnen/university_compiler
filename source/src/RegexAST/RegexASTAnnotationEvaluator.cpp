@@ -1,6 +1,9 @@
-#include "RegexASTAnnotationEvaluator.h"
+#include "RegexAST/RegexASTAnnotationEvaluator.h"
+#include "InputChecker/InputHandler.h"
 #include "Utility.h"
+
 namespace Lexer {
+
 std::ostream& operator << (std::ostream& out, IInputChecker* check)
 {
     check->print(out);
@@ -100,7 +103,7 @@ void RegexASTAnnotationEvaluator::evaluate_impl(BasicNode* ast)
 
         case RegexASTType::CHAR_CLASS:
         {
-            CharClassCheckNode* node = static_cast<CharClassCheckNode*>(ast);
+            CharClassCheckLeaf* node = static_cast<CharClassCheckLeaf*>(ast);
             node->m_firstpos.push_back(node->m_id);
             node->m_lastpos.push_back(node->m_id);
             node->m_nullable = false;
@@ -113,7 +116,7 @@ void RegexASTAnnotationEvaluator::evaluate_impl(BasicNode* ast)
 
         case RegexASTType::SINGLE_CHAR:
         {
-            CharCheckNode* node = static_cast<CharCheckNode*>(ast);
+            CharCheckLeaf* node = static_cast<CharCheckLeaf*>(ast);
             node->m_firstpos.push_back(node->m_id);
             node->m_lastpos.push_back(node->m_id);
             node->m_nullable = false;
