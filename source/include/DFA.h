@@ -108,6 +108,7 @@ void DFA<State, Checker>::print(std::ostream& out) const
 template <class State, class Checker>
 void DFA<State, Checker>::print_plantuml(std::ostream& out) const
 {
+    std::vector<State> checked_final_states;
     out << "@startuml\n";
     out << "[*] --> 0\n";
     for (const auto& from_state : m_STM)
@@ -117,10 +118,11 @@ void DFA<State, Checker>::print_plantuml(std::ostream& out) const
             out << from_state.first << " -->" << input_mapping.second << ":";
             input_mapping.first->print(out);
             out << "\n";
-            if ( from_state.first != input_mapping.second &&
-                 std::find(m_finalStates.begin(), m_finalStates.end(), input_mapping.second) != m_finalStates.end())
+            if (    std::find(checked_final_states.begin(), checked_final_states.end(), input_mapping.second) == checked_final_states.end() &&
+                    std::find(m_finalStates.begin(), m_finalStates.end(), input_mapping.second) != m_finalStates.end())
             {
-                out << input_mapping.second << " --> [*] : Success\n";
+                out << input_mapping.second << ": Success\n";
+                checked_final_states.push_back(input_mapping.second);
             }
         }
     }

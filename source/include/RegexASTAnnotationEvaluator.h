@@ -89,7 +89,15 @@ public:
 
     virtual void print(std::ostream& out) const override
     {
-        out << m_check;
+        if (m_check == ' ')
+        {
+            out << "'" << m_check << "'";
+        }
+        else
+        {
+            out << m_check;
+        }
+
     }
 
     virtual ~CharChecker()

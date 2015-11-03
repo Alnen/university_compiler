@@ -9,6 +9,7 @@ enum class TokenType
     ID,
     CR,
     CI,
+    CX,
     //
     RWLA,
     RWAR,
@@ -62,7 +63,6 @@ enum class TokenType
     SRSM,
     SRCN,
     SRSP,
-    SRDP,
     SRCA
 };
 
@@ -79,6 +79,7 @@ int main (int argc, char** argv)
         { "common",     TokenType::RWCM  },
         { "const",      TokenType::RWCN  },
         { "do",         TokenType::RWDO  },
+        { "denominator",TokenType::RWDN  },
         { "downto",     TokenType::RWDT  },
         { "else",       TokenType::RWEL  },
         { "end",        TokenType::RWEND },
@@ -89,6 +90,7 @@ int main (int argc, char** argv)
         { "integer",    TokenType::RWINT },
         { "irregular",  TokenType::RWIR  },
         { "label",      TokenType::RWLB  },
+        { "numenator",  TokenType::RWN   },
         { "not",        TokenType::RWLN  },
         { "of",         TokenType::RWOF  },
         { "operator",   TokenType::RWOP  },
@@ -125,12 +127,11 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::SRSM,     std::string(";#"),                              std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::SRCN,     std::string(":#"),                              std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::SRSP,     std::string(".#"),                              std::move(std::make_unique<IDHandler>()));
-    rules.emplace_back(TokenType::SRDP,     std::string("..#"),                             std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::SRCA,     std::string(",#"),                              std::move(std::make_unique<IDHandler>()));
-    rules.emplace_back(TokenType::RWDN,     std::string(".denominator#"),                   std::move(std::make_unique<IDHandler>()));
-    rules.emplace_back(TokenType::RWN,      std::string(".numenator#"),                     std::move(std::make_unique<IDHandler>()));
-    rules.emplace_back(TokenType::CR,       std::string("([1-9][0-9]*|0).[1-9][0-9]*#"),    std::move(std::make_unique<IDHandler>()));
+    rules.emplace_back(TokenType::CR,       std::string("([1-9][0-9]*|0).0*[1-9][0-9]*#"),    std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::CI,       std::string("[1-9][0-9]*#"),                    std::move(std::make_unique<IDHandler>()));
+    rules.emplace_back(TokenType::CX,       std::string("([1-9][0-9]*|([1-9][0-9]*|0).0*[1-9][0-9]*)j#"),                    std::move(std::make_unique<IDHandler>()));
+    rules.emplace_back(TokenType::CX,       std::string("{ *([1-9][0-9]*|([1-9][0-9]*|0).0*[1-9][0-9]*) *, *([1-9][0-9]*|([1-9][0-9]*|0).0*[1-9][0-9]*) *}#"),                    std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*#"),           std::move(std::make_unique<IDHandler>()));
     Lexer::Lexer<TokenType> lexer( std::move(rules), "");
 
