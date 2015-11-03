@@ -3,18 +3,49 @@
 
 #include <algorithm>
 #include <vector>
+#include <memory>
 
 struct PointerEquality
 {
     template <class T, class V>
-    bool operator ()(T& lhs, V& rhs) const
+    bool operator ()(const T& lhs, const V& rhs) const
     {
-        return (*lhs) == (*rhs);
+        bool answer = (*lhs) == (*rhs);
+        return answer;
+    }
+};
+
+struct PointerLess
+{
+    template <class T, class V>
+    bool operator ()(const T& lhs, const V& rhs) const
+    {
+        bool answer = (*lhs) < (*rhs);
+        std::cout << lhs << rhs << " " << answer << std::endl;
+        return answer;
     }
 };
 
 template <class T>
-std::ostream& operator << (std::ostream& out, std::vector<T>& cont)
+std::ostream& operator << (std::ostream& out, const std::shared_ptr<T>& pointer)
+{
+    out << pointer.get();
+    return out;
+}
+
+template <class T, class V>
+std::ostream& operator << (std::ostream& out, const std::pair<T, V>& cont)
+{
+    out << "[";
+    out << cont.first;
+    out << "-";
+    out << cont.second;
+    out << "]";
+    return out;
+}
+
+template <class T>
+std::ostream& operator << (std::ostream& out, const std::vector<T>& cont)
 {
     out << "[";
     if (cont.size() > 0)

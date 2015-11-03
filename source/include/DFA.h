@@ -2,12 +2,9 @@
 #define DFA_h
 
 #include <algorithm>
-#include <memory>
-#include <utility>
-#include <vector>
 #include <iosfwd>
-#include "Map.h"
-#include "RegexASTAnnotationEvaluator.h"
+#include <memory>
+#include <vector>
 
 #include <boost/container/flat_map.hpp>
 
@@ -31,7 +28,7 @@ public:
     void addState(StateType state);
     void addFinalState(StateType index);
     bool addStateTransition(StateType begin_state, CheckerType&& value, StateType end_state);
-    bool addStateTransition(StateType begin_state, CheckerType&  value, StateType end_state);
+    bool addStateTransition(StateType begin_state, const CheckerType&  value, StateType end_state);
     
     void print(std::ostream& out) const;
     void print_plantuml(std::ostream& out) const;
@@ -168,7 +165,7 @@ DFA<State, Checker>::addStateTransition(StateType begin_state, CheckerType&& val
 
 template <class State, class Checker>
 bool
-DFA<State, Checker>::addStateTransition(StateType begin_state, CheckerType& value, StateType end_state)
+DFA<State, Checker>::addStateTransition(StateType begin_state, const CheckerType& value, StateType end_state)
 {
     auto& input = m_STM[begin_state];
     if (input.get() == nullptr) input.reset(new InputCollection);

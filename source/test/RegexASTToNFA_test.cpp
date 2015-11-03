@@ -50,8 +50,8 @@ protected:
 
         for(auto it1 = expected_node_to_id_mapping.begin(), it2 = followpos_table.first.begin(); it1 != expected_node_to_id_mapping.end() && it2 != followpos_table.first.end(); ++it1, ++it2)
         {
-            ASSERT_EQ(*it1->get<0>(), *it2->get<0>());
-            ASSERT_EQ(it1->get<1>(), it2->get<1>());
+            ASSERT_EQ(*it1->first,  *it2->first);
+            ASSERT_EQ(it1->second, it2->second);
         }
     }
     virtual void TearDown() override

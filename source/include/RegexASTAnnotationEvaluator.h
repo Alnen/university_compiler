@@ -3,8 +3,9 @@
 
 #include <algorithm>
 #include <iosfwd>
+#include <iostream>
 
-#include "Map.h"
+#include <boost/container/flat_map.hpp>
 #include "RegexASTNode.h"
 #include "Utility.h"
 
@@ -31,6 +32,12 @@ public:
         return m_type == inputChecker.m_type;
     }
 
+    virtual bool operator<(const IInputChecker& inputChecker) const
+    {
+        return m_type < inputChecker.m_type;
+    }
+
+
     virtual void print(std::ostream& out) const = 0;
 
     virtual ~IInputChecker()
@@ -54,6 +61,18 @@ public:
     virtual bool operator()(char input) const override
     {
         return input == m_check;
+    }
+
+    virtual bool operator<(const IInputChecker& inputChecker) const override
+    {
+        if ((this)->IInputChecker::operator ==(inputChecker))
+        {
+            return m_check < static_cast<const CharChecker&>(inputChecker).m_check;
+        }
+        else
+        {
+            return (this)->IInputChecker::operator <(inputChecker);
+        }
     }
 
     virtual bool operator==(const IInputChecker& inputChecker) const override
@@ -81,6 +100,16 @@ public:
 protected:
     char m_check;
 };
+template <class T, class V>
+std::ostream& operator << (std::ostream& out, const std::pair<T, V>& cont)
+{
+    out << "[";
+    out << cont.first;
+    out << "-";
+    out << cont.second;
+    out << "]";
+    return out;
+}
 
 class CharClassChecker : public IInputChecker
 {
@@ -113,6 +142,28 @@ public:
         }
     }
 
+    virtual bool operator<(const IInputChecker& inputChecker) const override
+    {
+        if ((this)->IInputChecker::operator==(inputChecker))
+        {
+            const CharClassChecker& rhs = static_cast<const CharClassChecker&>(inputChecker);
+            if (m_charChecks.empty() && rhs.m_charChecks.empty())
+            {
+                std::cout << m_charRangeChecks[0] << " vs " << rhs.m_charRangeChecks[0] << " is " << (m_charRangeChecks < rhs.m_charRangeChecks) << std::endl;
+                return  m_charRangeChecks < rhs.m_charRangeChecks;
+            }
+            else
+            {
+                return  m_charChecks < rhs.m_charChecks ||
+                        m_charRangeChecks < rhs.m_charRangeChecks;
+            }
+        }
+        else
+        {
+            return (this)->IInputChecker::operator<(inputChecker);
+        }
+    }
+
     virtual void print(std::ostream& out) const override
     {
         out << "[";
@@ -142,7 +193,8 @@ namespace RegexAST {
 class RegexASTAnnotationEvaluator
 {
 public:
-    using answer_t = std::pair<Map<std::shared_ptr<IInputChecker>, std::vector<BasicLeaf::LeafId>, PointerEquality>,
+    using answer_t = std::pair<
+                            boost::container::flat_map<std::shared_ptr<IInputChecker>, std::vector<BasicLeaf::LeafId>, PointerLess>,
                             std::vector<std::vector<BasicLeaf::LeafId>>>;
 
     answer_t evaluate(BasicNode* ast, BasicLeaf::LeafId first_leaf_id)
@@ -153,13 +205,20 @@ public:
         m_firstLeafId = first_leaf_id;
 
         evaluate_impl(ast);
+
+        std::cout << "BOOM ";
+        for (const auto& k_v: m_inputToIdMapping)
+        {
+            std::cout << (IInputChecker*)&(*k_v.first) << ":z" << k_v.second.size() << std::endl;
+        }
+
         return std::make_pair(std::move(m_inputToIdMapping), std::move(m_followpos_table));
     }
 
 protected:
     void evaluate_impl(BasicNode* ast);
 
-    Map<std::shared_ptr<IInputChecker>, std::vector<BasicLeaf::LeafId>, PointerEquality> m_inputToIdMapping;
+    boost::container::flat_map<std::shared_ptr<IInputChecker>, std::vector<BasicLeaf::LeafId>, PointerLess> m_inputToIdMapping;
     std::vector<std::vector<BasicLeaf::LeafId>> m_followpos_table;
     BasicLeaf::LeafId m_firstLeafId;
     size_t m_numberOfLeaves = 0;

@@ -1,7 +1,6 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include "Map.h"
 #include "DFA.h"
 #include "NFA.h"
 
@@ -13,6 +12,8 @@
 
 #include <memory>
 #include <utility>
+
+#include <boost/container/flat_map.hpp>
 
 namespace Lexer
 {
@@ -101,7 +102,7 @@ protected:
     bool regexASTToDFA(RegexAST::BasicNode* ast, HandlerPtr handler);
 
     DFA<State, std::shared_ptr<IInputChecker>>  m_DFA;
-    Map<FinalStates, TokenInfo>                 m_finalStatesHandlers;
+    boost::container::flat_map<State, TokenInfo>                 m_finalStatesHandlers;
     HandlerPtr                                  m_errorHandler;
     // file
     // offset

@@ -6,7 +6,6 @@
 #include <utility>
 #include <vector>
 
-#include "Map.h"
 #include "DFA.h"
 #include "NFA.h"
 #include "RegexASTAnnotationEvaluator.h"

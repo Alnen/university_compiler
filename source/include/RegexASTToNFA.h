@@ -3,7 +3,7 @@
 
 #include "RegexASTNode.h"
 #include "NFA.h"
-#include "Map.h"
+#include <boost/container/flat_map.hpp>
 #include "RegexASTAnnotationEvaluator.h"
 
 #include <vector>
@@ -23,7 +23,7 @@ public:
     RegexASTtoNFA(NFA<State, Checker> *nfa, State startState, State stateGenerator = 1);
     std::vector<State> convertASTtoNFA(RegexAST::BasicNode* ast,
                          RegexAST::BasicLeaf::LeafId firstLeafId,
-                         Map<std::shared_ptr<IInputChecker>, std::vector<RegexAST::BasicLeaf::LeafId>, PointerEquality>& inputToIdMapping, // TODO replace IInputChecker with Checker
+                         const boost::container::flat_map<std::shared_ptr<IInputChecker>, std::vector<RegexAST::BasicLeaf::LeafId>, PointerLess>& inputToIdMapping, // TODO replace IInputChecker with Checker
                          const std::vector<std::vector<RegexAST::BasicLeaf::LeafId>>& followposTable);
 
 protected:
@@ -38,27 +38,11 @@ RegexASTtoNFA<State, Checker>::RegexASTtoNFA(NFA<State, Checker> *nfa, State sta
 {
 }
 
-template <class T>
-std::ostream& operator << (std::ostream& out,const std::vector<T>& cont)
-{
-    out << "[";
-    if (cont.size() > 0)
-    {
-        out << cont[0];
-    }
-    for (size_t i = 1; i < cont.size(); ++i)
-    {
-        out << ", " << cont[i];
-    }
-    out << "]";
-    return out;
-}
-
 // ID
 template <class State, class Checker>
 std::vector<State> RegexASTtoNFA<State, Checker>::convertASTtoNFA(RegexAST::BasicNode* ast,
                      RegexAST::BasicLeaf::LeafId firstLeafId,
-                     Map<std::shared_ptr<IInputChecker>, std::vector<RegexAST::BasicLeaf::LeafId>, PointerEquality>& inputToIdMapping,
+                     const boost::container::flat_map<std::shared_ptr<IInputChecker>, std::vector<RegexAST::BasicLeaf::LeafId>, PointerLess>& inputToIdMapping,
                      const std::vector<std::vector<RegexAST::BasicLeaf::LeafId>>& followposTable)
 {
     using StateName = std::vector<State>;
@@ -67,36 +51,23 @@ std::vector<State> RegexASTtoNFA<State, Checker>::convertASTtoNFA(RegexAST::Basi
     std::vector<State> final_states;
 
     std::vector<std::pair<StateName, State>> stack;
-    Map<StateName, State> created_states;
+    boost::container::flat_map<StateName, State> created_states;
 
     std::pair<StateName, State> current_state = std::make_pair(ast->m_firstpos, m_startState);
     created_states[ast->m_firstpos] = m_startState;
     stack.push_back(current_state);
 
-
-    std::cout << "follow pos table :" << std::endl;
-    for (const auto& key_value : inputToIdMapping)
-    {
-        std::cout << key_value.get<0>() << " : "  << key_value.get<1>() << std::endl;
-    }
-    std::cout << "follow pos table :" << std::endl;
-    for (size_t i = 0; i < followposTable.size(); ++i)
-    {
-        std::cout << i + firstLeafId << " : "  << followposTable[i] << std::endl;
-    }
-
-
     do
     {
         current_state = stack.back();
         stack.pop_back();
-        std::cout << "next unmarked state" << current_state.first << ":" << current_state.second << std::endl;
+        //std::cout << "next unmarked state" << current_state.first << ":" << current_state.second << std::endl;
         for (const auto& key_value : inputToIdMapping)
         {
-            std::cout << "for each inputs : " << boost::get<0>(key_value) << std::endl;
+            std::cout << "for each inputs : " << key_value.first << std::endl;
             std::pair<StateName, State> nextState;
             bool finalState = false;
-            for (auto leafId : key_value.get<1>())
+            for (auto leafId : key_value.second)
             {
                 if (std::find(current_state.first.begin(), current_state.first.end(), leafId) != current_state.first.end())
                 {
@@ -108,8 +79,8 @@ std::vector<State> RegexASTtoNFA<State, Checker>::convertASTtoNFA(RegexAST::Basi
                 finalState = true;
             }
             if (nextState.first.empty()) continue;
-            typename Map<StateName, State>::key_iterator pos;
-            if ((pos = std::find(created_states.key_begin(), created_states.key_end(), nextState.first)) == created_states.key_end())
+            typename boost::container::flat_map<StateName, State>::const_iterator pos;
+            if ((pos = created_states.find(nextState.first)) == created_states.end())
             {
                 std::cout << "new state" << std::endl;
                 nextState.second = m_stateGenerator++;
@@ -118,26 +89,21 @@ std::vector<State> RegexASTtoNFA<State, Checker>::convertASTtoNFA(RegexAST::Basi
                 std::cout << "alocated states" << std::endl;
                 if (finalState)
                 {
-                    std::cout << "new final state " << nextState.first << ":" << nextState.second << std::endl;
+                    //std::cout << "new final state " << nextState.first << ":" << nextState.second << std::endl;
                     m_nfa->addFinalState(nextState.second);
                     final_states.push_back(nextState.second);
                 }
                 else
                 {
-                    std::cout << "new ordinary state " << nextState.first << ":" << nextState.second << std::endl;
+                    //std::cout << "new ordinary state " << nextState.first << ":" << nextState.second << std::endl;
                     m_nfa->addState(nextState.second);
                 }
             }
             else
             {
-                std::cout << "found next state name " << *pos << std::endl;
-                std::cout << "offset " << std::distance(created_states.key_begin(), pos) << std::endl;
-                auto state_it = created_states.value_begin();
-                std::advance(state_it, std::distance(created_states.key_begin(), pos));
-                nextState.second = *state_it;
-                std::cout << "old state " << nextState.second << std::endl;
+                nextState.second = (*pos).second;
             }
-            m_nfa->addStateTransition(current_state.second, key_value.get<0>(), nextState.second);
+            m_nfa->addStateTransition(current_state.second, key_value.first, nextState.second);
             std::cout << "creating new transition: " << current_state.second << " => " << nextState.second  << std::endl;
         }
     }

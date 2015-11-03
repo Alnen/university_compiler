@@ -7,6 +7,8 @@
 #include "RegexASTNode.h"
 #include <memory>
 
+#include <Utility.h>
+
 using namespace Lexer::RegexAST;
 using namespace Lexer;
 
@@ -52,14 +54,14 @@ TEST_F(RegexASTAnnotationEvaluatorTest, ifPassedCorrectASTSHouldCorrectlyEvaluat
     ASSERT_EQ(expected_table, followpos_table.second);
     //
     RegexASTAnnotationEvaluator::answer_t::first_type expected_node_to_id_mapping;
-    expected_node_to_id_mapping[std::move(std::make_unique<CharChecker>('a'))] = { 1, 3 };
-    expected_node_to_id_mapping[std::move(std::make_unique<CharChecker>('b'))] = { 2, 4, 5 };
-    expected_node_to_id_mapping[std::move(std::make_unique<CharChecker>('#'))] = { 6 };
+    expected_node_to_id_mapping[std::make_shared<CharChecker>('a')] = { 1, 3 };
+    expected_node_to_id_mapping[std::make_shared<CharChecker>('b')] = { 2, 4, 5 };
+    expected_node_to_id_mapping[std::make_shared<CharChecker>('#')] = { 6 };
 
     for(auto it1 = expected_node_to_id_mapping.begin(), it2 = followpos_table.first.begin(); it1 != expected_node_to_id_mapping.end() && it2 != followpos_table.first.end(); ++it1, ++it2)
     {
-        ASSERT_EQ(*it1->get<0>(), *it2->get<0>());
-        ASSERT_EQ(it1->get<1>(), it2->get<1>());
+        ASSERT_EQ(*it1->first,  *it2->first);
+        ASSERT_EQ(it1->second, it2->second);
     }
 }
 

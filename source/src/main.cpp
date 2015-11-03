@@ -132,7 +132,6 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::CR,       std::string("([1-9][0-9]*|0).[1-9][0-9]*#"),    std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::CI,       std::string("[1-9][0-9]*#"),                    std::move(std::make_unique<IDHandler>()));
     rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*#"),           std::move(std::make_unique<IDHandler>()));
-
     Lexer::Lexer<TokenType> lexer( std::move(rules), "");
 
     return 0;

@@ -7,11 +7,12 @@
 #include <vector>
 #include <iosfwd>
 
-#include "Map.h"
+#include "Utility.h"
 #include "RegexASTAnnotationEvaluator.h"
 #include <iostream>
 #include "DFA.h"
-#include "Utility.h"
+
+#include <boost/container/flat_map.hpp>
 
 template <class State, class _Checker>
 class NFA
@@ -20,29 +21,9 @@ public:
     using StateType = State;
     using CheckerType = _Checker;
     using InputChecker = Lexer::InputCheckerType;
-    using InputCollection = Map<CheckerType, std::vector<State>, PointerEquality>;
-    using StateTransitionTable = Map<State, std::unique_ptr<InputCollection>>; // TODO : delete pointer comparison
+    using InputCollection = boost::container::flat_map<CheckerType, std::vector<State>, PointerLess>;
+    using StateTransitionTable = boost::container::flat_map<State, std::unique_ptr<InputCollection>>; // TODO : delete pointer comparison
 
-protected:
-    class Walker
-    {
-        void reset();
-        bool goNextState(char input);
-
-        StateType getCurrentState() const;
-        bool isCurrentStateFinal() const;
-
-        Walker(const Walker&) = delete;
-        Walker& operator=(const Walker&) = delete;
-
-    protected:
-        Walker(NFA* pNFA);
-
-        NFA* m_pNFA;
-        StateType m_currentState;
-    };
-
-public:
     NFA();
     NFA(const NFA&) = delete;
     NFA& operator=(const NFA&) = delete;
@@ -55,12 +36,9 @@ public:
     void addState(StateType state);
     void addFinalState(StateType index);
     bool addStateTransition(StateType begin_state, CheckerType&& value, StateType end_state);
-    bool addStateTransition(StateType begin_state, CheckerType& value, StateType end_state);
+    bool addStateTransition(StateType begin_state, const CheckerType& value, StateType end_state);
     void print(std::ostream& out);
     DFA<State, CheckerType> convert();
-
-    Walker getWalker() const;
-    //combine operators
 
 protected:
     StateType                   m_startingState;
@@ -102,12 +80,12 @@ void NFA<State, Checker>::print(std::ostream& out)
     out << "STM" << std::endl;
     for (const auto& from_state : m_STM)
     {
-        out << boost::get<0>(from_state) << " =>" << std::endl;
-        for (const auto& input_mapping : *boost::get<1>(from_state))
+        out << from_state.first << " =>" << std::endl;
+        for (const auto& input_mapping : *from_state.second)
         {
             out << std::string(4, ' ');
-            boost::get<0>(input_mapping).get()->print(out);
-            out <<  " =>" << boost::get<1>(input_mapping) <<  std::endl;
+            input_mapping.first.get()->print(out);
+            out <<  " =>" << input_mapping.second <<  std::endl;
         }
     }
 }
@@ -129,7 +107,7 @@ DFA<State, Checker> NFA<State, Checker>::convert()
     stack.emplace_back(DFAState{m_startingState}, 0);
 
 
-    Map<DFAState, State> created_states;
+    boost::container::flat_map<DFAState, State> created_states;
     created_states[DFAState{0}] = 0;
     std::vector<std::pair<DFAState, State>> final_states_mapping;
 
@@ -151,27 +129,27 @@ DFA<State, Checker> NFA<State, Checker>::convert()
             for (auto input : val)
             {
                 StateRecord nextState;
-                std::cout << "currently checked input " << boost::get<0>(input) << std::endl;
-                if (std::find_if(ckecked_inputs.begin(), ckecked_inputs.end(), [&input](const auto& inputInCont){ return boost::get<0>(input) == inputInCont; }) == ckecked_inputs.end())
+                std::cout << "currently checked input " << input.first << std::endl;
+                if (std::find_if(ckecked_inputs.begin(), ckecked_inputs.end(), [&input](const auto& inputInCont){ return *input.first == *inputInCont; }) == ckecked_inputs.end())
                 {
-                    ckecked_inputs.push_back(boost::get<0>(input));
+                    ckecked_inputs.push_back(input.first);
                     std::cout << "new input " << std::endl;
                     // get new state
-                    Utility::set_union(nextState.first, boost::get<1>(input));
+                    Utility::set_union(nextState.first, input.second);
                     for (auto it2 = ++currentState.first.begin(); it2 != currentState.first.end(); ++it2)
                     {
                         if (m_STM[*it2] == nullptr) continue;
                         auto& input_seq = (*m_STM[*it2]);
 
-                        if (std::find_if(input_seq.key_begin(), input_seq.key_end(), [&input](const auto& inputInCont){ return boost::get<0>(input) == inputInCont; }) != input_seq.key_end())
+                        if (input_seq.find(input.first) != input_seq.end())
                         {
-                            Utility::set_union(nextState.first, (*m_STM[*it2])[boost::get<0>(input)]);
+                            Utility::set_union(nextState.first, (*m_STM[*it2])[input.first]);
                         }
                     }
                     std::cout << "next state" << nextState.first << std::endl;
                     // record it
-                    typename Map<DFAState, State>::key_iterator pos;
-                    if ((pos = std::find(created_states.key_begin(), created_states.key_end(), nextState.first)) == created_states.key_end())
+                    typename boost::container::flat_map<DFAState, State>::const_iterator pos;
+                    if ((pos = created_states.find(nextState.first)) == created_states.end())
                     {
                         nextState.second = stateGenerator++;
                         stack.push_back(nextState);
@@ -207,16 +185,9 @@ DFA<State, Checker> NFA<State, Checker>::convert()
                     }
                     else
                     {
-                        std::cout << "found next state name :";
-                        for (auto id : *pos) std:: cout << id << " ";
-                        std::cout << std::endl;
-                        std::cout << "offset " << std::distance(created_states.key_begin(), pos) << std::endl;
-                        auto state_it = created_states.value_begin();
-                        std::advance(state_it, std::distance(created_states.key_begin(), pos));
-                        nextState.second = *state_it;
-                        std::cout << "old starte " << nextState.second << std::endl;
+                        nextState.second = (*pos).second;
                     }
-                    dfa.addStateTransition(currentState.second, boost::get<0>(input), nextState.second);
+                    dfa.addStateTransition(currentState.second, input.first, nextState.second);
                     std::cout << "creating new transition: " << currentState.second << " => " << nextState.second  << std::endl;
                 }
             }
@@ -284,7 +255,7 @@ NFA<State, Checker>::addStateTransition(StateType begin_state, Checker&& value, 
 
 template <class State, class Checker>
 bool
-NFA<State, Checker>::addStateTransition(StateType begin_state, Checker& value, StateType end_state)
+NFA<State, Checker>::addStateTransition(StateType begin_state, const Checker& value, StateType end_state)
 {
     //std::cout << begin_state << end_state << std::endl;
     auto& input = m_STM[begin_state];
@@ -294,46 +265,6 @@ NFA<State, Checker>::addStateTransition(StateType begin_state, Checker& value, S
     //std::cout << begin_state << end_state << std::endl;
     val.push_back(end_state);
     return true;
-}
-
-template <class State, class _Checker>
-typename
-NFA<State, _Checker>::Walker NFA<State, _Checker>::getWalker() const
-{
-    return Walker(this);
-}
-
-// NFA::WALKER
-template <class State, class _Checker>
-void
-NFA<State, _Checker>::Walker::reset()
-{
-    m_currentState = m_pNFA->m_startingState;
-}
-
-template <class State, class _Checker>
-bool
-NFA<State, _Checker>::Walker::goNextState(char input)
-{
-
-    State nextState = (*m_pNFA).m_STM[m_currentState];
-    m_currentState = nextState;
-    return true;
-}
-
-template <class State, class _Checker>
-typename NFA<State, _Checker>::StateType
-NFA<State, _Checker>::Walker::getCurrentState() const
-{
-    return m_currentState;
-}
-
-template <class State, class _Checker>
-bool
-NFA<State, _Checker>::Walker::isCurrentStateFinal() const
-{
-    auto position = std::find((*m_pNFA).m_finalStateList.begin(), (*m_pNFA).m_finalStateList.end(), m_currentState);
-    return (position != (*m_pNFA).m_finalStateList.end());
 }
 
 #endif /* NFA_h */

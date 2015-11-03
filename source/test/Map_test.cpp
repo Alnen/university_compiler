@@ -2,7 +2,6 @@
 #define MAP_TEST_CPP
 
 #include "gtest/gtest.h"
-#include "Map.h"
 
 #include <memory>
 

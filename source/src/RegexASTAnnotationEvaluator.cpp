@@ -1,4 +1,5 @@
 #include "RegexASTAnnotationEvaluator.h"
+#include "Utility.h"
 namespace Lexer {
 std::ostream& operator << (std::ostream& out, IInputChecker* check)
 {
@@ -106,7 +107,7 @@ void RegexASTAnnotationEvaluator::evaluate_impl(BasicNode* ast)
             ++m_numberOfLeaves;
             m_followpos_table.resize(m_numberOfLeaves);
             std::shared_ptr<CharClassChecker> checker = std::make_shared<CharClassChecker>(node->m_charChecks, node->m_charRangeChecks);
-            m_inputToIdMapping[std::move(checker)].push_back(node->m_id);
+            m_inputToIdMapping[checker].push_back(node->m_id);
             break;
         }
 
@@ -119,7 +120,7 @@ void RegexASTAnnotationEvaluator::evaluate_impl(BasicNode* ast)
             ++m_numberOfLeaves;
             m_followpos_table.resize(m_numberOfLeaves);
             std::shared_ptr<CharChecker> checker = std::make_shared<CharChecker>(node->m_elem);
-            m_inputToIdMapping[std::move(checker)].push_back(node->m_id);
+            m_inputToIdMapping[checker].push_back(node->m_id);
             break;
         }
     }

@@ -15,7 +15,6 @@ set(HEADERS
 set(TEST_SOURCES
     ${TEST_SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/test/Utility_test.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/Map_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/DFA_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/RegexASTParser_test.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/RegexASTToNFA_test.cpp
