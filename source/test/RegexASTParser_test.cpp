@@ -3,6 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "RegexAST/RegexASTParser.h"
+#include "StdFix.h"
 
 #include <memory>
 

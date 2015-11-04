@@ -1,6 +1,7 @@
 #include "RegexAST/RegexASTAnnotationEvaluator.h"
 #include "InputChecker/InputHandler.h"
 #include "Utility.h"
+#include "StdFix.h"
 
 namespace Lexer {
 
@@ -50,7 +51,7 @@ void RegexASTAnnotationEvaluator::evaluate_impl(BasicNode* ast)
                             node->m_rhsElem->m_firstpos.begin(),
                             node->m_rhsElem->m_firstpos.end(),
                             std::back_inserter(m_followpos_table[leaf_table_offset]),
-                            [this, leaf_table_offset](auto value)
+                            [this, leaf_table_offset](BasicLeaf::LeafId value)
                             {
                                 return std::find(
                                             m_followpos_table[leaf_table_offset].begin(),
@@ -88,7 +89,7 @@ void RegexASTAnnotationEvaluator::evaluate_impl(BasicNode* ast)
                             node->m_elem->m_firstpos.begin(),
                             node->m_elem->m_firstpos.end(),
                             std::back_inserter(m_followpos_table[leaf_table_offset]),
-                            [this, leaf_table_offset](auto value)
+                            [this, leaf_table_offset](BasicLeaf::LeafId value)
                             {
                                 return std::find(
                                             m_followpos_table[leaf_table_offset].begin(),

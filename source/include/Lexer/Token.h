@@ -12,6 +12,13 @@ class Token
 public:
     using TokenType = _TokenType;
 
+    Token(TokenType type, std::string value):
+        m_type(type),
+        m_value(value)
+    {
+
+    }
+
     TokenType type() const { return m_type; }
     boost::any& value() { return m_value; }
 

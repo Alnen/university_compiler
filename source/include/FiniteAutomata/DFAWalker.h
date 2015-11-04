@@ -6,23 +6,31 @@
 template <class State, class Checker>
 class Walker
 {
+public:
     void reset();
     bool goNextState(char input);
 
-    StateType getCurrentState() const;
+    State getCurrentState() const;
     bool isCurrentStateFinal() const;
 
+    Walker(DFA<State, Checker>* pDFA);
     Walker(const Walker&) = delete;
     Walker& operator=(const Walker&) = delete;
 
 protected:
-    Walker(DFA* pDFA);
-
-    DFA* m_pDFA;
-    StateType m_currentState;
+    DFA<State, Checker>* m_pDFA;
+    State m_currentState;
 };
 
 // DFA::WALKER
+template <class State, class Checker>
+Walker<State, Checker>::Walker(DFA<State, Checker>* pDFA):
+    m_currentState(pDFA->m_startingState),
+    m_pDFA(pDFA)
+{
+
+}
+
 template <class State, class Checker>
 void
 Walker<State, Checker>::reset()
@@ -34,15 +42,26 @@ template <class State, class Checker>
 bool
 Walker<State, Checker>::goNextState(char input)
 {
+    const auto& input_mapping = (*m_pDFA).m_STM.find(m_currentState);
+    if (input_mapping == (*m_pDFA).m_STM.end())
+    {
+        return false;
+    }
 
-    State next_state = (*m_pDFA).m_STM[m_currentState];
-    m_currentState = next_state;
-    return true;
+    for (const auto& mapping : *(*input_mapping).second)
+    {
+        if ((*mapping.first)(input))
+        {
+            m_currentState = mapping.second;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 template <class State, class Checker>
-typename DFA<State, Checker>::StateType
-Walker<State, Checker>::getCurrentState() const
+State Walker<State, Checker>::getCurrentState() const
 {
     return m_currentState;
 }
@@ -51,8 +70,7 @@ template <class State, class Checker>
 bool
 Walker<State, Checker>::isCurrentStateFinal() const
 {
-    auto position = std::find((*m_pDFA).m_finalStateList.begin(), (*m_pDFA).m_finalStateList.end(), m_currentState);
-    return (position != (*m_pDFA).m_finalStateList.end());
+    return (std::find((*m_pDFA).m_finalStates.begin(), (*m_pDFA).m_finalStates.end(), m_currentState) != (*m_pDFA).m_finalStates.end());
 }
 
 #endif // DFAWALKER_H

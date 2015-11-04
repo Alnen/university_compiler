@@ -8,6 +8,9 @@
 
 #include <boost/container/flat_map.hpp>
 
+template <class State, class Checker>
+class Walker;
+
 template <class State, class _Checker>
 class DFA
 {
@@ -16,6 +19,7 @@ public:
     using CheckerType = _Checker;
     using InputCollection = boost::container::flat_map<CheckerType, State>;
     using StateTransitionTable = boost::container::flat_map<State, std::shared_ptr<InputCollection>>;
+    friend class Walker<StateType, CheckerType>;
 
     DFA();
     DFA(DFA&& rhs);

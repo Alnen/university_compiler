@@ -3,6 +3,7 @@
 
 #include "gtest/gtest.h"
 #include "Utility.h"
+#include "StdFix.h"
 
 #include <vector>
 #include <utility>

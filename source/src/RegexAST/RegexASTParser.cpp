@@ -1,4 +1,5 @@
 #include "RegexAST/RegexASTParser.h"
+#include "StdFix.h"
 
 namespace Lexer {
 namespace RegexAST {

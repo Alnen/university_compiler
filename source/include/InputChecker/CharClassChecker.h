@@ -10,19 +10,20 @@ namespace Lexer {
 class CharClassChecker : public IInputChecker
 {
 public:
+    using Range = std::pair<char, char>;
     CharClassChecker(std::vector<char>& charChecks, std::vector<std::pair<char, char>>& charRangeChecks):
         IInputChecker(InputCheckerType::CHAR_CLASS_CHECK),
         m_charChecks(charChecks),
         m_charRangeChecks(charRangeChecks)
     {
         std::sort(charChecks.begin(), charChecks.begin());
-        std::sort(charRangeChecks.begin(), charRangeChecks.begin(), [](auto range1, auto range2){ return range1.first < range2.first; });
+        std::sort(charRangeChecks.begin(), charRangeChecks.begin(), [](Range range1, Range range2){ return range1.first < range2.first; });
     }
 
     virtual bool operator()(char input) const override
     {
         return  std::find(m_charChecks.begin(), m_charChecks.end(), input) != m_charChecks.end() ||
-                std::find_if(m_charRangeChecks.begin(), m_charRangeChecks.end(), [input, this](auto range){ return range.first >= input && range.second <= input; }) != m_charRangeChecks.end();
+                std::find_if(m_charRangeChecks.begin(), m_charRangeChecks.end(), [input, this](Range range){ return range.first <= input && range.second >= input; }) != m_charRangeChecks.end();
     }
 
     virtual bool operator==(const IInputChecker& inputChecker) const override

@@ -68,7 +68,7 @@ std::vector<T> construct_set_union(const std::vector<T>& vec1, const std::vector
 {
     std::vector<T> answer = vec1;
     std::copy_if(vec2.begin(), vec2.end(), std::back_inserter(answer),
-                [&vec1](auto value)
+                [&vec1](T value)
                 {
                     return std::find(vec1.begin(), vec1.end(), value) == vec1.end();
                 }
@@ -80,7 +80,7 @@ template <class T>
 void set_union(std::vector<T>& vec1, const std::vector<T>& vec2)
 {
     std::copy_if(vec2.begin(), vec2.end(), std::back_inserter(vec1),
-                [&vec1](auto value)
+                [&vec1](T value)
                 {
                     return std::find(vec1.begin(), vec1.end(), value) == vec1.end();
                 }
