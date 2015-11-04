@@ -11,6 +11,7 @@
 #include "RegexAST/RegexASTNode.h"
 #include "FiniteAutomata/NFA.h"
 #include "InputChecker/InputHandler.h"
+#include "StdFix.h"
 
 using namespace Lexer::RegexAST;
 using namespace Lexer;

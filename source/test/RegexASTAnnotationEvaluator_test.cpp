@@ -10,6 +10,7 @@
 #include "RegexAST/RegexASTNode.h"
 #include "InputChecker/InputHandler.h"
 #include <Utility.h>
+#include "StdFix.h"
 
 using namespace Lexer::RegexAST;
 using namespace Lexer;

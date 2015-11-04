@@ -133,7 +133,7 @@ NFA<State, Checker>::convert()
             {
                 StateRecord nextState;
                 std::cout << "currently checked input " << input.first << std::endl;
-                if (std::find_if(ckecked_inputs.begin(), ckecked_inputs.end(), [&input](const auto& inputInCont){ return *input.first == *inputInCont; }) == ckecked_inputs.end())
+                if (std::find_if(ckecked_inputs.begin(), ckecked_inputs.end(), [&input](const Checker& inputInCont){ return *input.first == *inputInCont; }) == ckecked_inputs.end())
                 {
                     std::cout << "new input " << std::endl;
                     ckecked_inputs.push_back(input.first);

@@ -2,6 +2,7 @@
 #define RULEIMPL_H
 
 #include "TokenHandler.h"
+#include "DefaultTokenHandler.h"
 
 #include <memory>
 #include <string>
@@ -10,14 +11,14 @@
 namespace Lexer
 {
 
-template <class _TokenType, class _HandlerPtr = std::shared_ptr<TokenHandler<_TokenType>>>
+template <class _TokenType>
 struct RuleImpl
 {
     using TokenType = _TokenType;
-    using HandlerPtr = _HandlerPtr;
+    using HandlerPtr = std::shared_ptr<TokenHandler<_TokenType>>;
 
     RuleImpl() = default;
-    RuleImpl(TokenType type, std::string regex, HandlerPtr&& handlerPtr):
+    RuleImpl(TokenType type, std::string regex, HandlerPtr handlerPtr = std::make_shared<DefaultTokenHandler<TokenType>>()):
         m_type(type),
         m_regex(regex),
         m_handlerPtr(std::move(handlerPtr))
