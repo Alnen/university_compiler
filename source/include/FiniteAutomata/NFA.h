@@ -25,6 +25,11 @@ public:
     using InputCollection = boost::container::flat_map<CheckerType, std::vector<State>, PointerLess>;
     using StateTransitionTable = boost::container::flat_map<State, std::unique_ptr<InputCollection>>; // TODO : delete pointer comparison
 
+    using DFAConvertAnswer = std::pair<
+                                    DFA<State, CheckerType>,
+                                    boost::container::flat_map<State, std::vector<State>>
+                                      >;
+
     NFA();
     NFA(const NFA&) = delete;
     NFA& operator=(const NFA&) = delete;
@@ -39,7 +44,7 @@ public:
     bool addStateTransition(StateType begin_state, CheckerType&& value, StateType end_state);
     bool addStateTransition(StateType begin_state, const CheckerType& value, StateType end_state);
     void print(std::ostream& out);
-    DFA<State, CheckerType> convert();
+    DFAConvertAnswer convert();
 
 protected:
     StateType                   m_startingState;
@@ -90,35 +95,34 @@ void NFA<State, Checker>::print(std::ostream& out)
 }
 
 template <class State, class Checker>
-DFA<State, Checker> NFA<State, Checker>::convert()
+typename NFA<State, Checker>::DFAConvertAnswer
+NFA<State, Checker>::convert()
 {
     // TODO : rework this later.
     using DFAState = std::vector<State>;
     using StateRecord = std::pair<DFAState, State>;
+
     DFA<State, Checker> dfa;
-
     std::vector<StateRecord> stack;
-
     State stateGenerator = 1;
+    boost::container::flat_map<DFAState, State> created_states;
+    boost::container::flat_map<State, std::vector<State>> nfa_to_dfa_final_state_map;
 
     dfa.addState(m_startingState);
     dfa.setStartState(m_startingState);
     stack.emplace_back(DFAState{m_startingState}, 0);
-
-
-    boost::container::flat_map<DFAState, State> created_states;
     created_states[DFAState{0}] = 0;
-    std::vector<std::pair<DFAState, State>> final_states_mapping;
 
     std::cout << "Starting converting NFA to DFA" << std::endl;
     while (!stack.empty())
     {
+        std::vector<Checker> ckecked_inputs;
         StateRecord currentState = stack.back();
         stack.pop_back();
-        std::cout << "next unmarked state" << currentState.first << ":" << currentState.second << std::endl;
 
-        std::vector<Checker> ckecked_inputs;
+        std::cout << "next unmarked state" << currentState.first << ":" << currentState.second << std::endl;
         std::cout << "already checked inputs" << ckecked_inputs << std::endl;
+
         for (auto it = currentState.first.begin(); it != currentState.first.end(); ++it)
         {
             State state = *it;
@@ -131,8 +135,8 @@ DFA<State, Checker> NFA<State, Checker>::convert()
                 std::cout << "currently checked input " << input.first << std::endl;
                 if (std::find_if(ckecked_inputs.begin(), ckecked_inputs.end(), [&input](const auto& inputInCont){ return *input.first == *inputInCont; }) == ckecked_inputs.end())
                 {
-                    ckecked_inputs.push_back(input.first);
                     std::cout << "new input " << std::endl;
+                    ckecked_inputs.push_back(input.first);
                     // get new state
                     Utility::set_union(nextState.first, input.second);
                     for (auto it2 = ++currentState.first.begin(); it2 != currentState.first.end(); ++it2)
@@ -174,7 +178,7 @@ DFA<State, Checker> NFA<State, Checker>::convert()
                             std::cout << "new final state " << nextState.second << std::endl;
                             dfa.addFinalState(nextState.second);
                             finalStateTransition.second = nextState.second;
-                            final_states_mapping.emplace_back(finalStateTransition);
+                            nfa_to_dfa_final_state_map[finalStateTransition.second] = finalStateTransition.first;
                         }
                         else
                         {
@@ -192,8 +196,7 @@ DFA<State, Checker> NFA<State, Checker>::convert()
             }
         }
     }
-
-    return dfa;
+    return std::make_pair(std::move(dfa), std::move(nfa_to_dfa_final_state_map));
 }
 
 template <class State, class _Checker>
