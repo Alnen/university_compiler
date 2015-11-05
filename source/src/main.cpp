@@ -6,13 +6,13 @@
 
 // experimental
 #include <iostream>
-#include "Grammar.h"
-#include "ControlTable.h"
-#include "SyntaxAnalyzer.h"
+#include "Parser/Grammar.h"
+#include "Parser/ControlTable.h"
+#include "Parser/SyntaxAnalyzer.h"
 
 #include <string>
 #include <fstream>
-#include "set.h"
+#include "Parser/set.h"
 
 #include "Nonterminals.h"
 #include "Terminals.h"

@@ -1,7 +1,7 @@
 #ifndef PASCALRULES_H
 #define PASCALRULES_H
 
-#include "Grammar.h"
+#include "Parser/Grammar.h"
 #include "Nonterminals.h"
 #include "Terminals.h"
 
