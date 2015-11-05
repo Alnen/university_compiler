@@ -35,8 +35,8 @@ public:
 	TokenType start_symbol;
 
 private:
-	TokenSet first(TokenType A, TokenSet& checked_rules) const;
-	TokenSet follow(TokenType A, TokenSet& checked_rules) const;
+    TokenSet first(TokenType A, TokenSet& checked_rules) const;
+    TokenSet follow(TokenType A, TokenSet& checked_rules) const;
 };
 
 template <class Terminal, class Nonterminal>
@@ -172,9 +172,11 @@ Grammar<Terminal, Nonterminal>::follow(TokenType A, TokenSet& checked_rules) con
                         if (f_set.size() > 0) follow_set.update(f_set);
                     }
                 }
-                else {
-                    TokenSet f_set = first(rules[i].right[j + 1]);
-                    if (f_set.size() == 0) continue;
+                else
+                {
+                    std::vector<TokenType> rest_of_rule(rules[i].right.begin() + (j + 1), rules[i].right.end());
+                    TokenSet f_set = ruleFirst(rest_of_rule);
+                    if (f_set.size() == 0) throw std::runtime_error("f_set.size() == 0");
                     for (size_t k = 0; k < f_set.size(); ++k) {
                         if (f_set[k] != Nonterminal::EPSILON) {
                             follow_set.add(f_set[k]);

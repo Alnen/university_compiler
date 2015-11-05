@@ -1,6 +1,11 @@
-#pragma once
+#ifndef CONTROLTABLE_H
+#define CONTROLTABLE_H
 
 #include "Grammar.h"
+
+#include <algorithm>
+#include <iterator>
+#include <iostream>
 
 namespace Parser
 {
@@ -15,13 +20,15 @@ class ControlTable
 public:
     ControlTable(const Grammar<_TerminalType, _NonterminalType>& grammar);
     void add(size_t row_value, size_t col_value, Rule<TokenType> value);
-    Rule<TokenType> getRule(size_t row_value, size_t col_value) const;
-    Rule<TokenType> getRuleByIndex(size_t row_index, size_t col_index) const;
+    const Rule<TokenType>& getRule(size_t row_value, size_t col_value) const;
+    const Rule<TokenType>& getRuleByIndex(size_t row_index, size_t col_index) const;
 
 public:
 	std::vector<int> row_names;
 	std::vector<int> column_names;
     std::vector<Rule<TokenType>> values;
+
+    const Rule<TokenType> empty_rule;
 };
 
 template<class TerminalType, class NonterminalType>
@@ -43,17 +50,26 @@ ControlTable<TerminalType, NonterminalType>::ControlTable(const Grammar<Terminal
         for (size_t row = 0; row < row_names.size(); ++row) {
             if (row_names[row] == grammar.rules[i].left) {
                 Set<TokenType> f_set = grammar.ruleFirst(grammar.rules[i].right);
+                std::cout << "first[";
+                std::copy(f_set.begin(), f_set.end(), std::ostream_iterator<TokenType>(std::cout, ", "));
+                std::cout << "]" << std::endl;
                 for (size_t j = 0; j < f_set.size(); ++j) {
                     if (f_set[j] != NonterminalType::EPSILON) {
+                        if (row_names[row] == 126) std::cout << "*()* << " << f_set[j] << "| " << grammar.rules[i].right[0] << ", " << grammar.rules[i].right.size() << std::endl;
                         add(row_names[row], f_set[j], grammar.rules[i]);
                     }
                 }
                 if (f_set.contain(TokenType(NonterminalType::EPSILON))) {
                     f_set = grammar.follow(TokenType(row_names[row]));
+                    std::cout << "follow[";
+                    std::copy(f_set.begin(), f_set.end(), std::ostream_iterator<TokenType>(std::cout, ", "));
+                    std::cout << "]" << std::endl;
                     for (size_t j = 0; j < f_set.size(); ++j) {
+                        if (row_names[row] == 126) std::cout << "*([])* << " << f_set[j] << "| " << grammar.rules[i].right[0] << ", " << grammar.rules[i].right.size() << std::endl;
                         add(row_names[row], f_set[j], grammar.rules[i]);
                     }
                     if (f_set.contain(TokenType(TerminalType::ENDOFFILE))) {
+                        if (row_names[row] == 126) std::cout << "*(7)* << " << TerminalType::ENDOFFILE << ", " << i << std::endl;
                         add(row_names[row], TerminalType::ENDOFFILE, grammar.rules[i]);
                     }
                 }
@@ -78,7 +94,7 @@ void ControlTable<TerminalType, NonterminalType>::add(size_t row_value, size_t c
 }
 
 template<class TerminalType, class NonterminalType>
-Rule<typename ControlTable<TerminalType, NonterminalType>::TokenType>
+const Rule<typename ControlTable<TerminalType, NonterminalType>::TokenType>&
 ControlTable<TerminalType, NonterminalType>::getRule(size_t row_value, size_t col_value) const
 {
     size_t i = 0;
@@ -93,12 +109,15 @@ ControlTable<TerminalType, NonterminalType>::getRule(size_t row_value, size_t co
 }
 
 template<class TerminalType, class NonterminalType>
-Rule<typename ControlTable<TerminalType, NonterminalType>::TokenType>
+const Rule<typename ControlTable<TerminalType, NonterminalType>::TokenType>&
 ControlTable<TerminalType, NonterminalType>::getRuleByIndex(size_t row_index, size_t col_index) const
 {
     if (row_index*column_names.size() + col_index >= values.size())
-        return Rule<TokenType>();
+        return empty_rule;
+    std::cout << row_index << " " << col_index << " " << values[row_index*column_names.size() + col_index].right.size() << std::endl;
     return values[row_index*column_names.size() + col_index];
 }
 
 } // namespace Grammar
+
+#endif // CONTROLTABLE_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RULE_H
+#define RULE_H
 
 #include <vector>
 #include <string>
@@ -9,6 +10,8 @@ namespace Parser
 template <class TokenType>
 struct Rule
 {
+    static const int EMPTY_RULE = -1;
+
 	TokenType left;
 	std::vector<TokenType> right;
 
@@ -16,7 +19,7 @@ struct Rule
 	bool operator !=(const Rule& other) const;
 	bool operator <(const Rule& other) const;
 
-	Rule() : left(-1) {};
+    Rule() : left(EMPTY_RULE) {};
 	Rule(TokenType left_part, const std::vector<TokenType>& right_part) : left(left_part), right(right_part) {};
 };
 
@@ -54,3 +57,5 @@ bool Rule<TokenType>::operator <(const Rule& other) const
 }
 
 } // namespace Grammar
+
+#endif // RULE_H
