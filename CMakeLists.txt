@@ -11,8 +11,10 @@ set(HEADERS)
 set(SOURCE)
 set(TEST_SOURCES)
 set(SOURCE_DIR "source")
+set(NEW_SOURCE_DIR "my_src")
 
 add_subdirectory(${SOURCE_DIR})
+add_subdirectory(${NEW_SOURCE_DIR}) # !
 
 include_directories(${HEADERS})
 include_directories(${G_TEST_SOURCE_DIR})
