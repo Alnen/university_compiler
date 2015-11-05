@@ -121,14 +121,15 @@ Lexer<TokenType, State>::getToken()
 {
     std::vector<char> ignore = {' ', '\t', '\n'};
     Walker<State, std::shared_ptr<IInputChecker>> walker(&m_DFA);
+
+    while (m_offset < m_sourceFile.size() && std::find(ignore.begin(), ignore.end(), m_sourceFile.data()[m_offset]) != ignore.end()) ++m_offset;
+
     if (m_offset == m_sourceFile.size())
     {
         return std::make_unique<Token<TokenType>>(TokenType::ENDOFFILE, "EOF");
     }
 
     m_len = 0;
-
-    while (m_offset < m_sourceFile.size() && std::find(ignore.begin(), ignore.end(), m_sourceFile.data()[m_offset]) != ignore.end()) ++m_offset;
 
     //std::cout << "GET TOKEN" << std::endl;
     //std::cout << "current_state :" << walker.getCurrentState() << std::endl;

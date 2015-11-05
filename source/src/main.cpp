@@ -4,89 +4,63 @@
 #include "Lexer/Lexer.h"
 #include "Lexer/TokenHandler.h"
 
-enum class TokenType
-{
-    ID,
-    CJ,
-    CI,
-    //
-    RWLA,
-    RWAR,
-    RWB,
-    RWCM,
-    RWCN,
-    RWDO,
-    RWDT,
-    RWEL,
-    RWEND,
-    RWFOR,
-    RWFR,
-    RWGT,
-    RWIF,
-    RWINT,
-    RWIR,
-    RWLB,
-    RWLN,
-    RWOF,
-    RWOP,
-    RWLO,
-    RWPR,
-    RWRAT,
-    RWRD,
-    RWSM,
-    RWTH,
-    RWTO,
-    RWTP,
-    RWV,
-    RWWR,
-    RWCX,
-    RWFUN,
-    RWIM,
-    RWRE,
-    RWINTOP,
-    RWPRC,
-    RWDN,
-    RWN,
-    //
-    OPPLUS,
-    OPMINUS,
-    OPMUL,
-    OPDIV,
-    OPGT,
-    OPLT,
-    OPGE,
-    OPLE,
-    OPEQ,
-    OPNE,
-    OPAS,
-    //
-    SRLP,
-    SRRP,
-    SRLB,
-    SRRB,
-    SRSM,
-    SRCN,
-    SRSP,
-    SRCA,
-    SRLCB,
-    SRRCB,
-    //
-    ERROR,
-    ENDOFFILE
-};
+// experimental
+#include <iostream>
+#include "Parser/Grammar.h"
+#include "Parser/ControlTable.h"
+#include "Parser/SyntaxAnalyzer.h"
+
+#include <string>
+#include <fstream>
+#include "Parser/set.h"
+
+#include "Nonterminals.h"
+#include "Terminals.h"
+#include "PascalRules.h"
 
 class IDHandler : public Lexer::TokenHandler<TokenType>
 {
 public:
+    IDHandler(const boost::bimap<std::string, TokenType>& mapping): 
+        m_mapping(mapping)
+    {
+    }
+
     virtual TokenPtr operator()(TokenPtr a) override
     {
-        a->value() = boost::any_cast<std::string>(a->value()) + "ANY";
+        std::string value = boost::any_cast<std::string>(a->value());
+        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+        boost::bimap<std::string, TokenType>::left_const_iterator pos;
+        if ((pos = m_mapping.left.find(value)) != m_mapping.left.end())
+        {
+            a->set_type(pos->second);
+        }
         return a;
     }
+
+protected:
+    const boost::bimap<std::string, TokenType>& m_mapping;
 };
 
 int main (int argc, char** argv)
 {
+    Parser::Set<TokenType> terminals;
+    for (size_t i = TERMINAL_START_INDEX + 1;
+    i < TERMINAL_FINISH_INDEX; ++i)
+    {
+        terminals.add(TokenType(i));
+    }
+    Parser::Set<NonterminalSymbols> nonterminals;
+    for (size_t i = NONTERMINAL_START_INDEX + 1;
+        i < NONTERMINAL_FINISH_INDEX; ++i)
+    {
+        nonterminals.add(NonterminalSymbols(i));
+    }
+
+    Parser::Grammar<TokenType, NonterminalSymbols> grammar(grammar_rules, Program);
+    std::cout<< "grammar.isLL1() "  << grammar.isLL1() << std::endl;
+    Parser::SyntaxAnalyzer<TokenType, NonterminalSymbols> syntax_analyzer(grammar);
+
     // reserwed words map
     std::vector<boost::bimap<std::string, TokenType>::value_type> reserved_words_map_items =
     {
@@ -113,7 +87,7 @@ int main (int argc, char** argv)
         { "im",         TokenType::RWIM  },
         { "j",          TokenType::CJ    },
         { "label",      TokenType::RWLB  },
-        { "numenator",  TokenType::RWN   },
+        { "numerator",  TokenType::RWN   },
         { "not",        TokenType::RWLN  },
         { "of",         TokenType::RWOF  },
         { "operator",   TokenType::RWOP  },
@@ -143,28 +117,26 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::OPGE,     std::string(">=")                    );
     rules.emplace_back(TokenType::OPLE,     std::string("<=")                    );
     rules.emplace_back(TokenType::OPEQ,     std::string("=")                     );
-    rules.emplace_back(TokenType::OPNE,     std::string(":=")                    );
-    rules.emplace_back(TokenType::OPAS,     std::string("<>")                    );
+    rules.emplace_back(TokenType::OPAS,     std::string(":=")                    );
+    rules.emplace_back(TokenType::OPNE,     std::string("<>")                    );
     rules.emplace_back(TokenType::SRLP,     std::string("\\(")                   );
     rules.emplace_back(TokenType::SRRP,     std::string("\\)")                   );
     rules.emplace_back(TokenType::SRLB,     std::string("\\[")                   );
     rules.emplace_back(TokenType::SRRB,     std::string("\\]")                   );
-    rules.emplace_back(TokenType::SRLB,     std::string("{")                     );
-    rules.emplace_back(TokenType::SRRB,     std::string("}")                     );
+    rules.emplace_back(TokenType::SRLCB,    std::string("{")                     );
+    rules.emplace_back(TokenType::SRRCB,    std::string("}")                     );
     rules.emplace_back(TokenType::SRSM,     std::string(";")                     );
     rules.emplace_back(TokenType::SRCN,     std::string(":")                     );
     rules.emplace_back(TokenType::SRSP,     std::string(".")                     );
     rules.emplace_back(TokenType::SRCA,     std::string(",")                     );
     rules.emplace_back(TokenType::CI,       std::string("[1-9][0-9]*")           );
-    rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*"), std::make_shared<IDHandler>());
+    rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*"), std::make_shared<IDHandler>(reserved_words));
 
     Lexer::Lexer<TokenType> lexer( std::move(rules));
     lexer.openInput("/home/alex/Projects/university_compiler/program.pas");
-    std::unique_ptr<Lexer::Token<TokenType>> token;
-    while ((token = lexer.getToken())->type() != TokenType::ENDOFFILE)
-    {
-        std::cout << "NEW TOKEN : " << boost::any_cast<std::string>(token->value()) << std::endl;
 
-    }
+    bool res = syntax_analyzer.parse(lexer);
+    std::cout << "SyntaxAnalyser result: " << res << std::endl;
+
     return 0;
 }
