@@ -48,8 +48,8 @@ ControlTable<TerminalType, NonterminalType>::ControlTable(const Grammar<Terminal
     }
     for (size_t i = 0; i < grammar.rules.size(); ++i) {
         for (size_t row = 0; row < row_names.size(); ++row) {
-            if (row_names[row] == grammar.rules[i].left) {
-                Set<TokenType> f_set = grammar.ruleFirst(grammar.rules[i].right);
+            if (row_names[row] == grammar.rules[i].left()) {
+                Set<TokenType> f_set = grammar.ruleFirst(grammar.rules[i].right());
                 for (size_t j = 0; j < f_set.size(); ++j) {
                     if (f_set[j] != NonterminalType::EPSILON) {
                         add(row_names[row], f_set[j], grammar.rules[i]);

@@ -6,8 +6,11 @@
 #include "set.h"
 #include "Rule.h"
 
+
+
 namespace Parser
 {
+
 
 template<class _TerminalType, class _NonterminalType>
 class Grammar
@@ -32,7 +35,7 @@ public:
 	TokenSet terminals;
 	TokenSet nonterminals;
 	RuleList rules;
-	TokenType start_symbol;
+    TokenType start_symbol;
 
 private:
     TokenSet first(TokenType A, TokenSet& checked_rules) const;
@@ -85,18 +88,18 @@ Grammar<Terminal, Nonterminal>::first(TokenType A, TokenSet& checked_rules) cons
     }
     checked_rules.add(A);
     for (size_t i = 0; i < rules.size(); ++i) {
-        if (rules[i].left == A) {
-            if (rules[i].right[0] == Nonterminal::EPSILON) {
+        if (rules[i].left() == A) {
+            if (rules[i].right()[0] == Nonterminal::EPSILON) {
                 first_set.add(TokenType(Nonterminal::EPSILON));
             }
             else {
-                for (size_t j = 0; j < rules[i].right.size(); ++j) {
-                    if (!checked_rules.contain(rules[i].right[j])) {
-                        TokenSet f_set = first(rules[i].right[j], checked_rules);
+                for (size_t j = 0; j < rules[i].right().size(); ++j) {
+                    if (!checked_rules.contain(rules[i].right()[j])) {
+                        TokenSet f_set = first(rules[i].right()[j], checked_rules);
                         if (f_set.size() == 0) continue;
                         if (f_set.contain(TokenType(Nonterminal::EPSILON))) {
                             for (size_t k = 0; k < f_set.size(); ++k) {
-                                if ((f_set[k] != Nonterminal::EPSILON) || (i == (rules[i].right.size() - 1))) {
+                                if ((f_set[k] != Nonterminal::EPSILON) || (i == (rules[i].right().size() - 1))) {
                                     first_set.add(f_set[k]);
                                 }
                             }
@@ -164,17 +167,17 @@ Grammar<Terminal, Nonterminal>::follow(TokenType A, TokenSet& checked_rules) con
         follow_set.add(Terminal::ENDOFFILE);
     }
     for (size_t i = 0; i < rules.size(); ++i) {
-        for (size_t j = 0; j < rules[i].right.size(); ++j) {
-            if (rules[i].right[j] == A) {
-                if (j == (rules[i].right.size() - 1)) {
-                    if (!checked_rules.contain(rules[i].left)) {
-                        TokenSet f_set = follow(rules[i].left, checked_rules);
+        for (size_t j = 0; j < rules[i].right().size(); ++j) {
+            if (rules[i].right()[j] == A) {
+                if (j == (rules[i].right().size() - 1)) {
+                    if (!checked_rules.contain(rules[i].left())) {
+                        TokenSet f_set = follow(rules[i].left(), checked_rules);
                         if (f_set.size() > 0) follow_set.update(f_set);
                     }
                 }
                 else
                 {
-                    std::vector<TokenType> rest_of_rule(rules[i].right.begin() + (j + 1), rules[i].right.end());
+                    std::vector<TokenType> rest_of_rule(rules[i].right().begin() + (j + 1), rules[i].right().end());
                     TokenSet f_set = ruleFirst(rest_of_rule);
                     if (f_set.size() == 0) throw std::runtime_error("f_set.size() == 0");
                     for (size_t k = 0; k < f_set.size(); ++k) {
@@ -182,8 +185,8 @@ Grammar<Terminal, Nonterminal>::follow(TokenType A, TokenSet& checked_rules) con
                             follow_set.add(f_set[k]);
                         }
                     }
-                    if (f_set.contain(TokenType(Nonterminal::EPSILON)) && (!checked_rules.contain(rules[i].left))) {
-                        f_set = follow(rules[i].left, checked_rules);
+                    if (f_set.contain(TokenType(Nonterminal::EPSILON)) && (!checked_rules.contain(rules[i].left()))) {
+                        f_set = follow(rules[i].left(), checked_rules);
                         if (f_set.size() > 0) follow_set.update(f_set);
                     }
                 }
@@ -207,8 +210,8 @@ bool Grammar<Terminal, Nonterminal>::isLL1() const
     for (size_t i = 0; i < nonterminals.size(); ++i) {
         std::vector<std::vector<TokenType>> t_rules;
         for (size_t j = 0; j < rules.size(); ++j) {
-            if (nonterminals[i] == rules[j].left) {
-                t_rules.push_back(rules[j].right);
+            if (nonterminals[i] == rules[j].left()) {
+                t_rules.push_back(rules[j].right());
             }
         }
         for (size_t j = 0; j < t_rules.size(); ++j) {

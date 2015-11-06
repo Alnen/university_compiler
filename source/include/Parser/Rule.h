@@ -4,31 +4,39 @@
 #include <vector>
 #include <string>
 
+#include "RuleHandler.h"
+
 namespace Parser
 {
 
 template <class TokenType>
-struct Rule
+class Rule
 {
+public:
     static const int EMPTY_RULE = -1;
 
-	TokenType left;
-	std::vector<TokenType> right;
+    TokenType left() const { return m_left; }
+    const std::vector<TokenType>& right() const { return m_right; }
 
 	bool operator ==(const Rule& other) const;
 	bool operator !=(const Rule& other) const;
 	bool operator <(const Rule& other) const;
 
-    Rule() : left(EMPTY_RULE) {};
-	Rule(TokenType left_part, const std::vector<TokenType>& right_part) : left(left_part), right(right_part) {};
+    Rule() : m_left(EMPTY_RULE) {};
+    Rule(TokenType left_part, const std::vector<TokenType>& right_part) : m_left(left_part), m_right(right_part) {};
+
+protected:
+    TokenType                                   m_left;
+    std::vector<TokenType>                      m_right;
+    //std::shared_ptr<RuleHandler<TokenType>>
 };
 
 template <class TokenType>
 bool Rule<TokenType>::operator ==(const Rule& other) const
 {
-    if ((left == other.left) && (right.size() == other.right.size())) {
-        for (int i = 0; i < right.size(); ++i) {
-            if (right[i] != other.right[i]) {
+    if ((m_left == other.m_left) && (m_right.size() == other.m_right.size())) {
+        for (int i = 0; i < m_right.size(); ++i) {
+            if (m_right[i] != other.right[i]) {
                 return false;
             }
         }
@@ -46,14 +54,7 @@ bool Rule<TokenType>::operator !=(const Rule& other) const
 template <class TokenType>
 bool Rule<TokenType>::operator <(const Rule& other) const
 {
-    if (left < other.left)
-        return true;
-    size_t min_size = ((other.right.size() < right.size()) ? other.right.size() : right.size());
-    for (int i = 0; i < min_size; ++i) {
-        if (right[i] < other.right[i])
-            return true;
-    }
-    return false;
+    return (m_left < other.m_left || m_right < other.m_right);
 }
 
 } // namespace Grammar

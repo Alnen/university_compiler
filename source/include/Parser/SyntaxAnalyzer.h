@@ -7,6 +7,8 @@
 #include <vector>
 #include <iomanip>
 
+#include "boost/any.hpp"
+
 namespace Parser
 {
 
@@ -27,11 +29,12 @@ private:
     int getRuleId(const Rule<TokenType>& rule);
 	
 private:
-    ControlTable<_TerminalType, _NonterminalType> m_control_table;
-    Grammar<_TerminalType, _NonterminalType> m_grammar;
-    TokenList m_stack;
-    //
-    std::vector<int> output_tree;
+    using StackElement = std::pair<TokenType, boost::any>;
+    ControlTable<_TerminalType, _NonterminalType>   m_control_table;
+    Grammar<_TerminalType, _NonterminalType>        m_grammar;
+    std::vector<TokenType>                       m_stack;
+    std::vector<boost::any>                         m_valueStack;
+    std::vector<boost::any>                         m_backValueStack;
 };
 
 template<class TerminalType, class NonterminalType>
@@ -78,15 +81,15 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType>::readNextToken(TokenType new_
         else
         {
             const Rule<TokenType>& ct_rule = m_control_table.getRule(m_stack.back(), new_token);
-            if (ct_rule.left == Rule<TokenType>::EMPTY_RULE) {
+            if (ct_rule.left() == Rule<TokenType>::EMPTY_RULE) {
                 return false;
             }
             else
             {
                 m_stack.pop_back();
-                if (!(ct_rule.right.size() == 1 && ct_rule.right[0] == NonterminalType::EPSILON))
+                if (!(ct_rule.right().size() == 1 && ct_rule.right()[0] == NonterminalType::EPSILON))
                 {
-                    std::copy(ct_rule.right.rbegin(), ct_rule.right.rend(), std::back_inserter(m_stack));
+                    std::copy(ct_rule.right().rbegin(), ct_rule.right().rend(), std::back_inserter(m_stack));
                 }
             }
         }
