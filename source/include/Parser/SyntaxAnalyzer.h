@@ -38,8 +38,9 @@ template<class TerminalType, class NonterminalType>
 bool SyntaxAnalyzer<TerminalType, NonterminalType>::parse(Lexer::Lexer<TeminalType>& lexer)
 {
     std::unique_ptr<Lexer::Token<TerminalType>> token;
-    while ((token = lexer.getToken())->type() != TerminalType::ENDOFFILE)
+    while (!m_stack.empty())
     {
+        token = lexer.getToken();
         std::cout << "NEW TOKEN : " << std::setw(3) << token->type() << "|" << boost::any_cast<std::string>(token->value()) << std::endl;
         if (!readNextToken(token->type()))
         {
@@ -67,34 +68,22 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType>::readNextToken(TokenType new_
         std::cout << "]" << std::endl;
         if (m_stack.back() == new_token)
         {
-            std::cout << "1" << std::endl;
             m_stack.pop_back();
             return true;
         }
         else if (m_grammar.isTerminal(m_stack.back()))
         {
-            std::cout << "2 " << m_stack.back() << std::endl;
             return false;
         }
         else
         {
-            if (m_stack.back() == 126)
-            {
-                if (!flag)
-                {
-                    flag = true;
-                }
-            }
             const Rule<TokenType>& ct_rule = m_control_table.getRule(m_stack.back(), new_token);
             if (ct_rule.left == Rule<TokenType>::EMPTY_RULE) {
-                std::cout << "3" << std::endl;
                 return false;
             }
             else
             {
-                //output_tree.push_back(getRuleId(ct_rule));
                 m_stack.pop_back();
-                //std::cout << ct_rule.right.size() << "|" << ct_rule.right[0] << std::endl;
                 if (!(ct_rule.right.size() == 1 && ct_rule.right[0] == NonterminalType::EPSILON))
                 {
                     std::copy(ct_rule.right.rbegin(), ct_rule.right.rend(), std::back_inserter(m_stack));

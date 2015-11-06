@@ -133,7 +133,7 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*"), std::make_shared<IDHandler>(reserved_words));
 
     Lexer::Lexer<TokenType> lexer( std::move(rules));
-    lexer.openInput("/home/alex/Projects/university_compiler/program.pas");
+    lexer.openInput("/Users/alnen/Desktop/Coding/C++\ projects/university_compiler/program.pas");
 
     bool res = syntax_analyzer.parse(lexer);
     std::cout << "SyntaxAnalyser result: " << res << std::endl;
