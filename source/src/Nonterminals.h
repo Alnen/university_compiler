@@ -104,6 +104,10 @@ enum NonterminalSymbols {
     VarSection1, // 198
     VarSection2, // 199
     NONTERMINAL_FINISH_INDEX,
+    ACTION_START_INDEX,
+    ACTION1,
+    ACTION2,
+    ACTION_FINISH_INDEX,
     EPSILON
 };
 
