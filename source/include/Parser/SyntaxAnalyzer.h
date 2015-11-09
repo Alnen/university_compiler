@@ -77,7 +77,7 @@ public:
     using stack_item_pointer = std::unique_ptr<StackItem>;
     ActionItem() : StackItem(Type::ACTION) {}
 
-    virtual void operator()(/*stack<stack_item_pointer>& stack*/) = 0;
+    virtual void operator()() = 0;
 };
 
 template<class _TerminalType, class _NonterminalType, class _ActionVector>

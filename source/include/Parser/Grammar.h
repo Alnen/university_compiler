@@ -99,7 +99,7 @@ Grammar<Terminal, Nonterminal>::first(TokenType A, TokenSet& checked_rules) cons
                         if (f_set.size() == 0) continue;
                         if (f_set.contain(TokenType(Nonterminal::EPSILON))) {
                             for (size_t k = 0; k < f_set.size(); ++k) {
-                                if ((f_set[k] != Nonterminal::EPSILON) || (i == (rules[i].right().size() - 1))) {
+                                if ((f_set[k] != Nonterminal::EPSILON) || (j == (rules[i].right().size() - 1))) {
                                     first_set.add(f_set[k]);
                                 }
                             }
