@@ -7,6 +7,8 @@
 #include <iterator>
 #include <iostream>
 
+#include "Utility.h"
+
 namespace Parser
 {
 
@@ -16,19 +18,20 @@ class ControlTable
     using TeminalType    = typename Grammar<_TerminalType, _NonterminalType>::TerminalType;
     using NonteminalType = typename Grammar<_TerminalType, _NonterminalType>::NonterminalType;
     using TokenType      = typename Grammar<_TerminalType, _NonterminalType>::TokenType;
+    using Rule           = Rule<TeminalType, NonteminalType>;
 
 public:
     ControlTable(const Grammar<_TerminalType, _NonterminalType>& grammar);
-    void add(size_t row_value, size_t col_value, Rule<TokenType> value);
-    const Rule<TokenType>& getRule(size_t row_value, size_t col_value) const;
-    const Rule<TokenType>& getRuleByIndex(size_t row_index, size_t col_index) const;
+    void add(size_t row_value, size_t col_value, Rule value);
+    const Rule& getRule(size_t row_value, size_t col_value) const;
+    const Rule& getRuleByIndex(size_t row_index, size_t col_index) const;
 
 public:
 	std::vector<int> row_names;
 	std::vector<int> column_names;
-    std::vector<Rule<TokenType>> values;
+    std::vector<Rule> values;
 
-    const Rule<TokenType> empty_rule;
+    const Rule empty_rule;
 };
 
 template<class TerminalType, class NonterminalType>
@@ -41,27 +44,30 @@ ControlTable<TerminalType, NonterminalType>::ControlTable(const Grammar<Terminal
         column_names.push_back(grammar.terminals[i]);
     }
     column_names.push_back(TerminalType::ENDOFFILE);
-    for (size_t i = 0; i < row_names.size(); ++i) {
-        for (size_t j = 0; j < column_names.size(); ++j) {
-            values.push_back(Rule<TokenType>());
-        }
-    }
+    values.resize(row_names.size()*column_names.size());
+
     for (size_t i = 0; i < grammar.rules.size(); ++i) {
         for (size_t row = 0; row < row_names.size(); ++row) {
             if (row_names[row] == grammar.rules[i].left()) {
                 Set<TokenType> f_set = grammar.ruleFirst(grammar.rules[i].right());
+                if (row_names[row] == 186) std::cout << "*||* 1 << " << grammar.rules[i].right() << std::endl;
                 for (size_t j = 0; j < f_set.size(); ++j) {
+                    if (row_names[row] == 186) std::cout << "*||* 6 << " << f_set[j] << std::endl;
                     if (f_set[j] != NonterminalType::EPSILON) {
+                        if (row_names[row] == 186) std::cout << "*||* 2 << " << f_set[j] << std::endl;
                         add(row_names[row], f_set[j], grammar.rules[i]);
                     }
-                }
-                if (f_set.contain(TokenType(NonterminalType::EPSILON))) {
-                    f_set = grammar.follow(TokenType(row_names[row]));
-                    for (size_t j = 0; j < f_set.size(); ++j) {
-                        add(row_names[row], f_set[j], grammar.rules[i]);
-                    }
-                    if (f_set.contain(TokenType(TerminalType::ENDOFFILE))) {
-                        add(row_names[row], TerminalType::ENDOFFILE, grammar.rules[i]);
+                    else
+                    {
+                        f_set = grammar.follow(TokenType(row_names[row])); // action
+                        if (row_names[row] == 186) std::cout << "*||* 3 << " << std::endl;
+                        for (size_t j = 0; j < f_set.size(); ++j) {
+                            if (row_names[row] == 186) std::cout << "*||* 4 << " << std::endl;
+                            add(row_names[row], f_set[j], grammar.rules[i]);
+                        }
+                        if (f_set.contain(TokenType(TerminalType::ENDOFFILE))) {
+                            add(row_names[row], TerminalType::ENDOFFILE, grammar.rules[i]);
+                        }
                     }
                 }
                 break;
@@ -71,7 +77,7 @@ ControlTable<TerminalType, NonterminalType>::ControlTable(const Grammar<Terminal
 }
 
 template<class TerminalType, class NonterminalType>
-void ControlTable<TerminalType, NonterminalType>::add(size_t row_value, size_t col_value, Rule<TokenType> value)
+void ControlTable<TerminalType, NonterminalType>::add(size_t row_value, size_t col_value, Rule value)
 {
     size_t i = 0;
     for (; i < row_names.size(); ++i) {
@@ -85,7 +91,7 @@ void ControlTable<TerminalType, NonterminalType>::add(size_t row_value, size_t c
 }
 
 template<class TerminalType, class NonterminalType>
-const Rule<typename ControlTable<TerminalType, NonterminalType>::TokenType>&
+const typename ControlTable<TerminalType, NonterminalType>::Rule&
 ControlTable<TerminalType, NonterminalType>::getRule(size_t row_value, size_t col_value) const
 {
     size_t i = 0;
@@ -100,7 +106,7 @@ ControlTable<TerminalType, NonterminalType>::getRule(size_t row_value, size_t co
 }
 
 template<class TerminalType, class NonterminalType>
-const Rule<typename ControlTable<TerminalType, NonterminalType>::TokenType>&
+const typename ControlTable<TerminalType, NonterminalType>::Rule&
 ControlTable<TerminalType, NonterminalType>::getRuleByIndex(size_t row_index, size_t col_index) const
 {
     if (row_index*column_names.size() + col_index >= values.size())

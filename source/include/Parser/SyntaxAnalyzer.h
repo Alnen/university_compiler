@@ -16,69 +16,93 @@
 namespace Parser
 {
 
-template <class T>
-class stack : public std::stack<T, std::vector<T>>
-{
-public:
-    using reference       = typename std::vector<T>::reference;
-    using const_reference = typename std::vector<T>::const_reference;
-    using std::stack<char>::c;
-
-    reference       operator[]( size_t pos )
-    {
-        return c[c.size() - pos];
-    }
-
-    const_reference operator[]( size_t pos ) const
-    {
-        return c[c.size() - pos];
-    }
-};
-
 class StackItem
 {
 public:
     enum class Type
     {
         TOKEN = 0,
-        ACTION,
+        NONTERMINAL,
+        INHERIT,
         SYNTHESIZE
     };
 
     StackItem(Type type): m_type(type) {}
     Type type() const { return m_type; }
-    void set_erase(size_t size) { m_eraseCount = size; }
-    size_t eraseCount(size_t size) const { return m_eraseCount; }
+    virtual ~StackItem() {}
 
 protected:
     Type    m_type;
-    size_t  m_eraseCount;
 };
 
 template <class TokenType>
 class TokenItem : public StackItem
 {
 public:
-    using Token = Lexer::Token<TokenType>;
-    using token_pointer = std::unique_ptr<Token>;
-
     TokenItem() : StackItem(Type::TOKEN) {}
-    void set_tokenPtr(token_pointer&& token) { m_tokenPtr = std::move(token); }
-    const Token& token() const { return *m_tokenPtr; }
-    Token& token() { return *m_tokenPtr; }
-
-protected:
-    token_pointer m_tokenPtr;
 };
 
-class ActionItem : public StackItem
+class BaseStackedItem : public StackItem
 {
 public:
-    using stack_item_pointer = std::unique_ptr<StackItem>;
-    ActionItem() : StackItem(Type::ACTION) {}
+    using value = boost::any;
+    using value_pointer = std::shared_ptr<value>;
+    using const_value_pointer = std::shared_ptr<const value>;
 
-    virtual void operator()() = 0;
+    BaseStackedItem(Type type): StackItem(type) {}
+
+    template <class T>
+    void push(T&& item)
+    {
+        m_stack.push_back(std::make_shared<boost::any>(std::forward<T>(item)));
+    }
+
+    template <class T>
+    void push(std::shared_ptr<T>&& item)
+    {
+        m_stack.push_back(std::forward<T>(item));
+    }
+
+    std::vector<const_value_pointer> m_stack;
+    const_value_pointer              m_value;
 };
+
+class NonterminalItems : public BaseStackedItem
+{
+public:
+    NonterminalItems(): BaseStackedItem(Type::NONTERMINAL) {}
+};
+
+class BaseActionItem : public BaseStackedItem
+{
+public:
+     BaseActionItem(Type type): BaseStackedItem(type) {}
+
+     virtual void operator()() = 0;
+};
+
+class BaseInheritItem : public BaseActionItem
+{
+public:
+     BaseInheritItem(): BaseActionItem(Type::INHERIT) {}
+
+     virtual void operator()()
+     {
+
+     }
+};
+
+class BaseSynthesizeItem : public BaseActionItem
+{
+public:
+     BaseSynthesizeItem(): BaseActionItem(Type::SYNTHESIZE) {}
+
+     virtual void operator()()
+     {
+
+     }
+};
+
 
 template<class _TerminalType, class _NonterminalType, class _ActionVector>
 class SyntaxAnalyzer
@@ -89,13 +113,14 @@ public:
     using TokenType      = typename Grammar<_TerminalType, _NonterminalType>::TokenType;
     using TokenList      = typename Grammar<_TerminalType, _NonterminalType>::TokenList;
     using ActionVector   = _ActionVector;
+    using Rule           = Rule<TeminalType, NonteminalType>;
 
     SyntaxAnalyzer(const Grammar<_TerminalType, _NonterminalType>& grammar);
     bool readNextToken(TokenType new_token);
     bool parse(Lexer::Lexer<TeminalType>& lexer);
 
 private:
-    int getRuleId(const Rule<TokenType>& rule);
+    int getRuleId(const Rule& rule);
 	
 private:
     using StackElement = std::pair<TokenType, boost::any>;
@@ -139,6 +164,12 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
         std::cout << "stack : [";
         std::copy(m_stack.begin(), m_stack.end(), std::ostream_iterator<TokenType>(std::cout, " "));
         std::cout << "]" << std::endl;
+
+        while (Grammar<TerminalType, NonterminalType>::isAction(m_stack.back()))
+        {
+            m_stack.pop_back();
+        }
+
         if (m_stack.back() == new_token)
         {
             m_stack.pop_back();
@@ -146,18 +177,20 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
         }
         else if (m_grammar.isTerminal(m_stack.back()))
         {
+            std::cout << "BOOM 2" << std::endl;
             return false;
         }
         else
         {
-            const Rule<TokenType>& ct_rule = m_control_table.getRule(m_stack.back(), new_token);
-            if (ct_rule.left() == Rule<TokenType>::EMPTY_RULE) {
+            const Rule& ct_rule = m_control_table.getRule(m_stack.back(), new_token);
+            if (ct_rule.left() == Rule::EMPTY_RULE) {
+                std::cout << "BOOM 1 " << m_stack.back() << "|" << new_token << std::endl;
                 return false;
             }
             else
             {
                 m_stack.pop_back();
-                if (!(ct_rule.right().size() == 1 && ct_rule.right()[0] == NonterminalType::EPSILON))
+                if (!(ct_rule.right().size() == 2 && ct_rule.right()[0] == NonterminalType::EPSILON))
                 {
                     std::copy(ct_rule.right().rbegin(), ct_rule.right().rend(), std::back_inserter(m_stack));
                 }
@@ -167,7 +200,7 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
 }
 
 template<class TerminalType, class NonterminalType, class ActionVector>
-int SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::getRuleId(const Rule<TokenType>& rule)
+int SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::getRuleId(const Rule& rule)
 {
     for (int i = 0; i < m_grammar.rules.size(); ++i) {
         if (m_grammar.rules[i] == rule) return i;

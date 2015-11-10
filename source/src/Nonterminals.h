@@ -107,6 +107,7 @@ enum NonterminalSymbols {
     ACTION_START_INDEX,
     ACTION1,
     ACTION2,
+    DEFAULT_SYNTHESIZE,
     ACTION_FINISH_INDEX,
     EPSILON
 };

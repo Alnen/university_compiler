@@ -53,7 +53,7 @@ template <class ActionMapping, class TokenType>
 class ActorFactory
 {
 public:
-    using ActionPtr = std::unique_ptr<Parser::ActionItem>;
+    using ActionPtr = std::unique_ptr<Parser::BaseActionItem>;
     ActorFactory()
     {
         mapping_constructor functor(*this);
@@ -182,6 +182,8 @@ int main (int argc, char** argv)
     bool res = syntax_analyzer.parse(lexer);
     std::cout << "SyntaxAnalyser result: " << res << std::endl;
 
+
+
     using action_container = boost::mpl::map<
         boost::mpl::pair<boost::mpl::int_<ACTION1>, PascalParser::Action1>,
         boost::mpl::pair<boost::mpl::int_<ACTION2>, PascalParser::Action2>
@@ -189,6 +191,22 @@ int main (int argc, char** argv)
     ActorFactory<action_container, NonterminalSymbols> factory;
     auto a = factory(ACTION1);
     (*a)();
+
+    int symbol = 186;
+
+    std::cout << "first :[ ";
+    for (auto val : grammar.ruleFirst({EPSILON, 204}))
+    {
+        std::cout << val << ", ";
+    }
+    std::cout << "]" << std::endl;
+
+    std::cout << "follo :[ ";
+    for (auto val : grammar.follow(symbol))
+    {
+        std::cout << val << ", ";
+    }
+    std::cout << "]" << std::endl;
 
 
     return 0;

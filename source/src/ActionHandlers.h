@@ -3,19 +3,19 @@
 namespace PascalParser
 {
 
-class Action1 : public Parser::ActionItem
+class Action1 : public Parser::BaseSynthesizeItem
 {
 public:
-    virtual void operator()(/*Parser::stack<stack_item_pointer>& stack*/)
+    virtual void operator()()
     {
         std::cout << "ACTION1" << std::endl;
     }
 };
 
-class Action2 : public Parser::ActionItem
+class Action2 : public Parser::BaseSynthesizeItem
 {
 public:
-    virtual void operator()(/*Parser::stack<stack_item_pointer>& stack*/)
+    virtual void operator()()
     {
         std::cout << "ACTION2" << std::endl;
     }
