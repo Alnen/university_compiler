@@ -6,7 +6,7 @@
 #include "Terminals.h"
 
 Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
-    {Program,{RWPR,ID,SRSM,Program1}},
+    {Program,{RWPR,ID,SRSM , ACTION3, Program1}, ACTION1},
     {Program1,{ProcedureFunctions,CompoundStatement,SRSP}},
     {Program1,{DescriptionSection1,DescriptionSection,ProcedureFunctions,CompoundStatement,SRSP}},
     {DescriptionSection,{EPSILON}},

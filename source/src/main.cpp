@@ -8,6 +8,8 @@
 #include "Parser/Grammar.h"
 #include "Parser/ControlTable.h"
 #include "Parser/SyntaxAnalyzer.h"
+#include "Parser/ActionFactory.h"
+#include "Parser/StackItem.h"
 
 #include <string>
 #include <fstream>
@@ -22,8 +24,7 @@
 #include <utility>
 
 #include <boost/mpl/map.hpp>
-#include <boost/mpl/for_each.hpp>
-#include <boost/mpl/range_c.hpp>
+
 
 class IDHandler : public Lexer::TokenHandler<TokenType>
 {
@@ -49,42 +50,6 @@ protected:
     const boost::bimap<std::string, TokenType>& m_mapping;
 };
 
-template <class ActionMapping, class TokenType>
-class ActorFactory
-{
-public:
-    using ActionPtr = std::unique_ptr<Parser::BaseActionItem>;
-    ActorFactory()
-    {
-        mapping_constructor functor(*this);
-        boost::mpl::for_each<ActionMapping>(functor);
-    }
-
-    ActionPtr operator()(TokenType action)
-    {
-        return m_map[action]();
-    }
-
-protected:
-    boost::container::flat_map<int, std::function<ActionPtr()>> m_map;
-
-private:
-    class mapping_constructor
-    {
-    public:
-        mapping_constructor(ActorFactory& factory): m_factory(factory) {}
-
-        template <class P>
-        void operator()(P pair)
-        {
-            m_factory.m_map[decltype(pair)::first::value] = [](){ return std::make_unique<typename decltype(pair)::second>(); };
-        }
-
-    protected:
-        ActorFactory& m_factory;
-    };
-};
-
 int main (int argc, char** argv)
 {
     Parser::Set<TokenType> terminals;
@@ -103,7 +68,16 @@ int main (int argc, char** argv)
     Parser::Grammar<TokenType, NonterminalSymbols> grammar(grammar_rules, Program);
     std::cout<< "grammar.isLL1() "  << grammar.isLL1() << std::endl;
 
-    Parser::SyntaxAnalyzer<TokenType, NonterminalSymbols, boost::mpl::map<int>> syntax_analyzer(grammar);
+    using action_container = boost::mpl::map<
+        boost::mpl::pair<boost::mpl::int_<DEFAULT_INHERIT>, Parser::BaseInheritItem>,
+        boost::mpl::pair<boost::mpl::int_<DEFAULT_SYNTHESIZE>, Parser::BaseSynthesizeItem>,
+        boost::mpl::pair<boost::mpl::int_<ACTION1>, PascalParser::Action1>,
+        boost::mpl::pair<boost::mpl::int_<ACTION2>, PascalParser::Action2>,
+        boost::mpl::pair<boost::mpl::int_<ACTION3>, PascalParser::Action3>
+    >;
+    ActionFactory<action_container, NonterminalSymbols> factory;
+
+    Parser::SyntaxAnalyzer<TokenType, NonterminalSymbols, action_container> syntax_analyzer(grammar);
 
     // reserwed words map
     std::vector<boost::bimap<std::string, TokenType>::value_type> reserved_words_map_items =
@@ -181,16 +155,6 @@ int main (int argc, char** argv)
 
     bool res = syntax_analyzer.parse(lexer);
     std::cout << "SyntaxAnalyser result: " << res << std::endl;
-
-
-
-    using action_container = boost::mpl::map<
-        boost::mpl::pair<boost::mpl::int_<ACTION1>, PascalParser::Action1>,
-        boost::mpl::pair<boost::mpl::int_<ACTION2>, PascalParser::Action2>
-    >;
-    ActorFactory<action_container, NonterminalSymbols> factory;
-    auto a = factory(ACTION1);
-    (*a)();
 
     int symbol = 186;
 

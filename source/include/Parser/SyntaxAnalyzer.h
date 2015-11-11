@@ -2,6 +2,8 @@
 #define SYNTAX_ANALYZER_H
 
 #include "Grammar.h"
+#include "ActionFactory.h"
+#include "StackItem.h"
 #include "Lexer/Lexer.h"
 #include "Lexer/Token.h"
 #include "ControlTable.h"
@@ -16,147 +18,106 @@
 namespace Parser
 {
 
-class StackItem
-{
-public:
-    enum class Type
-    {
-        TOKEN = 0,
-        NONTERMINAL,
-        INHERIT,
-        SYNTHESIZE
-    };
-
-    StackItem(Type type): m_type(type) {}
-    Type type() const { return m_type; }
-    virtual ~StackItem() {}
-
-protected:
-    Type    m_type;
-};
-
-template <class TokenType>
-class TokenItem : public StackItem
-{
-public:
-    TokenItem() : StackItem(Type::TOKEN) {}
-};
-
-class BaseStackedItem : public StackItem
-{
-public:
-    using value = boost::any;
-    using value_pointer = std::shared_ptr<value>;
-    using const_value_pointer = std::shared_ptr<const value>;
-
-    BaseStackedItem(Type type): StackItem(type) {}
-
-    template <class T>
-    void push(T&& item)
-    {
-        m_stack.push_back(std::make_shared<boost::any>(std::forward<T>(item)));
-    }
-
-    template <class T>
-    void push(std::shared_ptr<T>&& item)
-    {
-        m_stack.push_back(std::forward<T>(item));
-    }
-
-    std::vector<const_value_pointer> m_stack;
-    const_value_pointer              m_value;
-};
-
-class NonterminalItems : public BaseStackedItem
-{
-public:
-    NonterminalItems(): BaseStackedItem(Type::NONTERMINAL) {}
-};
-
-class BaseActionItem : public BaseStackedItem
-{
-public:
-     BaseActionItem(Type type): BaseStackedItem(type) {}
-
-     virtual void operator()() = 0;
-};
-
-class BaseInheritItem : public BaseActionItem
-{
-public:
-     BaseInheritItem(): BaseActionItem(Type::INHERIT) {}
-
-     virtual void operator()()
-     {
-
-     }
-};
-
-class BaseSynthesizeItem : public BaseActionItem
-{
-public:
-     BaseSynthesizeItem(): BaseActionItem(Type::SYNTHESIZE) {}
-
-     virtual void operator()()
-     {
-
-     }
-};
-
-
 template<class _TerminalType, class _NonterminalType, class _ActionVector>
 class SyntaxAnalyzer
 {
 public:
-    using TeminalType    = typename Grammar<_TerminalType, _NonterminalType>::TerminalType;
-    using NonteminalType = typename Grammar<_TerminalType, _NonterminalType>::NonterminalType;
-    using TokenType      = typename Grammar<_TerminalType, _NonterminalType>::TokenType;
-    using TokenList      = typename Grammar<_TerminalType, _NonterminalType>::TokenList;
+    using Grammar        = Grammar<_TerminalType, _NonterminalType>;
+    using TerminalType    = typename Grammar::TerminalType;
+    using NonteminalType = typename Grammar::NonterminalType;
+    using TokenType      = typename Grammar::TokenType;
+    using TokenList      = typename Grammar::TokenList;
     using ActionVector   = _ActionVector;
-    using Rule           = Rule<TeminalType, NonteminalType>;
+    using Rule           = Rule<TerminalType, NonteminalType>;
+    using StackItemPointer = std::unique_ptr<Parser::StackItem>;
 
-    SyntaxAnalyzer(const Grammar<_TerminalType, _NonterminalType>& grammar);
-    bool readNextToken(TokenType new_token);
-    bool parse(Lexer::Lexer<TeminalType>& lexer);
+    SyntaxAnalyzer(const Grammar& grammar);
+    bool readNextToken(Lexer::Token<TerminalType>* new_token);
+    bool parse(Lexer::Lexer<TerminalType>& lexer);
 
 private:
     int getRuleId(const Rule& rule);
+    void pushTokenBack(TokenType token);
+    void popTokenBack();
 	
 private:
     using StackElement = std::pair<TokenType, boost::any>;
     ControlTable<_TerminalType, _NonterminalType>   m_control_table;
-    Grammar<_TerminalType, _NonterminalType>        m_grammar;
+    Grammar                                         m_grammar;
     std::vector<TokenType>                          m_stack;
-    std::vector<boost::any>                         m_valueStack;
-    std::vector<boost::any>                         m_backValueStack;
+    std::vector<StackItemPointer>                   m_valueStack;
+    ActionFactory<_ActionVector, _NonterminalType>  m_actionfactory;
 };
 
 template<class TerminalType, class NonterminalType, class ActionVector>
-bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::parse(Lexer::Lexer<TeminalType>& lexer)
+SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::SyntaxAnalyzer(const Grammar& grammar) : m_grammar(grammar), m_control_table(grammar)
 {
-    m_stack.push_back(TerminalType::ENDOFFILE);
-    m_stack.push_back(m_grammar.start_symbol);
+}
+
+template<class TerminalType, class NonterminalType, class ActionVector>
+void SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::pushTokenBack(TokenType token)
+{
+    m_stack.push_back(token);
+    if (Grammar::isTerminal(token))
+    {
+        m_valueStack.emplace_back();
+    }
+    else if (Grammar::isNonterminal(token))
+    {
+        m_valueStack.push_back( std::make_unique<NonterminalItem>() );
+    }
+    else if (Grammar::isAction(token))
+    {
+        m_valueStack.push_back(m_actionfactory((NonterminalType)token));
+    }
+    else
+    {
+        std::cout << "ERROR " << token << std::endl;
+        throw std::runtime_error("void SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::pushTokenBack(TokenType token): error");
+    }
+}
+
+template<class TerminalType, class NonterminalType, class ActionVector>
+void SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::popTokenBack()
+{
+    m_stack.pop_back();
+    m_valueStack.pop_back();
+}
+
+template<class TerminalType, class NonterminalType, class ActionVector>
+bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::parse(Lexer::Lexer<TerminalType>& lexer)
+{
+    pushTokenBack(NonterminalType::DEFAULT_SYNTHESIZE);
+    pushTokenBack(TerminalType::ENDOFFILE);
+    pushTokenBack(m_grammar.start_symbol);
 
     std::unique_ptr<Lexer::Token<TerminalType>> token;
     while (!m_stack.empty())
     {
         token = lexer.getToken();
         std::cout << "NEW TOKEN : " << std::setw(3) << token->type() << "|" << boost::any_cast<std::string>(token->value()) << std::endl;
-        if (!readNextToken(token->type()))
+        if (!readNextToken(token.get()))
         {
-            return false;
+            break;
+        }
+        if (token->type() == TerminalType::ENDOFFILE)
+        {
+            break;
         }
     }
-    return true;
+    if (m_stack.size() == 1)
+    {
+
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 template<class TerminalType, class NonterminalType, class ActionVector>
-SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::SyntaxAnalyzer(const Grammar<TerminalType, NonterminalType>& grammar) : m_grammar(grammar), m_control_table(grammar)
-{
-}
-
-template<class TerminalType, class NonterminalType, class ActionVector>
-bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(TokenType new_token)
+bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(Lexer::Token<TerminalType>* new_token)
 {
     static bool flag = false;
     while (true)
@@ -165,14 +126,52 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
         std::copy(m_stack.begin(), m_stack.end(), std::ostream_iterator<TokenType>(std::cout, " "));
         std::cout << "]" << std::endl;
 
-        while (Grammar<TerminalType, NonterminalType>::isAction(m_stack.back()))
+        if (Grammar::isAction(m_stack.back())) // TODO
         {
-            m_stack.pop_back();
-        }
+            auto action_on_back = static_cast<BaseStackedItem*>(m_valueStack.back().get());
+            action_on_back->executeHandler();
+            /*if (action_on_back->type() == BaseStackedItem::Type::SYNTHESIZE)
+            {
+                for (int i = m_stack.size() - 2; i >= 0; --i)
+                {
+                    if (Grammar::isAction(m_stack[i]))
+                    {
+                        //std::cout << i << " " << m_stack[m_stack.size() - i] << std::endl;
+                        auto action_on_stack = static_cast<BaseStackedItem*>(m_valueStack[i].get());
+                        action_on_stack->push(action_on_back->getValue());
+                        if (action_on_stack->type() == BaseStackedItem::Type::SYNTHESIZE)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                //auto next_nonterminal = m_valueStack[m_valueStack.size()-2].get();
+                //next_nonterminal->getValue() = action_on_back->getValue();
+            }*/
 
-        if (m_stack.back() == new_token)
+            popTokenBack();
+            continue;
+        }
+        else if (m_stack.back() == new_token->type())
         {
-            m_stack.pop_back();
+            popTokenBack();
+            auto token_value = std::make_shared<boost::any>(new_token->value());
+            for (int i = m_stack.size() - 1; i >= 0; --i)
+            {
+                if (Grammar::isAction(m_stack[i]))
+                {
+                    //std::cout << i << " " << m_stack[m_stack.size() - i] << std::endl;
+                    auto action_on_stack = static_cast<BaseStackedItem*>(m_valueStack[i].get());
+                    action_on_stack->push(token_value);
+                    if (action_on_stack->type() == BaseStackedItem::Type::SYNTHESIZE)
+                    {
+                        break;
+                    }
+                }
+            }
             return true;
         }
         else if (m_grammar.isTerminal(m_stack.back()))
@@ -182,17 +181,26 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
         }
         else
         {
-            const Rule& ct_rule = m_control_table.getRule(m_stack.back(), new_token);
+            const Rule& ct_rule = m_control_table.getRule(m_stack.back(), new_token->type());
             if (ct_rule.left() == Rule::EMPTY_RULE) {
                 std::cout << "BOOM 1 " << m_stack.back() << "|" << new_token << std::endl;
                 return false;
             }
             else
             {
-                m_stack.pop_back();
+                auto value = m_valueStack.back()->getValue();
+                popTokenBack();
                 if (!(ct_rule.right().size() == 2 && ct_rule.right()[0] == NonterminalType::EPSILON))
                 {
-                    std::copy(ct_rule.right().rbegin(), ct_rule.right().rend(), std::back_inserter(m_stack));
+                    for (int i = ct_rule.right().size() - 1; i >= 0; --i)
+                    {
+                        pushTokenBack(ct_rule.right()[i]);
+                        if (Grammar::isAction(m_stack.back()))
+                        {
+                            auto action_on_stack = static_cast<BaseStackedItem*>(m_valueStack.back().get());
+                            action_on_stack->push(value);
+                        }
+                    }
                 }
             }
         }
