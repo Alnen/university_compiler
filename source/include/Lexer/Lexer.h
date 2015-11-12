@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <utility>
+#include <iostream>
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -25,6 +26,50 @@
 namespace Lexer
 {
 
+template <class TokenType>
+class LexerLogger
+{
+public:
+    LexerLogger(std::ostream* outPtr, boost::container::flat_map<TokenType, std::string>* mapping):
+        m_outPtr(outPtr),
+        m_tokenTypeMapping(mapping)
+    {
+    }
+
+    template <class T>
+    LexerLogger& operator<<(T&& value)
+    {
+        if (m_outPtr != nullptr)
+        {
+            (*m_outPtr) << std::forward<T>(value);
+        }
+        return *this;
+    }
+
+    template <class T>
+    LexerLogger& operator<<(Token<T>& value)
+    {
+
+        if (m_outPtr != nullptr)
+        {
+            if (m_tokenTypeMapping != nullptr)
+            {
+                (*m_outPtr) << (*m_tokenTypeMapping)[value.type()];
+            }
+            else
+            {
+                (*m_outPtr) << value.type();
+            }
+            (*m_outPtr) << "{V = \"" << boost::any_cast<std::string>(value.value()) << "\"}";
+        }
+        return *this;
+    }
+
+protected:
+    std::ostream* m_outPtr;
+    boost::container::flat_map<TokenType, std::string>* m_tokenTypeMapping;
+};
+
 template <class _TokenType, class _State = int>
 class Lexer
 {
@@ -38,7 +83,7 @@ public:
     using TokenInfo = std::pair<TokenType, HandlerPtr>;
     using Rule = RuleImpl<TokenType>;
 
-    Lexer(std::vector<Rule> rules, ErrorHandlerPtr error_heandler = std::make_unique<DefaultErrorHandler<TokenType>>()/*, std::string serialize_path*/);
+    Lexer(std::vector<Rule> rules, std::ostream* logger = &std::cout, boost::container::flat_map<TokenType, std::string>* mappin = nullptr, ErrorHandlerPtr error_heandler = std::make_unique<DefaultErrorHandler<TokenType>>());
     void openInput(const std::string& path);
     TokenPtr getToken();
 
@@ -55,13 +100,15 @@ protected:
     boost::iostreams::mapped_file_source            m_sourceFile;
     size_t                                          m_offset;
     size_t                                          m_len;
+    // Log
+    LexerLogger<TokenType>                          m_logger;
 };
 
 template <class _TokenType, class State>
-Lexer<_TokenType, State>::Lexer(std::vector<Rule> rules, ErrorHandlerPtr error_heandler/*, std::string serialize_path*/)
+Lexer<_TokenType, State>::Lexer(std::vector<Rule> rules, std::ostream* logger, boost::container::flat_map<_TokenType, std::string>* mapping, ErrorHandlerPtr error_heandler):
+    m_logger(logger, mapping)
 {
     m_errorHandler = std::move(error_heandler);
-
 
     RegexAST::RegexToASTParser              regex_parser;
     RegexAST::RegexASTAnnotationEvaluator   ast_evaluator;
@@ -122,38 +169,43 @@ Lexer<TokenType, State>::getToken()
     std::vector<char> ignore = {' ', '\t', '\n'};
     Walker<State, std::shared_ptr<IInputChecker>> walker(&m_DFA);
 
-    while (m_offset < m_sourceFile.size() && std::find(ignore.begin(), ignore.end(), m_sourceFile.data()[m_offset]) != ignore.end()) ++m_offset;
-
-    if (m_offset == m_sourceFile.size())
+    while (m_offset < m_sourceFile.size() && std::find(ignore.begin(), ignore.end(), m_sourceFile.data()[m_offset]) != ignore.end())
     {
-        return std::make_unique<Token<TokenType>>(TokenType::ENDOFFILE, "EOF");
-    }
-
-    m_len = 0;
-
-    //std::cout << "GET TOKEN" << std::endl;
-    //std::cout << "current_state :" << walker.getCurrentState() << std::endl;
-    //std::cout << "current_input :" << m_sourceFile.data()[m_offset + m_len] << std::endl;
-    while (m_offset + m_len < m_sourceFile.size() && walker.goNextState(m_sourceFile.data()[m_offset + m_len]))
-    {
-        //std::cout << "current_state :" << walker.getCurrentState() << std::endl;
-        //std::cout << "current_input :" << m_sourceFile.data()[m_offset + m_len] << std::endl;
-        ++m_len;
+        m_logger <<  m_sourceFile.data()[m_offset];
+        ++m_offset;
     }
 
     std::unique_ptr<Token<TokenType>> token;
-    if (walker.isCurrentStateFinal())
+
+    if (m_offset == m_sourceFile.size())
     {
-        const auto& rule_info= m_finalStatesHandlers[walker.getCurrentState()];
-        token = std::make_unique<Token<TokenType>>(rule_info.first, std::string(&m_sourceFile.data()[m_offset], m_len));
-        token = (*rule_info.second)(std::move(token));
+        token = std::make_unique<Token<TokenType>>(TokenType::ENDOFFILE, "EOF");
     }
     else
     {
-        std::cout << "NOT FOUND" << std::endl;
-        token = std::make_unique<Token<TokenType>>(TokenType::ERROR, "error");
+        m_len = 0;
+
+        while (m_offset + m_len < m_sourceFile.size() && walker.goNextState(m_sourceFile.data()[m_offset + m_len]))
+        {
+            ++m_len;
+        }
+
+
+        if (walker.isCurrentStateFinal())
+        {
+            const auto& rule_info= m_finalStatesHandlers[walker.getCurrentState()];
+            token = std::make_unique<Token<TokenType>>(rule_info.first, std::string(&m_sourceFile.data()[m_offset], m_len));
+            token = (*rule_info.second)(std::move(token));
+        }
+        else
+        {
+            std::cout << "NOT FOUND" << std::endl;
+            token = std::make_unique<Token<TokenType>>(TokenType::ERROR, "error");
+        }
+        m_offset += m_len;
     }
-    m_offset += m_len;
+
+    m_logger << *token << " ";
 
     return token;
 }
@@ -168,6 +220,8 @@ void Lexer<_TokenType, _State>::openInput(const std::string& path)
     m_sourceFile.open(path);
     m_offset = 0;
     m_len = 0;
+
+    m_logger << "[Lexer] Reading programm code from : \"" << path << "\"\n";
 }
 
 template <class _TokenType, class _State>

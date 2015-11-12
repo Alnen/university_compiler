@@ -150,7 +150,8 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::CI,       std::string("[1-9][0-9]*")           );
     rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*"), std::make_shared<IDHandler>(reserved_words));
 
-    Lexer::Lexer<TokenType> lexer( std::move(rules));
+    std::ofstream lexer_out("lexer.log", std::ofstream::out&std::ofstream::trunc);
+    Lexer::Lexer<TokenType> lexer( std::move(rules), &lexer_out, &tokenTypeMapping);
     lexer.openInput(argv[1]);
 
     bool res = syntax_analyzer.parse(lexer);
