@@ -9,6 +9,13 @@ var a : integer;
       d : rational;
       x: complex;
 begin
+      for i := 0 to 10 do
+      begin;
+            for i := 0 to 10 do
+            begin;
+                  a := i;
+            end;
+      end;
       a := 5;
       b := 7;
       a := b * a;

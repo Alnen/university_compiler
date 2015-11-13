@@ -25,6 +25,8 @@
 
 #include <boost/mpl/map.hpp>
 
+std::set<std::string> used_id;
+std::set<std::string> used_ci;
 
 class IDHandler : public Lexer::TokenHandler<TokenType>
 {
@@ -43,11 +45,29 @@ public:
         {
             a->set_type(pos->second);
         }
+        else
+        {
+            used_id.insert(boost::any_cast<std::string>(a->value()));
+        }
         return a;
     }
 
 protected:
     const boost::bimap<std::string, TokenType>& m_mapping;
+};
+
+class CIHandler : public Lexer::TokenHandler<TokenType>
+{
+public:
+    CIHandler()
+    {
+    }
+
+    virtual TokenPtr operator()(TokenPtr a) override
+    {
+        used_ci.insert(boost::any_cast<std::string>(a->value()));
+        return a;
+    }
 };
 
 int main (int argc, char** argv)
@@ -147,7 +167,7 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::SRCN,     std::string(":")                     );
     rules.emplace_back(TokenType::SRSP,     std::string(".")                     );
     rules.emplace_back(TokenType::SRCA,     std::string(",")                     );
-    rules.emplace_back(TokenType::CI,       std::string("[1-9][0-9]*")           );
+    rules.emplace_back(TokenType::CI,       std::string("[0-9][0-9]*")         , std::make_shared<CIHandler>());
     rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*"), std::make_shared<IDHandler>(reserved_words));
 
     std::ofstream lexer_out("lexer.log", std::ofstream::out&std::ofstream::trunc);
@@ -162,7 +182,7 @@ int main (int argc, char** argv)
 
     boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>(*value)->print(std::cout, 0, true);
 
-    std::ofstream diag_out("b.txt", std::ofstream::out&std::ofstream::trunc);
+    std::ofstream diag_out("program_tree.txt", std::ofstream::out&std::ofstream::trunc);
     PascalParser::print_uml(boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>(*value).get()->children()[0].get(), diag_out);
 
     int symbol = 186;
@@ -184,6 +204,19 @@ int main (int argc, char** argv)
     std::ofstream control_table_out("cto.txt", std::ofstream::out&std::ofstream::trunc);
     syntax_analyzer.print(control_table_out);
 
+    std::ofstream lexer_output("lexer_table.log", std::ofstream::out&std::ofstream::trunc);
+    lexer_output << std::endl << "ID table" << std::endl;
+    for(const auto& id : used_id)
+    {
+        lexer_output << id << std::endl;
+    }
+
+
+    lexer_output << std::endl << "CI table" << std::endl;
+    for(const auto& id : used_ci)
+    {
+        lexer_output << id << std::endl;
+    }
 
     return 0;
 }

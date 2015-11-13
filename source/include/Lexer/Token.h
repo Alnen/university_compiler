@@ -19,6 +19,21 @@ public:
 
     }
 
+    Token(const Token& token):
+        m_type(token.m_type),
+        m_value(token.m_value)
+    {
+
+    }
+
+    void operator=(const Token& token)
+    {
+        m_type = token.m_type;
+        m_value = token.m_value;
+    }
+
+    Token() = default;
+
     TokenType type() const { return m_type; }
     boost::any& value() { return m_value; }
 

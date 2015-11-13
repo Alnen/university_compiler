@@ -4,6 +4,7 @@
 #include <memory>
 #include <utility>
 #include <iostream>
+#include <fstream>
 
 #include <boost/container/flat_map.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
@@ -158,8 +159,9 @@ Lexer<_TokenType, State>::Lexer(std::vector<Rule> rules, std::ostream* logger, b
         }
         m_finalStatesHandlers[mapping.first] = std::make_pair(rules[rule_number].m_type, rules[rule_number].m_handlerPtr);
     }
+    std::ofstream out("lexer_dfa.txt", std::ofstream::out&std::ofstream::trunc);
     std::cout << m_DFA << std::endl;
-    m_DFA.print_plantuml(std::cout);
+    m_DFA.print_plantuml(out);
 }
 
 template <class TokenType, class State>

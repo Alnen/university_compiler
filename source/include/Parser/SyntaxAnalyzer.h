@@ -14,9 +14,12 @@
 
 #include <iosfwd>
 #include <stack>
+#include <fstream>
 
 namespace Parser
 {
+
+std::ofstream parse_log("parse_log.txt", std::ofstream::out&std::ofstream::trunc);
 
 template <class Nonterminal>
 class NonterminalInfo
@@ -115,11 +118,13 @@ std::pair<std::shared_ptr<boost::any>, bool> SyntaxAnalyzer<TerminalType, Nonter
     pushTokenBack(m_grammar.start_symbol);
 
     std::unique_ptr<Lexer::Token<TerminalType>> token;
+    Lexer::Token<TerminalType> backup_token;
     while (!m_stack.empty())
     {
         token = lexer.getToken();
         auto token_type = token->type();
-        std::cout << "NEW TOKEN : " << std::setw(3) << token->type() << "|" << boost::any_cast<std::string>(token->value()) << std::endl;
+        backup_token = *token;
+        parse_log << "NEW TOKEN : " << std::setw(3) << token->type() << "|" << boost::any_cast<std::string>(token->value()) << std::endl;
         if (!readNextToken(std::move(token)))
         {
             break;
@@ -131,12 +136,55 @@ std::pair<std::shared_ptr<boost::any>, bool> SyntaxAnalyzer<TerminalType, Nonter
     }
     if (m_stack.size() == 1)
     {
+        parse_log << "SUCCESS";
         static_cast<BaseSynthesizeItem*>(m_valueStack[0].get())->executeHandler();
         return std::make_pair(static_cast<BaseSynthesizeItem*>(m_valueStack[0].get())->getValue(), true);
     }
     else
     {
-        return std::make_pair(std::make_shared<boost::any>(), false);
+        parse_log << "FAILURE";
+        auto token_shared_ptr = std::shared_ptr<Lexer::Token<TerminalType>>(new Lexer::Token<TerminalType>(backup_token));
+        auto token_value = std::make_shared<boost::any>(token_shared_ptr);
+        for (int i = m_stack.size() - 1; i >= 0; --i)
+        {
+            if (Grammar::isAction(m_stack[i]))
+            {
+                //std::cout << i << " " << m_stack[m_stack.size() - i] << std::endl;
+                auto action_on_stack = static_cast<BaseStackedItem*>(m_valueStack[i].get());
+                action_on_stack->push(token_value);
+                if (action_on_stack->type() == BaseStackedItem::Type::SYNTHESIZE)
+                {
+                    break;
+                }
+            }
+        }
+        //
+        while(m_stack.size() != 1)
+        {
+            if (Grammar::isAction(m_stack.back()))
+            {
+                auto action_on_back = static_cast<BaseStackedItem*>(m_valueStack.back().get());
+                action_on_back->executeHandler();
+                if (action_on_back->type() == BaseStackedItem::Type::SYNTHESIZE)
+                {
+                    for (int i = m_stack.size() - 2; i >= 0; --i)
+                    {
+                        if (Grammar::isAction(m_stack[i]))
+                        {
+                            auto action_on_stack = static_cast<BaseStackedItem*>(m_valueStack[i].get());
+                            action_on_stack->push(action_on_back->getValue());
+                            if (action_on_stack->type() == BaseStackedItem::Type::SYNTHESIZE)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            popTokenBack();
+        }
+        static_cast<BaseSynthesizeItem*>(m_valueStack[0].get())->executeHandler();
+        return std::make_pair(static_cast<BaseSynthesizeItem*>(m_valueStack[0].get())->getValue(), false);
     }
 }
 
@@ -146,9 +194,9 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
     static bool flag = false;
     while (true)
     {
-        std::cout << "stack : [";
-        std::copy(m_stack.begin(), m_stack.end(), std::ostream_iterator<TokenType>(std::cout, " "));
-        std::cout << "]" << std::endl;
+        parse_log << "stack : [";
+        std::copy(m_stack.begin(), m_stack.end(), std::ostream_iterator<TokenType>(parse_log, " "));
+        parse_log << "]" << std::endl;
 
         if (Grammar::isAction(m_stack.back())) // TODO
         {
@@ -200,6 +248,9 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
         }
         else if (m_grammar.isTerminal(m_stack.back()))
         {
+            parse_log << "ERROR: expected token with token_type "
+                      << tokenTypeMapping[(TerminalType)m_stack.back()] << ", but got "
+                      << tokenTypeMapping[(TerminalType)new_token->type()] << std::endl;
             return false;
         }
         else
