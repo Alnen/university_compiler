@@ -200,7 +200,7 @@ Lexer<TokenType, State>::getToken()
         else
         {
             std::cout << "NOT FOUND" << std::endl;
-            token = std::make_unique<Token<TokenType>>(TokenType::ERROR, "error");
+            token = std::make_unique<Token<TokenType>>(TokenType::ERROR, std::string(&m_sourceFile.data()[m_offset], ++m_len));
         }
         m_offset += m_len;
     }

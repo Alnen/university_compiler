@@ -72,7 +72,7 @@ int main (int argc, char** argv)
         boost::mpl::pair<boost::mpl::int_<DEFAULT_INHERIT>, Parser::BaseInheritItem>,
         boost::mpl::pair<boost::mpl::int_<DEFAULT_SYNTHESIZE>, Parser::BaseSynthesizeItem>,
         boost::mpl::pair<boost::mpl::int_<ACTION1>, PascalParser::Action1>,
-        boost::mpl::pair<boost::mpl::int_<ACTION2>, PascalParser::Action2>,
+        boost::mpl::pair<boost::mpl::int_<TreeConstructor>, PascalParser::TreeConstructor>,
         boost::mpl::pair<boost::mpl::int_<ACTION3>, PascalParser::Action3>
     >;
     ActionFactory<action_container, NonterminalSymbols> factory;
@@ -154,8 +154,13 @@ int main (int argc, char** argv)
     Lexer::Lexer<TokenType> lexer( std::move(rules), &lexer_out, &tokenTypeMapping);
     lexer.openInput(argv[1]);
 
-    bool res = syntax_analyzer.parse(lexer);
+    std::shared_ptr<boost::any> value;
+    bool res;
+    std::tie(value, res) = syntax_analyzer.parse(lexer);
     std::cout << "SyntaxAnalyser result: " << res << std::endl;
+
+    boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>(*value)->print(std::cout, 0, true);
+    PascalParser::print_uml(boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>(*value).get(), std::cout);
 
     int symbol = 186;
 

@@ -55,7 +55,7 @@ public:
     {
         if (!m_stack.empty())
         {
-           *m_value = m_stack[0];
+           *m_value = *m_stack[0];
         }
     }
 
@@ -78,5 +78,4 @@ public:
 };
 
 }
-
 #endif // STACKITEM_H
