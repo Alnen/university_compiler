@@ -1,3 +1,6 @@
+#ifndef ACTIONHANDLERS_H
+#define ACTIONHANDLERS_H
+
 #include <memory>
 #include <utility>
 
@@ -58,7 +61,7 @@ public:
         return m_children;
     }
 
-    virtual void print(std::ostream& out, size_t level, bool first)
+    virtual void print(std::ostream& out, size_t level, bool first) override
     {
         if (!first)
         {
@@ -76,12 +79,12 @@ public:
         }
     }
 
-    virtual void print_uml(std::ostream& out, std::string father, int& generator)
+    virtual void print_uml(std::ostream& out, std::string father, int& generator) override
     {
         auto name = nonterminalTypeMapping[m_symbol];
-        auto unique_name = name + std::to_string(++generator);
+        auto unique_name = name + "_" + std::to_string(++generator);
         out << "state \"" << name << "\" as " << unique_name << std::endl;
-        out << unique_name << "-->" << father << std::endl;
+        out << father << " --> " << unique_name << std::endl;
         for (auto& child : m_children)
         {
             child->print_uml(out, unique_name, generator);
@@ -103,7 +106,7 @@ public:
         return m_token;
     }
 
-    virtual void print(std::ostream& out, size_t level, bool first)
+    virtual void print(std::ostream& out, size_t level, bool first) override
     {
         if (!first)
         {
@@ -112,12 +115,13 @@ public:
         out << std::setw(25) << tokenTypeMapping[m_token->type()] << std::endl;
     }
 
-    virtual void print_uml(std::ostream& out, std::string father, int& generator)
+    virtual void print_uml(std::ostream& out, std::string father, int& generator) override
     {
         auto name = tokenTypeMapping[m_token->type()];
-        auto unique_name = name + std::to_string(++generator);
+        auto unique_name = name + "_" + std::to_string(++generator);
         out << "state \"" << name << "\" as " << unique_name << std::endl;
-        out << unique_name << "-->" << father << std::endl;
+        out << unique_name << " : " << boost::any_cast<std::string>(m_token->value()) << std::endl;
+        out << father << " --> " << unique_name << std::endl;
     }
 
 protected:
@@ -413,3 +417,5 @@ protected:
    // {ResultArgs,{SRSM,RWV,FunctionArgs}},
 
 }
+
+#endif // ACTIONHANDLERS_H

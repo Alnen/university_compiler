@@ -157,10 +157,13 @@ int main (int argc, char** argv)
     std::shared_ptr<boost::any> value;
     bool res;
     std::tie(value, res) = syntax_analyzer.parse(lexer);
+
     std::cout << "SyntaxAnalyser result: " << res << std::endl;
 
     boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>(*value)->print(std::cout, 0, true);
-    PascalParser::print_uml(boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>(*value).get(), std::cout);
+
+    std::ofstream diag_out("b.txt", std::ofstream::out&std::ofstream::trunc);
+    PascalParser::print_uml(boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>(*value).get()->children()[0].get(), diag_out);
 
     int symbol = 186;
 
@@ -177,6 +180,9 @@ int main (int argc, char** argv)
         std::cout << val << ", ";
     }
     std::cout << "]" << std::endl;
+
+    std::ofstream control_table_out("cto.txt", std::ofstream::out&std::ofstream::trunc);
+    syntax_analyzer.print(control_table_out);
 
 
     return 0;

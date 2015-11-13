@@ -48,6 +48,7 @@ public:
     SyntaxAnalyzer(const Grammar& grammar);
     bool readNextToken(std::unique_ptr<Lexer::Token<TerminalType>> new_token);
     std::pair<std::shared_ptr<boost::any>, bool> parse(Lexer::Lexer<TerminalType>& lexer);
+    void print(std::ostream& out);
 
 private:
     int getRuleId(const Rule& rule);
@@ -62,6 +63,12 @@ private:
     std::vector<StackItemPointer>                   m_valueStack;
     ActionFactory<_ActionVector, _NonterminalType>  m_actionfactory;
 };
+
+template<class TerminalType, class NonterminalType, class ActionVector>
+void SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::print(std::ostream& out)
+{
+    m_control_table.print(out);
+}
 
 template<class TerminalType, class NonterminalType, class ActionVector>
 SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::SyntaxAnalyzer(const Grammar& grammar) : m_grammar(grammar), m_control_table(grammar)
