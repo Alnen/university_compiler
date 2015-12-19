@@ -50,7 +50,7 @@ public:
 
     SyntaxAnalyzer(const Grammar& grammar);
     bool readNextToken(std::unique_ptr<Lexer::Token<TerminalType>> new_token);
-    std::pair<std::shared_ptr<boost::any>, bool> parse(Lexer::Lexer<TerminalType>& lexer);
+    std::pair<std::shared_ptr<boost::container::flat_map<std::string, boost::any>>, bool> parse(Lexer::Lexer<TerminalType>& lexer);
     void print(std::ostream& out);
 
 private:
@@ -89,7 +89,7 @@ void SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::pushTokenBack(
     else if (Grammar::isNonterminal(token))
     {
         auto nonterminalItem = std::make_unique<NonterminalItem>();
-        *(nonterminalItem->getValue()) = NonterminalInfo<NonterminalType>((NonterminalType)token);
+        (*(nonterminalItem->getValue()))["tree"] = NonterminalInfo<NonterminalType>((NonterminalType)token);
         m_valueStack.push_back( std::move(nonterminalItem) );
     }
     else if (Grammar::isAction(token))
@@ -111,7 +111,8 @@ void SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::popTokenBack()
 }
 
 template<class TerminalType, class NonterminalType, class ActionVector>
-std::pair<std::shared_ptr<boost::any>, bool> SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::parse(Lexer::Lexer<TerminalType>& lexer)
+std::pair<std::shared_ptr<boost::container::flat_map<std::string, boost::any>>, bool>
+SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::parse(Lexer::Lexer<TerminalType>& lexer)
 {
     pushTokenBack(NonterminalType::DEFAULT_SYNTHESIZE);
     pushTokenBack(TerminalType::ENDOFFILE);
@@ -144,7 +145,10 @@ std::pair<std::shared_ptr<boost::any>, bool> SyntaxAnalyzer<TerminalType, Nonter
     {
         parse_log << "FAILURE";
         auto token_shared_ptr = std::shared_ptr<Lexer::Token<TerminalType>>(new Lexer::Token<TerminalType>(backup_token));
-        auto token_value = std::make_shared<boost::any>(token_shared_ptr);
+        auto temp_map =  boost::container::flat_map<std::string, boost::any>{ {"tree", token_shared_ptr} };
+        auto token_value = std::make_shared<boost::container::flat_map<std::string, boost::any>>(temp_map);
+
+
         for (int i = m_stack.size() - 1; i >= 0; --i)
         {
             if (Grammar::isAction(m_stack[i]))
@@ -230,7 +234,8 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
         {
             popTokenBack();
             auto token_shared_ptr = std::shared_ptr<Lexer::Token<TerminalType>>(std::move(new_token));
-            auto token_value = std::make_shared<boost::any>(token_shared_ptr);
+            auto token_map = boost::container::flat_map<std::string, boost::any>{ {"tree", token_shared_ptr} };
+            auto token_value = std::make_shared<boost::container::flat_map<std::string, boost::any>>(token_map);
             for (int i = m_stack.size() - 1; i >= 0; --i)
             {
                 if (Grammar::isAction(m_stack[i]))

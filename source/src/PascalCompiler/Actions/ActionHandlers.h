@@ -6,8 +6,8 @@
 
 #include "Parser/SyntaxAnalyzer.h"
 #include "Lexer/Lexer.h"
-#include "Nonterminals.h"
-#include "Terminals.h"
+#include "../Grammar/Nonterminals.h"
+#include "../Grammar/Terminals.h"
 
 namespace PascalParser
 {
@@ -19,6 +19,7 @@ using token_ptr_t = std::shared_ptr<Lexer::Token<token_t>>;
 #define TOKEN_VALUE(X)  boost::any_cast<token_ptr_t>(X)->value()
 #define STRING(X)       boost::any_cast<std::string>(X)
 #define NONTERMINAL(X)  boost::any_cast<Parser::NonterminalInfo<NonterminalSymbols>>(X)
+#define INIT()
 
 class TreeElement
 {
@@ -171,19 +172,20 @@ public:
     {
         std::cout << "TreeConstructor" << std::endl;
         std::cout << m_stack.size() << std::endl;
-        std::shared_ptr<TreeNode> head = std::make_shared<TreeNode>(NONTERMINAL(*m_stack[0]).symbol());
+        auto head = std::make_shared<TreeNode>(NONTERMINAL((*m_stack[0])["tree"]).symbol());
 
         for (size_t i = 1; i < m_stack.size(); ++i)
         {
-            if (isNeterminal(m_stack[i]))
+            auto& item = (*m_stack[i])["tree"];
+            if (isNeterminal(item))
             {
                 std::cout<< "N" << std::endl;
-                head->addChild(boost::any_cast<std::shared_ptr<TreeNode>>(*m_stack[i]));
+                head->addChild(boost::any_cast<std::shared_ptr<TreeNode>>(item));
             }
-            else if (isTerminal(m_stack[i]))
+            else if (isTerminal(item))
             {
                 std::cout<< "T" << std::endl;
-                head->addChild(std::make_shared<TreeLeaf>(TOKEN(*m_stack[i])));
+                head->addChild(std::make_shared<TreeLeaf>(TOKEN(item)));
             }
             else
             {
@@ -191,15 +193,16 @@ public:
                 throw std::runtime_error("WTF!");
             }
         }
-        *m_value = head;
+        (*m_value)["tree"] = std::move(head);
+        std::cout << "TreeConstructor END" << std::endl;
     }
 
 protected:
-    bool isNeterminal(std::shared_ptr<boost::any>& value)
+    bool isNeterminal(boost::any& value)
     {
         try
         {
-            boost::any_cast<std::shared_ptr<TreeNode>>(*value);
+            boost::any_cast<std::shared_ptr<TreeNode>>(value);
             return true;
         }
         catch(const boost::bad_any_cast &)
@@ -208,11 +211,11 @@ protected:
         }
     }
 
-    bool isTerminal(std::shared_ptr<boost::any>& value)
+    bool isTerminal(boost::any& value)
     {
         try
         {
-            boost::any_cast<token_ptr_t>(*value);
+            boost::any_cast<token_ptr_t>(value);
             return true;
         }
         catch(const boost::bad_any_cast &)
@@ -221,6 +224,8 @@ protected:
         }
     }
 };
+
+
 
    // {Program,{RWPR,ID,SRSM , ACTION3, Program1}, ACTION1},
    // {Program1,{ProcedureFunctions,CompoundStatement,SRSP}},

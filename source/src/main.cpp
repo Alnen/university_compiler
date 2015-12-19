@@ -16,11 +16,11 @@
 #include <utility>
 #include "Parser/set.h"
 
-#include "Nonterminals.h"
-#include "Terminals.h"
-#include "PascalRules.h"
-
-#include "ActionHandlers.h"
+#include "PascalCompiler/Grammar/Nonterminals.h"
+#include "PascalCompiler/Grammar/Terminals.h"
+#include "PascalCompiler/Grammar/PascalRules.h"
+#include "PascalCompiler/Actions/ActionHandlers.h"
+#include "PascalCompiler/Actions/ActionContainer.hpp"
 #include <utility>
 
 #include <boost/mpl/map.hpp>
@@ -88,61 +88,9 @@ int main (int argc, char** argv)
     Parser::Grammar<TokenType, NonterminalSymbols> grammar(grammar_rules, Program);
     std::cout<< "grammar.isLL1() "  << grammar.isLL1() << std::endl;
 
-    using action_container = boost::mpl::map<
-        boost::mpl::pair<boost::mpl::int_<DEFAULT_INHERIT>, Parser::BaseInheritItem>,
-        boost::mpl::pair<boost::mpl::int_<DEFAULT_SYNTHESIZE>, Parser::BaseSynthesizeItem>,
-        boost::mpl::pair<boost::mpl::int_<ACTION1>, PascalParser::Action1>,
-        boost::mpl::pair<boost::mpl::int_<TreeConstructor>, PascalParser::TreeConstructor>,
-        boost::mpl::pair<boost::mpl::int_<ACTION3>, PascalParser::Action3>
-    >;
-    ActionFactory<action_container, NonterminalSymbols> factory;
+    Parser::SyntaxAnalyzer<TokenType, NonterminalSymbols, ActionContainer> syntax_analyzer(grammar);
 
-    Parser::SyntaxAnalyzer<TokenType, NonterminalSymbols, action_container> syntax_analyzer(grammar);
 
-    // reserwed words map
-    std::vector<boost::bimap<std::string, TokenType>::value_type> reserved_words_map_items =
-    {
-        { "and",        TokenType::RWLA  },
-        { "array",      TokenType::RWAR  },
-        { "begin",      TokenType::RWB   },
-        { "common",     TokenType::RWCM  },
-        { "complex",    TokenType::RWCX  },
-        { "const",      TokenType::RWCN  },
-        { "do",         TokenType::RWDO  },
-        { "denominator",TokenType::RWDN  },
-        { "downto",     TokenType::RWDT  },
-        { "else",       TokenType::RWEL  },
-        { "end",        TokenType::RWEND },
-        { "for",        TokenType::RWFOR },
-        { "frac",       TokenType::RWFR  },
-        { "function",   TokenType::RWFUN },
-        { "goto",       TokenType::RWGT  },
-        { "if",         TokenType::RWIF  },
-        { "im",         TokenType::RWIM  },
-        { "int",        TokenType::RWINTOP},
-        { "integer",    TokenType::RWINT },
-        { "irregular",  TokenType::RWIR  },
-        { "im",         TokenType::RWIM  },
-        { "j",          TokenType::CJ    },
-        { "label",      TokenType::RWLB  },
-        { "numerator",  TokenType::RWN   },
-        { "not",        TokenType::RWLN  },
-        { "of",         TokenType::RWOF  },
-        { "operator",   TokenType::RWOP  },
-        { "or",         TokenType::RWLO  },
-        { "program",    TokenType::RWPR  },
-        { "procedure",  TokenType::RWPRC },
-        { "rational",   TokenType::RWRAT },
-        { "re",         TokenType::RWRE  },
-        { "read",       TokenType::RWRD  },
-        { "simplify",   TokenType::RWSM  },
-        { "then",       TokenType::RWTH  },
-        { "to",         TokenType::RWTO  },
-        { "type",       TokenType::RWTP  },
-        { "var",        TokenType::RWV   },
-        { "write",      TokenType::RWWR  }
-    };
-    boost::bimap<std::string, TokenType> reserved_words(reserved_words_map_items.begin(), reserved_words_map_items.end());
 
     //rules
     std::vector<Lexer::Lexer<TokenType>::Rule> rules;
@@ -174,16 +122,17 @@ int main (int argc, char** argv)
     Lexer::Lexer<TokenType> lexer( std::move(rules), &lexer_out, &tokenTypeMapping);
     lexer.openInput(argv[1]);
 
-    std::shared_ptr<boost::any> value;
+    std::shared_ptr<boost::container::flat_map<std::string, boost::any>> value;
     bool res;
     std::tie(value, res) = syntax_analyzer.parse(lexer);
 
     std::cout << "SyntaxAnalyser result: " << res << std::endl;
 
-    boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>(*value)->print(std::cout, 0, true);
+    auto tree = boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>((*value)["tree"]);
+    tree->print(std::cout, 0, true);
 
     std::ofstream diag_out("program_tree.txt", std::ofstream::out&std::ofstream::trunc);
-    PascalParser::print_uml(boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>(*value).get()->children()[0].get(), diag_out);
+    PascalParser::print_uml(tree.get()->children()[0].get(), diag_out);
 
     int symbol = 186;
 

@@ -5,6 +5,8 @@
 #include "Nonterminals.h"
 #include "Terminals.h"
 
+using namespace PascalCompiler::Grammar;
+
 Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
     {Program,{RWPR,ID,SRSM , Program1, TreeConstructor}, TreeConstructor},
     {Program1,{ProcedureFunctions,CompoundStatement,SRSP}, TreeConstructor},

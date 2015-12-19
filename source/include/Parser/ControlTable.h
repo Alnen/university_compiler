@@ -10,8 +10,10 @@
 #include "Utility.h"
 
 // Dirty hack
-#include "../../src/Nonterminals.h"
-#include "../../src/Terminals.h"
+#include "../../src/PascalCompiler/Grammar/Nonterminals.h"
+#include "../../src/PascalCompiler/Grammar/Terminals.h"
+using namespace PascalCompiler::Grammar;
+
 
 namespace Parser
 {
