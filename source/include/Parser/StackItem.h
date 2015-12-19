@@ -1,4 +1,4 @@
-../source/include/Parser/ControlTable.h#ifndef STACKITEM_H
+#ifndef STACKITEM_H
 #define STACKITEM_H
 
 #include <memory>
