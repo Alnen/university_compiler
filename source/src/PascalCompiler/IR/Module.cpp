@@ -256,7 +256,24 @@ Module::Module(std::string name):
         return result_codegen;
     };
 
+}
 
+llvm::Value* Module::addLoadOperation(llvm::BasicBlock* block, const std::string& name)
+{
+    VarInfo* nameID = m_currentContext->getVariable(name);
+    llvm::IRBuilder<> irBuilder(block);
+    llvm::Value* ptr = irBuilder.CreateGEP(nameID->getAllocaInst(), {llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(llvm::getGlobalContext()), 0)});
+    llvm::Value* value = irBuilder.CreateLoad(ptr);
+    return value;
+}
+
+llvm::Value* Module::addStoreOperation(llvm::BasicBlock* block, const std::string& name, llvm::Value* value)
+{
+    VarInfo* nameID = m_currentContext->getVariable(name);
+    llvm::IRBuilder<> irBuilder(block);
+    llvm::Value* ptr = irBuilder.CreateGEP(nameID->getAllocaInst(),{llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(llvm::getGlobalContext()), 0)});
+    llvm::Value* return_value = irBuilder.CreateStore(value, ptr);
+    return return_value;
 }
 
 llvm::Module* Module::getModule()

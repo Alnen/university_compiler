@@ -1,4 +1,4 @@
-#ifndef MODULE_H
+source/src/PascalCompiler/IR/Module.cpp#ifndef MODULE_H
 #define MODULE_H
 
 #include <functional>
@@ -49,6 +49,9 @@ public:
                       int OP);
 
     llvm::Value* addDNoperator(llvm::BasicBlock* block, llvm::Value* L, bool isNumenator, bool isStore);
+
+    llvm::Value* addLoadOperation(llvm::BasicBlock* block, const std::string& name);
+    llvm::Value* addStoreOperation(llvm::BasicBlock* block, const std::string& name, llvm::Value* value);
 
     std::pair<llvm::Value*, BasicTypeInfo*>
     addSubscription(llvm::Value* L, BasicTypeInfo* typeInfo, const std::vector<size_t>& offsets);

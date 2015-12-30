@@ -1,4 +1,4 @@
-#ifndef EXPRESSION_H
+source/src/PascalCompiler/Actions/IndividualActions/BaseHandlers.h#ifndef EXPRESSION_H
 #define EXPRESSION_H
 
 #include <string>
@@ -17,6 +17,7 @@ using ValuePair = std::pair<llvm::Value*, BasicTypeInfo*>;
 //----------------------------------------------
 // {Expression,{LogicOr}},   DEFAULT
 // {Factor,{Var1}},
+// {Var1,{RightHandVar}},
 class ValuePropagation : public TreeConstructor
 {
 public:
@@ -106,10 +107,9 @@ public:
 // {Expression2,{EPSILON}},
 // {Summand1,{EPSILON}},
 // {Factor1,{EPSILON}},
-// {Var2,{EPSILON}},
-// {Var3,{EPSILON}},
 // {LeftHandVar1,{EPSILON}},
 // {RightHandVar1,{EPSILON}},
+// {RatianalType2,{EPSILON}},
 // DEFAULT
 
 
@@ -148,44 +148,198 @@ public:
 //---------------------------------------------- LOW LEVEL PART
 
 
-
-
-
-class BracketValuePropagation : public TreeConstructor
+// {Var1,{CI,Var3}},
+class CreateConstComplex1 : public TreeConstructor
 {
 public:
     virtual void executeHandler() override
     {
         TreeConstructor::executeHandler();
-        (*m_value)["Value"] = cast_item<ValuePair>(m_stack[2], "Value");
+        int first = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1])));
+        if (cast_item<int>(m_stack[2], "j_flag"))
+        {
+            // TODO
+        }
+        else
+        {
+        }
+        ValuePair result;
+        result.first = llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), first, true);
+        result.second = getGlobalModule()->getTypeInfo("integer");
+        (*m_value)["Value"] = result;
+    }
+};
+// {Var3,{SRSP,CI,Var2}},
+class CreateConstComplex2 : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        /*TreeConstructor::executeHandler();
+        int first = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1])));
+        int rest = 1;
+        if (isType<int>(m_stack[2], "rest"))
+        {
+            rest = cast_item<int>(m_stack[2], "rest");
+        }*/
+        // TODO
     }
 };
 
-// {Var1,{CI,Var3}},
-// {Var3,{SRSP,CI,Var2}},
-
 // {Var1,{SRLCB,RatianalType1,SRCA,RatianalType1,SRRCB}},
+class CreateConstComplex3 : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        /*TreeConstructor::executeHandler();
+        int first = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1])));
+        int rest = 1;
+        if (isType<int>(m_stack[2], "rest"))
+        {
+            rest = cast_item<int>(m_stack[2], "rest");
+        }*/
+        // TODO
+    }
+};
+
+// {RatianalType1,{CI,RatianalType2}, TreeConstructor},
+class RationalStart : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        int first = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1])));
+        int rest = 1;
+        if (isType<int>(m_stack[2], "rest"))
+        {
+            rest = cast_item<int>(m_stack[2], "rest");
+        }
+        // TODO
+    }
+};
+
+// {RatianalType2,{SRSP,CI}, TreeConstructor},
+class RationalEnd : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        (*m_value)["rest"] = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[2])));
+    }
+};
+
+
 
 // {Var3,{CJ}},
 // {Var2,{CJ}},
+class JFlagTrue : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        (*m_value)["j_flag"] = true;
+    }
+};
 
+// {Var2,{EPSILON}},
+// {Var3,{EPSILON}},
 
-// {Var1,{RightHandVar}},
+class JFlagFalse : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        (*m_value)["j_flag"] = false;
+
+    }
+};
 
 // {LeftHandVar,{ID,LeftHandVar3}},
 // {LeftHandVar3,{LeftHandVar1}},
 // {LeftHandVar3,{ExprList,LeftHandVar1}},
 
 // {RightHandVar,{ID,RightHandVar3}},
+class LoadRightHandVar1 : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        std::string id = boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1]));
+        (*m_value)["Value"] = getGlobalModule()->addLoadOperation(getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock(), id);
+    }
+};
+
 // {RightHandVar3,{RightHandVar1}},
+class LoadRightHandVar2 : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        (*m_value)["OP"] = cast_item<int>(m_stack[1], "OP");
+    }
+};
+
 // {RightHandVar3,{ExprList,RightHandVar1}},
+class LoadRightHandVar3 : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        (*m_value)["expr_list"] = cast_item<std::vector<ValuePair>>(m_stack[1], "expr_list");
+        (*m_value)["OP"] = cast_item<int>(m_stack[2], "OP");
+    }
+};
 
-// {ExprList,{EPSILON}},
+
 // {ExprList,{SRLB,Expression,ExprList1,SRRB}},
+class FinalAppendExprList : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        std::vector<ValuePair> id_list;
+        std::vector<ValuePair> id_rest = cast_item<std::vector<ValuePair>>(m_stack[2], "expr_list");
+        ValuePair new_id = cast_item<ValuePair>(m_stack[1], "Value");
+        id_list.push_back(new_id);
+        std::copy(id_rest.begin(), id_rest.end(), std::back_inserter(id_list));
+        (*m_value)["expr_list"] = id_list;
+    }
+};
 // {ExprList1,{SRCA,Expression,ExprList1}},
+class AppendExprList : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        std::vector<ValuePair> id_list;
+        std::vector<ValuePair> id_rest = cast_item<std::vector<ValuePair>>(m_stack[3], "expr_list");
+        ValuePair new_id = cast_item<ValuePair>(m_stack[2], "Value");
+        id_list.push_back(new_id);
+        std::copy(id_rest.begin(), id_rest.end(), std::back_inserter(id_list));
+        (*m_value)["expr_list"] = id_list;
+    }
+};
+// {ExprList,{EPSILON}},
 // {ExprList1,{EPSILON}},
-
-
+class InitExprList : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
+        (*m_value)["expr_list"] = std::vector<ValuePair>();
+    }
+};
 
 // {BinaryAdditiveOperator,{OPPLUS}},
 class UnaryOperatorOPPLUS : public TreeConstructor

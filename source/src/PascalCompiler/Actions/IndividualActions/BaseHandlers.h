@@ -261,13 +261,26 @@ protected:
             return false;
         }
     }
-
     template <class V>
     bool isOP(V& boost_any, const std::string& property)
     {
         try
         {
             boost::any_cast<TokenType>((*boost_any)[property]);
+            return true;
+        }
+        catch(const boost::bad_any_cast &)
+        {
+            return false;
+        }
+    }
+
+    template <class T, class V>
+    bool isType(V& boost_any, const std::string& property)
+    {
+        try
+        {
+            boost::any_cast<T>((*boost_any)[property]);
             return true;
         }
         catch(const boost::bad_any_cast &)
