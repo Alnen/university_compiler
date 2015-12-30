@@ -6,20 +6,25 @@
 
 #include "Parser/SyntaxAnalyzer.h"
 #include "Lexer/Lexer.h"
-#include "../Grammar/Nonterminals.h"
-#include "../Grammar/Terminals.h"
+#include "../../Grammar/Nonterminals.h"
+#include "../../Grammar/Terminals.h"
+#include "../../IR/BasicTypeInfo.hpp"
 
-namespace PascalParser
+#include "llvm/ADT/STLExtras.h"
+
+namespace PascalCompiler
 {
 
 using token_t = Lexer::Lexer<TokenType, NonterminalSymbols>::TokenType;
 using token_ptr_t = std::shared_ptr<Lexer::Token<token_t>>;
 
 #define TOKEN(X)        boost::any_cast<token_ptr_t>(X)
-#define TOKEN_VALUE(X)  boost::any_cast<token_ptr_t>(X)->value()
+#define TOKEN_VALUE(X)  boost::any_cast<token_ptr_t>((*(X))["term"])->value()
 #define STRING(X)       boost::any_cast<std::string>(X)
 #define NONTERMINAL(X)  boost::any_cast<Parser::NonterminalInfo<NonterminalSymbols>>(X)
 #define INIT()
+#define MODULE(X)       boost::any_cast<PascalCompiler::PascalModule*>((*(X))["module"])
+#define IDLIST_REF(X)   boost::any_cast<std::vector<std::string>>((*(X))["id_list"])
 
 class TreeElement
 {
@@ -68,7 +73,7 @@ public:
         {
             out << std::string(level*29, ' ');
         }
-        out << std::setw(25) << nonterminalTypeMapping[m_symbol] << std::string(4, ' ');
+        out << std::setw(25) << getNonterminalTypeMapping()[m_symbol] << std::string(4, ' ');
 
         if (!m_children.empty())
         {
@@ -82,7 +87,7 @@ public:
 
     virtual void print_uml(std::ostream& out, std::string father, int& generator) override
     {
-        auto name = nonterminalTypeMapping[m_symbol];
+        auto name = getNonterminalTypeMapping()[m_symbol];
         auto unique_name = name + "_" + std::to_string(++generator);
         out << "state \"" << name << "\" as " << unique_name << std::endl;
         out << father << " --> " << unique_name << std::endl;
@@ -113,12 +118,12 @@ public:
         {
             out << std::string(level*29, ' ');
         }
-        out << std::setw(25) << tokenTypeMapping[m_token->type()] << std::endl;
+        out << std::setw(25) << tokenTypeMapping()[m_token->type()] << std::endl;
     }
 
     virtual void print_uml(std::ostream& out, std::string father, int& generator) override
     {
-        auto name = tokenTypeMapping[m_token->type()];
+        auto name = tokenTypeMapping()[m_token->type()];
         auto unique_name = name + "_" + std::to_string(++generator);
         out << "state \"" << name << "\" as " << unique_name << std::endl;
         out << unique_name << " : " << boost::any_cast<std::string>(m_token->value()) << std::endl;
@@ -137,33 +142,6 @@ void print_uml(TreeElement* elem, std::ostream& out)
     out << "@enduml\n";
 }
 
-class Action1 : public Parser::BaseSynthesizeItem
-{
-public:
-    virtual void executeHandler() override
-    {
-        std::cout << "SYNTHESIZE program name is " << STRING(TOKEN_VALUE(*m_stack[2])) << std::endl;
-    }
-};
-
-class Action2 : public Parser::BaseSynthesizeItem
-{
-public:
-    virtual void executeHandler() override
-    {
-        std::cout << "ACTION2" << std::endl;
-    }
-};
-
-class Action3 : public Parser::BaseInheritItem
-{
-public:
-    virtual void executeHandler() override
-    {
-        //std::cout << "INHERITED program name is " << boost::any_cast<std::string>(boost::any_cast<Lexer::Token<int>>(*m_stack[2]).value()) << std::endl;
-    }
-};
-
 //
 class TreeConstructor : public Parser::BaseSynthesizeItem
 {
@@ -172,33 +150,41 @@ public:
     {
         std::cout << "TreeConstructor" << std::endl;
         std::cout << m_stack.size() << std::endl;
-        auto head = std::make_shared<TreeNode>(NONTERMINAL((*m_stack[0])["tree"]).symbol());
+        auto head = std::make_shared<TreeNode>(NONTERMINAL((*m_stack[0])["term"]).symbol());
 
         for (size_t i = 1; i < m_stack.size(); ++i)
         {
-            auto& item = (*m_stack[i])["tree"];
-            if (isNeterminal(item))
+            do
             {
-                std::cout<< "N" << std::endl;
-                head->addChild(boost::any_cast<std::shared_ptr<TreeNode>>(item));
+                auto& tree_item = (*m_stack[i])["tree"];
+                if (isNonterminal(tree_item))
+                {
+                    std::cout<< "N" << std::endl;
+                    head->addChild(boost::any_cast<std::shared_ptr<TreeNode>>(tree_item));
+                    break;
+                }
+
+                auto& term_item = (*m_stack[i])["term"];
+                if (isTerminal(term_item))
+                {
+                    std::cout<< "T" << std::endl;
+                    head->addChild(std::make_shared<TreeLeaf>(TOKEN(term_item)));
+                }
+                else
+                {
+                    std::cout << m_stack.size() << std::endl;
+                    throw std::runtime_error("WTF!");
+                }
+
             }
-            else if (isTerminal(item))
-            {
-                std::cout<< "T" << std::endl;
-                head->addChild(std::make_shared<TreeLeaf>(TOKEN(item)));
-            }
-            else
-            {
-                std::cout << m_stack.size() << std::endl;
-                throw std::runtime_error("WTF!");
-            }
+            while (false);
         }
         (*m_value)["tree"] = std::move(head);
         std::cout << "TreeConstructor END" << std::endl;
     }
 
 protected:
-    bool isNeterminal(boost::any& value)
+    bool isNonterminal(boost::any& value)
     {
         try
         {
@@ -223,13 +209,103 @@ protected:
             return false;
         }
     }
+
+    bool isID(boost::any& value)
+    {
+        try
+        {
+            boost::any_cast<std::string>(value);
+            return true;
+        }
+        catch(const boost::bad_any_cast &)
+        {
+            return false;
+        }
+    }
+
+    bool isIDList(boost::any& value)
+    {
+        try
+        {
+            boost::any_cast<std::vector<std::string>>(value);
+            return true;
+        }
+        catch(const boost::bad_any_cast &)
+        {
+            return false;
+        }
+    }
+
+    bool isInt(boost::any& value)
+    {
+        try
+        {
+            boost::any_cast<int>(value);
+            return true;
+        }
+        catch(const boost::bad_any_cast &)
+        {
+            return false;
+        }
+    }
+
+    bool isTypeInfoPtr(boost::any& value)
+    {
+        try
+        {
+            boost::any_cast<BasicTypeInfo*>(value);
+            return true;
+        }
+        catch(const boost::bad_any_cast &)
+        {
+            return false;
+        }
+    }
+
+    template <class V>
+    bool isOP(V& boost_any, const std::string& property)
+    {
+        try
+        {
+            boost::any_cast<TokenType>((*boost_any)[property]);
+            return true;
+        }
+        catch(const boost::bad_any_cast &)
+        {
+            return false;
+        }
+    }
+
+    template <class T, class V>
+    T cast_item(V& boost_any, const std::string& property)
+    {
+        boost::any& item = (*boost_any)[property];
+        return boost::any_cast<T>(item);
+    }
+
 };
 
+class Example : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();
 
 
+
+    }
+
+protected:
+
+
+};
+
+// PROGRAMM
    // {Program,{RWPR,ID,SRSM , ACTION3, Program1}, ACTION1},
    // {Program1,{ProcedureFunctions,CompoundStatement,SRSP}},
    // {Program1,{DescriptionSection1,DescriptionSection,ProcedureFunctions,CompoundStatement,SRSP}},
+// DESCRIBE PROGRAMM
    // {DescriptionSection,{EPSILON}},
    // {DescriptionSection,{DescriptionSection1,DescriptionSection}},
    // {DescriptionSection1,{LabelSection}},
@@ -237,17 +313,21 @@ protected:
    // {DescriptionSection1,{TypeSection}},
    // {DescriptionSection1,{VarSection}},
    // {DescriptionSection1,{OperatorOverloadSection}},
+// FUCTION DECLARATION
    // {ProcedureFunctions,{Function,ProcedureFunctions}},
    // {ProcedureFunctions,{Procedure,ProcedureFunctions}},
    // {ProcedureFunctions,{EPSILON}},
+// LABELS SECTION
    // {LabelSection,{RWLB,Label,LabelSection1,SRSM}},
    // {LabelSection1,{EPSILON}},
    // {LabelSection1,{SRCA,Label,LabelSection1}},
    // {Label,{ID}},
+// CONST SECTION
    // {ConstSection,{RWCN,ConstDefinition,SRSM,ConstSection1}},
    // {ConstSection1,{EPSILON}},
    // {ConstSection1,{ConstDefinition,SRSM,ConstSection1}},
    // {ConstDefinition,{ID,OPEQ,Expression}},
+// TYPE System
    // {TypeSection,{RWTP,TypeDefinition,SRSM,TypeSection1}},
    // {TypeSection1,{EPSILON}},
    // {TypeSection1,{TypeDefinition,SRSM,TypeSection1}},
@@ -265,6 +345,7 @@ protected:
    // {IndexType,{EnumType}},
    // {IndexType,{ID}},
    // {EnumType,{SRLP,IdList,SRRP}},
+
    // {ConstExpr,{UnaryAdditiveOperator,ConstExpr1}},
    // {ConstExpr,{ConstExpr1}},
    // {ConstExpr1,{ID}},
@@ -279,6 +360,8 @@ protected:
    // {RatianalType1,{CI,RatianalType2}},
    // {RatianalType2,{SRSP,CI}},
    // {RatianalType2,{EPSILON}},
+
+// VAR
    // {VarSection,{RWV,VarSection1,VarSection2}},
    // {VarSection1,{IdList,SRCN,Type,SRSM}},
    // {VarSection2,{VarSection1,VarSection2}},
@@ -286,6 +369,8 @@ protected:
    // {IdList,{ID,IdList1}},
    // {IdList1,{SRCA,ID,IdList1}},
    // {IdList1,{EPSILON}},
+
+//Expr part
    // {Expression,{LogicOr}},
    // {LogicOr,{LogicAnd,LogicOr1}},
    // {LogicOr1,{RWLO,LogicAnd,LogicOr1}},
@@ -354,6 +439,7 @@ protected:
    // {PostfixRationalOperator1,{RWN}},
    // {LeftHandPostfixRationalOperator,{PostfixRationalOperator}},
    // {RightHandPostfixRationalOperator,{PostfixRationalOperator}},
+//
    // {CompoundStatement,{RWB,Statement,CompoundStatement1}},
    // {CompoundStatement1,{SRSM,CompoundStatement2}},
    // {CompoundStatement1,{RWEND}},
@@ -385,6 +471,7 @@ protected:
    // {InputOperator1,{SRCA,LeftHandVar}},
    // {OutputOperator,{RWWR,SRLP,Expression,OutputOperator1,SRRP}},
    // {OutputOperator1,{SRCA,Expression}},
+//
    // {OperatorOverloadSection,{RWOP,OperatorOverloadSection1}},
    // {OperatorOverloadSection1,{BinaryAdditiveOperator,SRLP,ID,OperatorOverloadSection2}},
    // {OperatorOverloadSection1,{OverloadBinaryOperation1,SRLP,ID,BinaryOperatorOverload1,ID,SRCN,Type,SRSM,LocalDefinition1,CompoundStatement,SRSM}},
@@ -410,6 +497,7 @@ protected:
    // {OverloadBinaryOperation1,{RWLA}},
    // {OverloadBinaryOperation1,{OPAS}},
    // {OverloadBinaryOperation1,{RWCM}},
+//
    // {Function,{RWFUN,ID,SRLP,FunctionArgs,SRRP,SRCN,Type,SRSM,LocalDefinition1,CompoundStatement,SRSM}},
    // {FunctionArgs,{OneTypeArgs,FunctionArgs1}},
    // {FunctionArgs1,{SRSM,FunctionArgs}},

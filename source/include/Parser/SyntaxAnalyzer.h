@@ -89,7 +89,7 @@ void SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::pushTokenBack(
     else if (Grammar::isNonterminal(token))
     {
         auto nonterminalItem = std::make_unique<NonterminalItem>();
-        (*(nonterminalItem->getValue()))["tree"] = NonterminalInfo<NonterminalType>((NonterminalType)token);
+        (*(nonterminalItem->getValue()))["term"] = NonterminalInfo<NonterminalType>((NonterminalType)token);
         m_valueStack.push_back( std::move(nonterminalItem) );
     }
     else if (Grammar::isAction(token))
@@ -145,7 +145,7 @@ SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::parse(Lexer::Lexer<
     {
         parse_log << "FAILURE";
         auto token_shared_ptr = std::shared_ptr<Lexer::Token<TerminalType>>(new Lexer::Token<TerminalType>(backup_token));
-        auto temp_map =  boost::container::flat_map<std::string, boost::any>{ {"tree", token_shared_ptr} };
+        auto temp_map =  boost::container::flat_map<std::string, boost::any>{ {"term", token_shared_ptr} };
         auto token_value = std::make_shared<boost::container::flat_map<std::string, boost::any>>(temp_map);
 
 
@@ -234,7 +234,7 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
         {
             popTokenBack();
             auto token_shared_ptr = std::shared_ptr<Lexer::Token<TerminalType>>(std::move(new_token));
-            auto token_map = boost::container::flat_map<std::string, boost::any>{ {"tree", token_shared_ptr} };
+            auto token_map = boost::container::flat_map<std::string, boost::any>{ {"term", token_shared_ptr} };
             auto token_value = std::make_shared<boost::container::flat_map<std::string, boost::any>>(token_map);
             for (int i = m_stack.size() - 1; i >= 0; --i)
             {
@@ -254,8 +254,8 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
         else if (m_grammar.isTerminal(m_stack.back()))
         {
             parse_log << "ERROR: expected token with token_type "
-                      << tokenTypeMapping[(TerminalType)m_stack.back()] << ", but got "
-                      << tokenTypeMapping[(TerminalType)new_token->type()] << std::endl;
+                      << tokenTypeMapping()[(TerminalType)m_stack.back()] << ", but got "
+                      << tokenTypeMapping()[(TerminalType)new_token->type()] << std::endl;
             return false;
         }
         else
@@ -268,10 +268,14 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
             {
                 auto value = m_valueStack.back()->getValue();
                 popTokenBack();
-                if (!(ct_rule.right().size() == 2 && ct_rule.right()[0] == NonterminalType::EPSILON))
-                {
+                //if (!(ct_rule.right().size() == 2 && ct_rule.right()[0] == NonterminalType::EPSILON))
+                //{
                     for (int i = ct_rule.right().size() - 1; i >= 0; --i)
                     {
+                        if (ct_rule.right()[i] == NonterminalType::EPSILON)
+                        {
+                            continue;
+                        }
                         pushTokenBack(ct_rule.right()[i]);
                         if (Grammar::isAction(m_stack.back()))
                         {
@@ -279,7 +283,7 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
                             action_on_stack->push(value);
                         }
                     }
-                }
+                //}
             }
         }
     }

@@ -130,13 +130,13 @@ void  ControlTable<TerminalType, NonterminalType>::print(std::ostream& out)
     out << " ";
     for (size_t i = 0; i < column_names.size(); ++i)
     {
-        out << "|" << tokenTypeMapping[(TerminalType)column_names[i]];
+        out << "|" << tokenTypeMapping()[(TerminalType)column_names[i]];
     }
     out << std::endl;
 
     for (size_t i = 0; i < row_names.size(); ++i)
     {
-        out << nonterminalTypeMapping[(NonterminalType)row_names[i]] << "|";
+        out << getNonterminalTypeMapping()[(NonterminalType)row_names[i]] << "|";
         for (size_t j = 0; j < column_names.size(); ++j)
         {
             auto& rule = values[i*column_names.size() + j];
@@ -151,11 +151,11 @@ void  ControlTable<TerminalType, NonterminalType>::print(std::ostream& out)
                 {
                     if (Grammar::isTerminal(rule.right()[0]))
                     {
-                        out << tokenTypeMapping[(TerminalType)rule.right()[0]];
+                        out << tokenTypeMapping()[(TerminalType)rule.right()[0]];
                     }
                     else if (Grammar::isNonterminal(rule.right()[0]) || rule.right()[0] == NonterminalType::EPSILON)
                     {
-                        out << nonterminalTypeMapping[(NonterminalType)rule.right()[0]];
+                        out << getNonterminalTypeMapping()[(NonterminalType)rule.right()[0]];
                     }
                     else
                     {
@@ -168,12 +168,12 @@ void  ControlTable<TerminalType, NonterminalType>::print(std::ostream& out)
                     if (Grammar::isTerminal(rule.right()[z]))
                     {
                         out << ", ";
-                        out << tokenTypeMapping[(TerminalType)rule.right()[z]];
+                        out << tokenTypeMapping()[(TerminalType)rule.right()[z]];
                     }
                     else if (Grammar::isNonterminal(rule.right()[z]) || rule.right()[z] == NonterminalType::EPSILON)
                     {
                         out << ", ";
-                        out << nonterminalTypeMapping[(NonterminalType)rule.right()[z]];
+                        out << getNonterminalTypeMapping()[(NonterminalType)rule.right()[z]];
                     }
                     else
                     {

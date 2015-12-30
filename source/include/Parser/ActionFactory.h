@@ -22,6 +22,7 @@ public:
 
     ActionPtr operator()(TokenType action)
     {
+        std::cout << "Action " << action << std::endl;
         return m_map[action]();
     }
 

@@ -3,6 +3,17 @@ set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/RegexAST/RegexASTNode.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/RegexAST/RegexASTParser.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/RegexAST/RegexASTAnnotationEvaluator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/ArrayTypeInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/BasicTypeInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/Context.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/CustomTypeInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/EnumerationTypeInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/LabelInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/Module.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/VarInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/GlobalContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/Grammar/Terminals.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/Grammar/Nonterminals.cpp
     PARENT_SCOPE
 )
 

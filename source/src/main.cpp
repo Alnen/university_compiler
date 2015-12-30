@@ -1,3 +1,6 @@
+#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
+#define BOOST_MPL_LIMIT_MAP_SIZE 30
+
 #include <memory>
 #include <boost/bimap.hpp>
 
@@ -19,11 +22,15 @@
 #include "PascalCompiler/Grammar/Nonterminals.h"
 #include "PascalCompiler/Grammar/Terminals.h"
 #include "PascalCompiler/Grammar/PascalRules.h"
-#include "PascalCompiler/Actions/ActionHandlers.h"
 #include "PascalCompiler/Actions/ActionContainer.hpp"
 #include <utility>
 
 #include <boost/mpl/map.hpp>
+
+#include "PascalCompiler/IR/GlobalContext.h"
+
+
+#include <boost/mpl/list.hpp>
 
 std::set<std::string> used_id;
 std::set<std::string> used_ci;
@@ -116,23 +123,40 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::SRSP,     std::string(".")                     );
     rules.emplace_back(TokenType::SRCA,     std::string(",")                     );
     rules.emplace_back(TokenType::CI,       std::string("[0-9][0-9]*")         , std::make_shared<CIHandler>());
-    rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*"), std::make_shared<IDHandler>(reserved_words));
+    rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*"), std::make_shared<IDHandler>(reserved_words()));
 
     std::ofstream lexer_out("lexer.log", std::ofstream::out&std::ofstream::trunc);
-    Lexer::Lexer<TokenType> lexer( std::move(rules), &lexer_out, &tokenTypeMapping);
+    Lexer::Lexer<TokenType> lexer( std::move(rules), &lexer_out, &(tokenTypeMapping()));
     lexer.openInput(argv[1]);
+
+
+    PascalCompiler::initModule("nodule");
+    // Creating Global Context
+    llvm::FunctionType* mainFunctionType = llvm::FunctionType::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), false);
+    auto* currentContext =  PascalCompiler::getGlobalModule()->registerContext(PascalCompiler::getGlobalModule()->getAnonimousName(), mainFunctionType, nullptr);
+    PascalCompiler::getGlobalModule()->setContext(currentContext);
 
     std::shared_ptr<boost::container::flat_map<std::string, boost::any>> value;
     bool res;
-    std::tie(value, res) = syntax_analyzer.parse(lexer);
+    try
+    {
+        std::tie(value, res) = syntax_analyzer.parse(lexer);
+    }
+    catch(std::runtime_error& e)
+    {
+        std::cout << "ERROR: " << e.what() << std::endl;
+        exit(1);
+    }
+
+
 
     std::cout << "SyntaxAnalyser result: " << res << std::endl;
 
-    auto tree = boost::any_cast<std::shared_ptr<PascalParser::TreeNode>>((*value)["tree"]);
+    auto tree = boost::any_cast<std::shared_ptr<PascalCompiler::TreeNode>>((*value)["tree"]);
     tree->print(std::cout, 0, true);
 
     std::ofstream diag_out("program_tree.txt", std::ofstream::out&std::ofstream::trunc);
-    PascalParser::print_uml(tree.get()->children()[0].get(), diag_out);
+    PascalCompiler::print_uml(tree.get()->children()[0].get(), diag_out);
 
     int symbol = 186;
 
@@ -166,6 +190,5 @@ int main (int argc, char** argv)
     {
         lexer_output << id << std::endl;
     }
-
     return 0;
 }
