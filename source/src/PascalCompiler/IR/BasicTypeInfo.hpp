@@ -1,4 +1,4 @@
-#ifndef BASICINFOTYPE_HPP
+source/src/PascalCompiler/IR/BasicTypeInfo.cpp#ifndef BASICINFOTYPE_HPP
 #define BASICINFOTYPE_HPP
 
 #include "BasicTypeInfo.hpp"
@@ -16,10 +16,11 @@ public:
         RATIONAL,
         COMPLEX,
         ENUMERATION,
+        STRUCT,
         CUSTOM
     };
 
-    BasicTypeInfo(Type type, std::string name = "");
+    BasicTypeInfo(Type type);
 
     const std::string& getName() const;
     void setName(const std::string& name);

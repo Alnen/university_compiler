@@ -12,6 +12,8 @@ set(SOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/Module.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/VarInfo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/GlobalContext.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/StructTypeInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/IR/IntegerTypeInfo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/Grammar/Terminals.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PascalCompiler/Grammar/Nonterminals.cpp
     PARENT_SCOPE

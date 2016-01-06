@@ -4,9 +4,10 @@
 namespace PascalCompiler {
 
 CustomTypeInfo::CustomTypeInfo(BasicTypeInfo* trueType, const std::string& name):
-    BasicTypeInfo(BasicTypeInfo::CUSTOM, name),
+    BasicTypeInfo(BasicTypeInfo::CUSTOM),
     m_trueType(trueType)
 {
+    m_name = name;
     m_llvmType = trueType->getLLVMType();
 }
 

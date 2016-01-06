@@ -1,4 +1,4 @@
-source/src/PascalCompiler/IR/Module.cpp#ifndef MODULE_H
+#ifndef MODULE_H
 #define MODULE_H
 
 #include <functional>
@@ -13,6 +13,7 @@ source/src/PascalCompiler/IR/Module.cpp#ifndef MODULE_H
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 
 #include "boost/container/flat_map.hpp"
+#include "boost/any.hpp"
 
 #include "../Grammar/Terminals.h"
 #include <algorithm>
@@ -29,6 +30,49 @@ source/src/PascalCompiler/IR/Module.cpp#ifndef MODULE_H
 #include "LabelInfo.hpp"
 
 namespace PascalCompiler {
+
+class VarModificator
+{
+public:
+    enum Type
+    {
+        NOT_INITIALIZED,
+        MATRIX_INDEX,
+        MEMBER_FETCH
+    };
+
+    Type getType() const
+    {
+        return m_type;
+    }
+
+    std::string getName() const
+    {
+        return boost::any_cast<std::string>(m_value);
+    }
+
+    void setName(const std::string& name)
+    {
+        m_type = MEMBER_FETCH;
+        m_value = name;
+    }
+
+    std::pair<llvm::Value*, BasicTypeInfo*> getIndexValue() const
+    {
+        return boost::any_cast<std::pair<llvm::Value*, BasicTypeInfo*>>(m_value);
+    }
+
+    void setIndexValue(const std::pair<llvm::Value*, BasicTypeInfo*>& indexValue)
+    {
+        m_type = MATRIX_INDEX;
+        m_value = indexValue;
+    }
+
+private:
+    Type m_type = NOT_INITIALIZED;
+    boost::any m_value;
+};
+
 
 class Module
 {
@@ -48,13 +92,14 @@ public:
                       llvm::Value* L, BasicTypeInfo* type_a,
                       int OP);
 
-    llvm::Value* addDNoperator(llvm::BasicBlock* block, llvm::Value* L, bool isNumenator, bool isStore);
-
-    llvm::Value* addLoadOperation(llvm::BasicBlock* block, const std::string& name);
-    llvm::Value* addStoreOperation(llvm::BasicBlock* block, const std::string& name, llvm::Value* value);
+    std::pair<llvm::Value*, BasicTypeInfo*> addLoadOperation(llvm::BasicBlock* block,
+                                                             llvm::Value* ptr, BasicTypeInfo* ptrType);
+    std::pair<llvm::Value*, BasicTypeInfo*> addStoreOperation(llvm::BasicBlock* block,
+                                                              llvm::Value* ptr, BasicTypeInfo* ptrType,
+                                                              llvm::Value* value, BasicTypeInfo* valueTyp);
 
     std::pair<llvm::Value*, BasicTypeInfo*>
-    addSubscription(llvm::Value* L, BasicTypeInfo* typeInfo, const std::vector<size_t>& offsets);
+    addSubscription(llvm::BasicBlock* block, llvm::Value* L, BasicTypeInfo* typeInfo, const std::vector<VarModificator>& modificators);
 
     BasicTypeInfo* registerCustomType(const std::string& name, std::unique_ptr<BasicTypeInfo> type_info);
 

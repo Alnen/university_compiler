@@ -20,7 +20,6 @@ ArrayTypeInfo::ArrayTypeInfo(const DimensionsVector& dimensions, BasicTypeInfo* 
     m_name = "array@" + elementType->getName();
 
     llvm::Type* currentLLVMType = elementType->getLLVMType();
-    size_t      currentSize = 0;
     for (int i = m_dimensions.size()-1; i >= 0; --i)
     {
         // only integer indexes supported
@@ -29,7 +28,7 @@ ArrayTypeInfo::ArrayTypeInfo(const DimensionsVector& dimensions, BasicTypeInfo* 
     m_llvmType = currentLLVMType;
 }
 
-BasicTypeInfo* ArrayTypeInfo::elementType() const
+BasicTypeInfo* ArrayTypeInfo::getElementType() const
 {
     return m_elementType;
 }

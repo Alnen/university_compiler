@@ -21,7 +21,7 @@ class TypeRegistrationAction : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
 
         if (isTypeInfoPtr((*(m_stack[3]))["type"]))
         {
@@ -46,7 +46,7 @@ class TypePropagation : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["type"] = cast_item<BasicTypeInfo*>(m_stack[1], "type");
     }
 protected:
@@ -57,7 +57,7 @@ class GetTypeAccordingToID : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         std::string id = boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1]));
         BasicTypeInfo* type = getGlobalModule()->getTypeInfo(id);
         (*m_value)["type"] = type;
@@ -69,7 +69,7 @@ class IntegerPass : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["type"] = getGlobalModule()->getTypeInfo("integer");
     }
 protected:
@@ -80,7 +80,7 @@ class RationalPass : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["type"] = getGlobalModule()->getTypeInfo("rational");
     }
 protected:
@@ -91,7 +91,7 @@ class ComplexPass : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["type"] = getGlobalModule()->getTypeInfo("complex");
     }
 protected:
@@ -102,12 +102,11 @@ class ArrayCreationAction : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
-
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         // Merge lists
         // Cast rest of indexes
         std::vector<std::pair<size_t, BasicTypeInfo*>>& rest = boost::any_cast<
-                std::vector<std::pair<size_t, BasicTypeInfo*>>&
+                    std::vector<std::pair<size_t, BasicTypeInfo*>>&
                 >(
                     (*(m_stack[4]))["massive"]
                 );
@@ -143,7 +142,7 @@ class Massive1InitVec : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         std::cout << "BOOM_INIT" << std::endl;
         (*m_value)["massive"] = std::vector<std::pair<size_t, BasicTypeInfo*>>();
     }
@@ -156,7 +155,7 @@ public:
     virtual void executeHandler() override
     {
         std::cout << "BOOM_CONCAT" << std::endl;
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         Module* module = getGlobalModule();
 
         // Cast rest of indexes
@@ -184,7 +183,7 @@ class IndexTypeCXSize : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         std::cout << "BOOM" << std::endl;
         (*m_value)["size"] = std::atoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1])).c_str());
     }
@@ -196,7 +195,7 @@ class IndexTypeIDCase : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         // CONST
         // ENUMERATION NOUT SUPPORTED
         (*m_value)["id"] = TOKEN_VALUE(m_stack[1]);
@@ -209,7 +208,7 @@ class EnumTypeConstruction : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         std::vector<std::string> id_list = cast_item<std::vector<std::string>>(m_stack[2], "idlist");
         std::unique_ptr<EnumerationTypeInfo> type = std::make_unique<EnumerationTypeInfo>();
 

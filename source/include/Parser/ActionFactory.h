@@ -9,6 +9,9 @@
 #include <boost/mpl/for_each.hpp>
 #include <boost/mpl/range_c.hpp>
 
+#include <boost/hana/map.hpp>
+#include <boost/hana/for_each.hpp>
+
 template <class ActionMapping, class TokenType>
 class ActionFactory
 {
@@ -16,8 +19,11 @@ public:
     using ActionPtr = std::unique_ptr<Parser::BaseStackedItem>;
     ActionFactory()
     {
-        mapping_constructor functor(*this);
-        boost::mpl::for_each<ActionMapping>(functor);
+        boost::hana::for_each(ActionMapping(), [this](auto pair){
+            m_map[std::remove_reference<decltype(boost::hana::first(pair))>::type::value] = [](){
+                return std::make_unique<typename std::remove_reference<decltype(boost::hana::second(pair))>::type::type>();
+            };
+        });
     }
 
     ActionPtr operator()(TokenType action)
@@ -28,22 +34,6 @@ public:
 
 protected:
     boost::container::flat_map<int, std::function<ActionPtr()>> m_map;
-
-private:
-    class mapping_constructor
-    {
-    public:
-        mapping_constructor(ActionFactory& factory): m_factory(factory) {}
-
-        template <class P>
-        void operator()(P pair)
-        {
-            m_factory.m_map[decltype(pair)::first::value] = [](){ return std::make_unique<typename decltype(pair)::second>(); };
-        }
-
-    protected:
-        ActionFactory& m_factory;
-    };
 };
 
 #endif // ACTIONFACTORY_H

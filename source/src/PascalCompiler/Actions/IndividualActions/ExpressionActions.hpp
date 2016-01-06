@@ -23,7 +23,7 @@ class ValuePropagation : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["Value"] = cast_item<ValuePair>(m_stack[1], "Value");
     }
 };
@@ -39,7 +39,7 @@ class ExpressionCombiner : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         ValuePair first_nt_codegen = cast_item<ValuePair>(m_stack[1], "Value");
         ValuePair result_codegen;
         if (isOP(m_stack[2], "OP"))
@@ -76,13 +76,16 @@ class SuperExpressionCombiner : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         ValuePair first_nt_codegen = cast_item<ValuePair>(m_stack[2], "Value");
+        std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         ValuePair result_codegen;
         if (isOP(m_stack[3], "OP"))
         {
             TokenType second_nt_op = cast_item<TokenType>(m_stack[3], "OP");
+            std::cout <<  __PRETTY_FUNCTION__ << std::endl;
             ValuePair second_nt_codogen = cast_item<ValuePair>(m_stack[3], "Value");
+            std::cout <<  __PRETTY_FUNCTION__ << std::endl;
 
             result_codegen = getGlobalModule()->addBinaryOperation(
                                                     getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock(),
@@ -95,7 +98,9 @@ public:
         {
             result_codegen = first_nt_codegen;
         }
+        std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = cast_item<TokenType>(m_stack[1], "OP");
+        std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["Value"] = result_codegen;
     }
 };
@@ -119,7 +124,7 @@ class BracketValuePropagation : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["Value"] = cast_item<ValuePair>(m_stack[2], "Value");
     }
 };
@@ -130,7 +135,7 @@ class UnaryOPValue : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         TokenType second_nt_op = cast_item<TokenType>(m_stack[1], "OP");
         ValuePair first_nt_codegen = cast_item<ValuePair>(m_stack[2], "Value");
         ValuePair result_codegen;
@@ -154,14 +159,15 @@ class CreateConstComplex1 : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         int first = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1])));
-        if (cast_item<int>(m_stack[2], "j_flag"))
+        if (cast_item<bool>(m_stack[2], "j_flag"))
         {
             // TODO
         }
         else
         {
+
         }
         ValuePair result;
         result.first = llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), first, true);
@@ -175,7 +181,7 @@ class CreateConstComplex2 : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        /*TreeConstructor::executeHandler();
+        /*TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         int first = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1])));
         int rest = 1;
         if (isType<int>(m_stack[2], "rest"))
@@ -192,7 +198,7 @@ class CreateConstComplex3 : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        /*TreeConstructor::executeHandler();
+        /*TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         int first = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1])));
         int rest = 1;
         if (isType<int>(m_stack[2], "rest"))
@@ -209,7 +215,7 @@ class RationalStart : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         int first = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1])));
         int rest = 1;
         if (isType<int>(m_stack[2], "rest"))
@@ -226,12 +232,10 @@ class RationalEnd : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["rest"] = std::stoi(boost::any_cast<std::string>(TOKEN_VALUE(m_stack[2])));
     }
 };
-
-
 
 // {Var3,{CJ}},
 // {Var2,{CJ}},
@@ -240,7 +244,7 @@ class JFlagTrue : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["j_flag"] = true;
     }
 };
@@ -253,50 +257,84 @@ class JFlagFalse : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["j_flag"] = false;
 
     }
 };
 
-// {LeftHandVar,{ID,LeftHandVar3}},
-// {LeftHandVar3,{LeftHandVar1}},
-// {LeftHandVar3,{ExprList,LeftHandVar1}},
-
-// {RightHandVar,{ID,RightHandVar3}},
-class LoadRightHandVar1 : public TreeConstructor
+// {LeftHandVar,{ID,VarHandlerList}},
+class PropagateLeftHandVarInfo : public TreeConstructor
 {
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        (*m_value)["id"] = boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1]));
+        (*m_value)["VarHandlerList"] = cast_item<std::vector<VarModificator>>(m_stack[2], "VarHandlerList");
+    }
+};
+
+// {LeftHandVar3,{LeftHandVar1}},
+// {LeftHandVar3,{ExprList,LeftHandVar1}},
+
+// {LeftHandVar,{ID,LeftHandVar3}, TreeConstructor},
+// {LeftHandVar3,{LeftHandVar1}, TreeConstructor},
+// {LeftHandVar3,{SRLB, ExprList, SRRB, LeftHandVar1}, TreeConstructor},
+// {LeftHandVar1,{EPSILON}, TreeConstructor},
+
+// {RightHandVar,{ID,VarHandlerList}},
+class LoadRightHandVar : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         std::string id = boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1]));
-        (*m_value)["Value"] = getGlobalModule()->addLoadOperation(getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock(), id);
+        std::vector<VarModificator> modificators = cast_item<std::vector<VarModificator>>(m_stack[2], "VarHandlerList");
+        VarInfo* idInfo = getGlobalModule()->getCurrentContext()->getVariable(id);
+        llvm::BasicBlock* block = getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock();
+        auto valuePair = getGlobalModule()->addSubscription(block,
+                                                            idInfo->getAllocaInst(), idInfo->getType(),
+                                                            modificators);
+        (*m_value)["Value"] = getGlobalModule()->addLoadOperation(block, valuePair.first, valuePair.second);
     }
 };
 
 // {RightHandVar3,{RightHandVar1}},
-class LoadRightHandVar2 : public TreeConstructor
+/*class LoadRightHandVar2 : public TreeConstructor
 {
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = cast_item<int>(m_stack[1], "OP");
+        (*m_value)["expr_list"] =         (*m_value)["expr_list"] = std::vector<ValuePair>();
     }
 };
 
-// {RightHandVar3,{ExprList,RightHandVar1}},
+// {RightHandVar3,{SRLB, ExprList, SRRB, RightHandVar1}, LoadRightHandVar3},
 class LoadRightHandVar3 : public TreeConstructor
 {
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
-        (*m_value)["expr_list"] = cast_item<std::vector<ValuePair>>(m_stack[1], "expr_list");
-        (*m_value)["OP"] = cast_item<int>(m_stack[2], "OP");
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        (*m_value)["expr_list"] = cast_item<std::vector<ValuePair>>(m_stack[2], "expr_list");
+        (*m_value)["OP"] = cast_item<int>(m_stack[4], "OP");
     }
 };
+
+// {RightHandVar1,{EPSILON}, LoadRightHandVar4},
+class LoadRightHandVar4 : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        (*m_value)["OP"] = -1;
+    }
+};*/
 
 
 // {ExprList,{SRLB,Expression,ExprList1,SRRB}},
@@ -305,7 +343,7 @@ class FinalAppendExprList : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         std::vector<ValuePair> id_list;
         std::vector<ValuePair> id_rest = cast_item<std::vector<ValuePair>>(m_stack[2], "expr_list");
         ValuePair new_id = cast_item<ValuePair>(m_stack[1], "Value");
@@ -320,7 +358,7 @@ class AppendExprList : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         std::vector<ValuePair> id_list;
         std::vector<ValuePair> id_rest = cast_item<std::vector<ValuePair>>(m_stack[3], "expr_list");
         ValuePair new_id = cast_item<ValuePair>(m_stack[2], "Value");
@@ -329,6 +367,7 @@ public:
         (*m_value)["expr_list"] = id_list;
     }
 };
+
 // {ExprList,{EPSILON}},
 // {ExprList1,{EPSILON}},
 class InitExprList : public TreeConstructor
@@ -336,10 +375,56 @@ class InitExprList : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["expr_list"] = std::vector<ValuePair>();
     }
 };
+
+// {VarHandlerList,{SRLB, Expression, SRRB, VarHandlerList}, TreeConstructor},
+class AppendIndexVarHandlerList : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        std::vector<VarModificator> id_list;
+        std::vector<VarModificator> id_rest = cast_item<std::vector<VarModificator>>(m_stack[4], "VarHandlerList");
+        ValuePair indexValue = cast_item<ValuePair>(m_stack[2], "Value");
+        VarModificator varModificator;
+        varModificator.setIndexValue(indexValue);
+        id_list.push_back(varModificator);
+        std::copy(id_rest.begin(), id_rest.end(), std::back_inserter(id_list));
+        (*m_value)["VarHandlerList"] = id_list;
+    }
+};
+// {VarHandlerList,{SRSP, ID, VarHandlerList}, TreeConstructor},
+class AppendMemberVarHandlerList : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        std::vector<VarModificator> id_list;
+        std::vector<VarModificator> id_rest = cast_item<std::vector<VarModificator>>(m_stack[3], "VarHandlerList");
+        std::string new_id = boost::any_cast<std::string>(TOKEN_VALUE(m_stack[2]));
+        VarModificator varModificator;
+        varModificator.setName(new_id);
+        id_list.push_back(varModificator);
+        std::copy(id_rest.begin(), id_rest.end(), std::back_inserter(id_list));
+        (*m_value)["VarHandlerList"] = id_list;
+    }
+};
+// {VarHandlerList,{EPSILON},                TreeConstructor},
+class InitVarHandlerList : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        (*m_value)["VarHandlerList"] = std::vector<VarModificator>();
+    }
+};
+
 
 // {BinaryAdditiveOperator,{OPPLUS}},
 class UnaryOperatorOPPLUS : public TreeConstructor
@@ -347,7 +432,7 @@ class UnaryOperatorOPPLUS : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPPLUS;
     }
 };
@@ -357,7 +442,7 @@ class UnaryOperatorOPMINUS : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPMINUS;
     }
 };
@@ -367,7 +452,7 @@ class UnaryOperatorOPMUL : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPMUL;
     }
 };
@@ -377,7 +462,7 @@ class UnaryOperatorOPDIV : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPDIV;
     }
 };
@@ -388,7 +473,7 @@ class UnaryOperatorRWINTOP : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = RWINTOP;
     }
 };
@@ -398,7 +483,7 @@ class UnaryOperatorRWIR : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = RWIR;
     }
 };
@@ -408,7 +493,7 @@ class UnaryOperatorRWSM : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = RWSM;
     }
 };
@@ -418,7 +503,7 @@ class UnaryOperatorRWFR : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = RWFR;
     }
 };
@@ -428,7 +513,7 @@ class UnaryOperatorRWLN : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = RWLN;
     }
 };
@@ -438,7 +523,7 @@ class UnaryOperatorRWIM : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = RWIM;
     }
 };
@@ -448,7 +533,7 @@ class UnaryOperatorRWRE : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = RWRE;
     }
 };
@@ -465,7 +550,7 @@ class OPPropagation : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = cast_item<ValuePair>(m_stack[1], "OP");
     }
 };
@@ -476,7 +561,7 @@ class BinaryRelationOperatorOPGT : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPGT;
     }
 };
@@ -486,7 +571,7 @@ class BinaryRelationOperatorOPLT : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPLT;
     }
 };
@@ -496,7 +581,7 @@ class BinaryRelationOperatorOPGE : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPGE;
     }
 };
@@ -506,7 +591,7 @@ class BinaryRelationOperatorOPLE : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPLE;
     }
 };
@@ -516,7 +601,7 @@ class BinaryRelationOperatorOPEQ : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPEQ;
     }
 };
@@ -526,7 +611,7 @@ class BinaryRelationOperatorOPNE : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = OPNE;
     }
 };
@@ -537,7 +622,7 @@ class PostfixRationalOperatorRWDNN : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = cast_item<TokenType>(m_stack[1], "OP");
     }
 };
@@ -548,7 +633,7 @@ class PostfixRationalOperatorRWDN : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = RWDN;
     }
 };
@@ -558,19 +643,30 @@ class PostfixRationalOperatorRWN : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = RWN;
     }
 };
 
-
-
-class Expression : public TreeConstructor
+// {BinaryLogicOperatorAnd,{RWLA}, BinaryLogicOperatorRWLA},
+class BinaryLogicOperatorRWLA : public TreeConstructor
 {
 public:
     virtual void executeHandler() override
     {
-        TreeConstructor::executeHandler();
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        (*m_value)["OP"] = RWLA;
+    }
+};
+
+// {BinaryLogicOperatorOr,{RWLO}, BinaryLogicOperatorRWLO},
+class BinaryLogicOperatorRWLO : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        (*m_value)["OP"] = RWLO;
     }
 };
 

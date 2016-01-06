@@ -1,10 +1,13 @@
-#include "EnumerationTypeInfo.hpp"
+source/src/PascalCompiler/IR/CustomTypeInfo.cpp#include "EnumerationTypeInfo.hpp"
+#include "llvm/IR/TypeBuilder.h"
 
 namespace PascalCompiler {
 
 EnumerationTypeInfo::EnumerationTypeInfo(const std::string& name):
-    BasicTypeInfo(BasicTypeInfo::Type::ENUMERATION, name)
+    BasicTypeInfo(BasicTypeInfo::Type::ENUMERATION)
 {
+    m_name = "enumeration";
+    m_llvmType  = llvm::TypeBuilder<llvm::types::i<32>, false>::get(llvm::getGlobalContext());
 }
 
 void EnumerationTypeInfo::addItem(const std::string& item)

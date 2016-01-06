@@ -1,6 +1,9 @@
 #include "Module.h"
 #include "StdFix.h"
 #include "BasicTypeInfo.hpp"
+#include "StructTypeInfo.h"
+#include "CustomTypeInfo.hpp"
+#include "IntegerTypeInfo.h"
 #include <iostream>
 
 namespace PascalCompiler {
@@ -9,49 +12,71 @@ Module::Module(std::string name):
     m_name(name),
     m_llvmModule(m_name, llvm::getGlobalContext())
 {
-    // Integer tpye
-    llvm::IntegerType*  integer_type  = llvm::TypeBuilder<llvm::types::i<32>, false>::get(llvm::getGlobalContext());
+    // Integer type
+    auto integer_typeInfo  = std::make_unique<IntegerTypeInfo>();
 
-    // Populate default type system
-    m_typeMap["integer"] = std::make_unique<BasicTypeInfo>(BasicTypeInfo::INTEGER);
-    m_typeMap["rational"] = std::make_unique<BasicTypeInfo>(BasicTypeInfo::RATIONAL);
-    m_typeMap["complex"] = std::make_unique<BasicTypeInfo>(BasicTypeInfo::COMPLEX);
+    // Rational type
+    StructTypeInfo::MemberVector rational_members = { {"numerator", integer_typeInfo.get()}, {"denominator", integer_typeInfo.get()} };
+    auto rational_structType = std::make_unique<StructTypeInfo>(rational_members, "rational");
 
+    // Complex type
+    StructTypeInfo::MemberVector complex_members = { {"im", rational_structType.get()}, {"re", rational_structType.get()} };
+    auto complex_structType = std::make_unique<StructTypeInfo>(complex_members, "complex");
+
+    m_typeMap["integer"] = std::move(integer_typeInfo);
+    m_typeMap["rational"] = std::move(rational_structType);
+    m_typeMap["complex"] = std::move(complex_structType);
+
+    llvm::Type* integer_type = m_typeMap["integer"]->getLLVMType();
     llvm::Type* rational_type = m_typeMap["rational"]->getLLVMType();
     llvm::Type* complex_type = m_typeMap["complex"]->getLLVMType();
 
     // Base operations
-    m_binaryBaseOperators["integer"] = [this](llvm::BasicBlock* block, llvm::Value* L, llvm::Value* R,int OP)
+    m_binaryBaseOperators["integer"] = [this, integer_type](llvm::BasicBlock* block, llvm::Value* L, llvm::Value* R,int OP)
     {
         llvm::IRBuilder<> irBuilder(block);
         llvm::Value* result_codegen = nullptr;
+        std::string type_str;
+        llvm::raw_string_ostream rso(type_str);
+        L->getType()->print(rso);
+        R->getType()->print(rso);
+        std::cout<< "*()*" <<rso.str() << std::endl;
 
         switch(OP)
         {
-        case PascalCompiler::Grammar::RWLO: // ||
+        case PascalCompiler::Grammar::RWLA: // ||
             result_codegen = irBuilder.CreateAnd(L, R, "tempand");
+            result_codegen = irBuilder.CreateIntCast(result_codegen, integer_type, true);
             break;
-        case PascalCompiler::Grammar::RWLA: // &&
+
+        case PascalCompiler::Grammar::RWLO: // &&
             result_codegen = irBuilder.CreateOr(L, R, "tempor");
+            result_codegen = irBuilder.CreateIntCast(result_codegen, integer_type, true);
             break;
 
         case PascalCompiler::Grammar::OPGT: // >
             result_codegen = irBuilder.CreateICmpSGT(L, R, "tempgt");
+            result_codegen = irBuilder.CreateIntCast(result_codegen, integer_type, true);
             break;
         case PascalCompiler::Grammar::OPLT: // <
             result_codegen = irBuilder.CreateICmpSLT(L, R, "templt");
+            result_codegen = irBuilder.CreateIntCast(result_codegen, integer_type, true);
             break;
         case PascalCompiler::Grammar::OPGE: // >=
             result_codegen = irBuilder.CreateICmpSGE(L, R, "tempge");
+            result_codegen = irBuilder.CreateIntCast(result_codegen, integer_type, true);
             break;
         case PascalCompiler::Grammar::OPLE: // <=
             result_codegen = irBuilder.CreateICmpSLE(L, R, "temple");
+            result_codegen = irBuilder.CreateIntCast(result_codegen, integer_type, true);
             break;
         case PascalCompiler::Grammar::OPEQ: // ==
             result_codegen = irBuilder.CreateICmpEQ(L, R, "tempeq");
+            result_codegen = irBuilder.CreateIntCast(result_codegen, integer_type, true);
             break;
         case PascalCompiler::Grammar::OPNE: // !=
             result_codegen = irBuilder.CreateICmpNE(L, R, "tempne");
+            result_codegen = irBuilder.CreateIntCast(result_codegen, integer_type, true);
             break;
 
         case PascalCompiler::Grammar::OPPLUS: // +
@@ -62,10 +87,10 @@ Module::Module(std::string name):
             break;
 
         case PascalCompiler::Grammar::OPMUL: // *
-            result_codegen = irBuilder.CreateAdd(L, R, "tempmul");
+            result_codegen = irBuilder.CreateMul(L, R, "tempmul");
             break;
         case PascalCompiler::Grammar::OPDIV: // /
-            result_codegen = irBuilder.CreateSub(L, R, "tempdiv");
+            result_codegen = irBuilder.CreateExactSDiv(L, R, "tempdiv");
             break;
 
         case PascalCompiler::Grammar::OPAS: // :=
@@ -258,22 +283,23 @@ Module::Module(std::string name):
 
 }
 
-llvm::Value* Module::addLoadOperation(llvm::BasicBlock* block, const std::string& name)
+std::pair<llvm::Value*, BasicTypeInfo*> Module::addLoadOperation(
+                            llvm::BasicBlock* block,
+                            llvm::Value* ptr, BasicTypeInfo* ptrType)
 {
-    VarInfo* nameID = m_currentContext->getVariable(name);
     llvm::IRBuilder<> irBuilder(block);
-    llvm::Value* ptr = irBuilder.CreateGEP(nameID->getAllocaInst(), {llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(llvm::getGlobalContext()), 0)});
     llvm::Value* value = irBuilder.CreateLoad(ptr);
-    return value;
+    return {value, ptrType};
 }
 
-llvm::Value* Module::addStoreOperation(llvm::BasicBlock* block, const std::string& name, llvm::Value* value)
+std::pair<llvm::Value*, BasicTypeInfo*> Module::addStoreOperation(
+                            llvm::BasicBlock* block,
+                            llvm::Value* ptr, BasicTypeInfo* ptrType,
+                            llvm::Value* value, BasicTypeInfo* valueType)
 {
-    VarInfo* nameID = m_currentContext->getVariable(name);
     llvm::IRBuilder<> irBuilder(block);
-    llvm::Value* ptr = irBuilder.CreateGEP(nameID->getAllocaInst(),{llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(llvm::getGlobalContext()), 0)});
     llvm::Value* return_value = irBuilder.CreateStore(value, ptr);
-    return return_value;
+    return {return_value, ptrType};
 }
 
 llvm::Module* Module::getModule()
@@ -289,74 +315,68 @@ Module::addBinaryOperation(llvm::BasicBlock* block,
 {
     llvm::Value* result_value = nullptr;
     BasicTypeInfo* result_type = nullptr;
+    std::cout << "**&OP is " << OP << std::endl;
 
-    do
+    if(type_a->getType() == BasicTypeInfo::ARRAY || type_b->getType() == BasicTypeInfo::ARRAY)
     {
-        if(type_a->getType() == BasicTypeInfo::ARRAY || type_b->getType() == BasicTypeInfo::ARRAY)
+        // one of them is array its kinda bad
+        throw std::runtime_error("Cannot perform binary operation on array");
+    }
+    else if (type_a->getType() == BasicTypeInfo::CUSTOM || type_b->getType() == BasicTypeInfo::CUSTOM)
+    {
+        // atleast one of them is custom
+        // need overload or we screwed
+        // if exist do it
+        // if not exist then throw
+    }
+    else if (type_a->getType() == BasicTypeInfo::ENUMERATION && type_b->getType() == BasicTypeInfo::ENUMERATION)
+    {
+        // enumeartion support only equality comparison and second
+        if(OP == Grammar::OPAS)
         {
-            // one of them is array its kinda bad
-            throw std::runtime_error("Cannot perform binary operation on array");
-        }
 
-        if (type_a->getType() == BasicTypeInfo::CUSTOM || type_b->getType() == BasicTypeInfo::CUSTOM)
+            //TODO call int thing
+        }
+        else if(OP == Grammar::OPEQ)
         {
-            // atleast one of them is custom
-            // need overload or we screwed
-            // if exist do it
-            // if not exist then throw
-            break;
+            //TODO call int thing
         }
-
-        if (type_a->getType() == BasicTypeInfo::ENUMERATION && type_b->getType() == BasicTypeInfo::ENUMERATION)
+        else if(OP == Grammar::OPNE)
         {
-            // enumeartion support only equality comparison and second
-            if(OP == Grammar::OPAS)
-            {
-
-                //TODO call int thing
-            }
-            else if(OP == Grammar::OPEQ)
-            {
-                //TODO call int thing
-            }
-            else if(OP == Grammar::OPNE)
-            {
-                //TODO call int thing
-            }
-            else
-            {
-                throw std::runtime_error("Enumeration support only assignment and equality compariosons");
-            }
-            break;
+            //TODO call int thing
         }
-
-        if((type_a->getType() == BasicTypeInfo::INTEGER || type_a->getType() == BasicTypeInfo::RATIONAL || type_a->getType() == BasicTypeInfo::COMPLEX) &&
-           (type_b->getType() == BasicTypeInfo::INTEGER || type_b->getType() == BasicTypeInfo::RATIONAL || type_b->getType() == BasicTypeInfo::COMPLEX))
+        else
         {
-            // TODO
-            // if both types simple
-            // cast to highest
-            // perform operations
-
-            if (type_a->getType() == BasicTypeInfo::INTEGER && type_b->getType() == BasicTypeInfo::INTEGER)
-            {
-                result_type = m_typeMap["integer"].get();
-                result_value = m_binaryBaseOperators["integer"](block, L, R, OP);
-            }
-            else
-            {
-                throw std::runtime_error("Only int supported");
-            }
-            break;
+            throw std::runtime_error("Enumeration support only assignment and equality compariosons");
         }
+    }
+    else if((type_a->getType() == BasicTypeInfo::INTEGER || type_a->getType() == BasicTypeInfo::RATIONAL || type_a->getType() == BasicTypeInfo::COMPLEX) &&
+       (type_b->getType() == BasicTypeInfo::INTEGER || type_b->getType() == BasicTypeInfo::RATIONAL || type_b->getType() == BasicTypeInfo::COMPLEX))
+    {
+        // TODO
+        // if both types simple
+        // cast to highest
+        // perform operations
 
+        if (type_a->getType() == BasicTypeInfo::INTEGER && type_b->getType() == BasicTypeInfo::INTEGER)
+        {
+            result_type = m_typeMap["integer"].get();
+            std::cout << "**OP is " << OP << std::endl;
+            result_value = m_binaryBaseOperators["integer"](block, L, R, OP);
+        }
+        else
+        {
+            throw std::runtime_error("Only int supported");
+        }
+    }
+    else
+    {
         // if came to here then some wierd stuff is going on around
         throw std::runtime_error("addBinaryOperation error unknown type_a is "
                                  + std::to_string(type_a->getType())
                                  + " and type_b is "
                                  + std::to_string(type_b->getType()));
     }
-    while(false);
 
     return {result_value, result_type};
 }
@@ -382,46 +402,87 @@ Module::addUnaryOperation(llvm::BasicBlock* block,
     return {result_value, result_type};
 }
 
-llvm::Value* Module::addDNoperator(llvm::BasicBlock* block, llvm::Value* L, bool isNumenator, bool isStore)
-{
-    if (isNumenator)
-    {
-        if (isStore)
-        {
-
-        }
-        else
-        {
-
-        }
-    }
-    else
-    {
-        if (isStore)
-        {
-
-        }
-        else
-        {
-
-        }
-    }
-}
-
 std::pair<llvm::Value*, BasicTypeInfo*>
-Module::addSubscription(llvm::Value* L, BasicTypeInfo* type, const std::vector<size_t>& offsets)
+Module::addSubscription(llvm::BasicBlock* block, llvm::Value* L, BasicTypeInfo* type, const std::vector<VarModificator>& modificators)
 {
     llvm::Value* return_value = nullptr;
-    BasicTypeInfo* return_type =  nullptr;
+    BasicTypeInfo* return_type =  type;
+    llvm::IRBuilder<> builder(block);
+    bool subscriptionFound = false;
+    std::vector<llvm::Value*> offset;
+    llvm::Type* integer_type = getGlobalModule()->getTypeInfo("integer")->getLLVMType();
+    size_t number_of_indexes = 0;
 
-    size_t currentItem = 0;
-
-    throw std::runtime_error("NOT IMPLEMENTED SUBSCRIPTION");
-
-    for (size_t currentIndex = 0; currentIndex < offsets.size(); ++currentIndex)
+    for (const auto& modificator : modificators)
     {
-
+        switch(modificator.getType())
+        {
+        case VarModificator::MATRIX_INDEX:
+        {
+            while (return_type->getType() == BasicTypeInfo::CUSTOM)
+            {
+                return_type = static_cast<CustomTypeInfo*>(return_type)->getTrueType();
+            }
+            if (return_type->getType() != BasicTypeInfo::ARRAY)
+            {
+                throw std::runtime_error("Index modificator must be applied to array");
+            }
+            std::pair<llvm::Value*, BasicTypeInfo*> index = modificator.getIndexValue();
+            offset.push_back(index.first);
+            ++number_of_indexes;
+            subscriptionFound = true;
+            break;
+        }
+        case VarModificator::MEMBER_FETCH:
+        {
+            if (subscriptionFound)
+            {
+                ArrayTypeInfo* array_type =  static_cast<ArrayTypeInfo*>(return_type);
+                if (number_of_indexes != array_type->getDimensions().size())
+                {
+                    throw std::runtime_error("Index count mismatch "
+                                             + std::to_string(number_of_indexes)
+                                             + " vs "
+                                             + std::to_string(array_type->getDimensions().size()));
+                }
+                return_type = array_type->getElementType();
+                subscriptionFound = false;
+                number_of_indexes = 0;
+            }
+            offset.push_back(llvm::ConstantInt::getSigned(integer_type, 0));
+            while (return_type->getType() == BasicTypeInfo::CUSTOM)
+            {
+                return_type = static_cast<CustomTypeInfo*>(return_type)->getTrueType();
+            }
+            if (return_type->getType() != BasicTypeInfo::STRUCT)
+            {
+                throw std::runtime_error("Memeber fetching must be applied to struct type");
+            }
+            StructTypeInfo* structType = static_cast<StructTypeInfo*>(return_type);
+            auto memberInfo = structType->getMemberInfo(modificator.getName());
+            offset.push_back(llvm::ConstantInt::getSigned(integer_type, memberInfo.first));
+            return_type = memberInfo.second;
+            break;
+        }
+        default:
+            throw std::runtime_error("Modificator not initialized");
+            break;
+        }
     }
+    if (subscriptionFound)
+    {
+        ArrayTypeInfo* array_type =  static_cast<ArrayTypeInfo*>(return_type);
+        if (number_of_indexes != array_type->getDimensions().size())
+        {
+            throw std::runtime_error("Index count mismatch "
+                                     + std::to_string(number_of_indexes)
+                                     + " vs "
+                                     + std::to_string(array_type->getDimensions().size()));
+        }
+        offset.push_back(llvm::ConstantInt::getSigned(integer_type, 0));
+        return_type = array_type->getElementType();
+    }
+    return_value = builder.CreateGEP(L, llvm::ArrayRef<llvm::Value*>(offset));
 
     return {return_value, return_type};
 }

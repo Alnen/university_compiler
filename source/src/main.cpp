@@ -1,5 +1,5 @@
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_LIMIT_MAP_SIZE 30
+#define BOOST_MPL_LIMIT_MAP_SIZE 50
 
 #include <memory>
 #include <boost/bimap.hpp>
@@ -28,9 +28,7 @@
 #include <boost/mpl/map.hpp>
 
 #include "PascalCompiler/IR/GlobalContext.h"
-
-
-#include <boost/mpl/list.hpp>
+#include <boost/hana/map.hpp>
 
 std::set<std::string> used_id;
 std::set<std::string> used_ci;
@@ -95,9 +93,7 @@ int main (int argc, char** argv)
     Parser::Grammar<TokenType, NonterminalSymbols> grammar(grammar_rules, Program);
     std::cout<< "grammar.isLL1() "  << grammar.isLL1() << std::endl;
 
-    Parser::SyntaxAnalyzer<TokenType, NonterminalSymbols, ActionContainer> syntax_analyzer(grammar);
-
-
+    Parser::SyntaxAnalyzer<TokenType, NonterminalSymbols, decltype(ActionContainer)> syntax_analyzer(grammar);
 
     //rules
     std::vector<Lexer::Lexer<TokenType>::Rule> rules;
@@ -123,7 +119,7 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::SRSP,     std::string(".")                     );
     rules.emplace_back(TokenType::SRCA,     std::string(",")                     );
     rules.emplace_back(TokenType::CI,       std::string("[0-9][0-9]*")         , std::make_shared<CIHandler>());
-    rules.emplace_back(TokenType::ID,       std::string("[a-zA-Z][a-zA-Z0-9]*"), std::make_shared<IDHandler>(reserved_words()));
+    rules.emplace_back(TokenType::ID,       std::string("[_a-zA-Z][_a-zA-Z0-9]*"), std::make_shared<IDHandler>(reserved_words()));
 
     std::ofstream lexer_out("lexer.log", std::ofstream::out&std::ofstream::trunc);
     Lexer::Lexer<TokenType> lexer( std::move(rules), &lexer_out, &(tokenTypeMapping()));
@@ -133,7 +129,7 @@ int main (int argc, char** argv)
     PascalCompiler::initModule("nodule");
     // Creating Global Context
     llvm::FunctionType* mainFunctionType = llvm::FunctionType::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), false);
-    auto* currentContext =  PascalCompiler::getGlobalModule()->registerContext(PascalCompiler::getGlobalModule()->getAnonimousName(), mainFunctionType, nullptr);
+    auto* currentContext =  PascalCompiler::getGlobalModule()->registerContext("main", mainFunctionType, nullptr);
     PascalCompiler::getGlobalModule()->setContext(currentContext);
 
     std::shared_ptr<boost::container::flat_map<std::string, boost::any>> value;

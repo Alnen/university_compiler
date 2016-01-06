@@ -150,8 +150,9 @@ public:
     {
         std::cout << "TreeConstructor" << std::endl;
         std::cout << m_stack.size() << std::endl;
+        std::cout << "TreeConstructor" << std::endl;
         auto head = std::make_shared<TreeNode>(NONTERMINAL((*m_stack[0])["term"]).symbol());
-
+        std::cout << "TreeConstructor" << std::endl;
         for (size_t i = 1; i < m_stack.size(); ++i)
         {
             do
@@ -163,7 +164,7 @@ public:
                     head->addChild(boost::any_cast<std::shared_ptr<TreeNode>>(tree_item));
                     break;
                 }
-
+                std::cout << "TreeConstructor" << std::endl;
                 auto& term_item = (*m_stack[i])["term"];
                 if (isTerminal(term_item))
                 {
@@ -172,8 +173,9 @@ public:
                 }
                 else
                 {
+                    std::cout << "TreeConstructor" << std::endl;
                     std::cout << m_stack.size() << std::endl;
-                    throw std::runtime_error("WTF!");
+                    //throw std::runtime_error("WTF!");
                 }
 
             }

@@ -15,7 +15,7 @@ public:
 
     ArrayTypeInfo(const DimensionsVector& dimensions, BasicTypeInfo* elementType);
 
-    BasicTypeInfo* elementType() const;
+    BasicTypeInfo* getElementType() const;
     const DimensionsVector& getDimensions() const;
 
 protected:

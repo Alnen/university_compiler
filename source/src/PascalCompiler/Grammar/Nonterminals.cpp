@@ -113,11 +113,9 @@ boost::container::flat_map<NonterminalSymbols, std::string>& getNonterminalTypeM
             { NonterminalSymbols::VarSection2,                             "VarSection2"                            }, // 199
             { NonterminalSymbols::NONTERMINAL_FINISH_INDEX,                "NONTERMINAL_FINISH_INDEX"               }, // 199
             { NonterminalSymbols::ACTION_START_INDEX,                      "ACTION_START_INDEX"                     }, // 199
-            { NonterminalSymbols::ACTION1,                                 "ACTION1"                                }, // 199
-            { NonterminalSymbols::TreeConstructor,                         "TreeConstructor"                        }, // 199
-            { NonterminalSymbols::ACTION3,                                 "ACTION3"                                }, // 199
             { NonterminalSymbols::DEFAULT_SYNTHESIZE,                      "DEFAULT_SYNTHESIZE"                     }, // 199
             { NonterminalSymbols::DEFAULT_INHERIT,                         "DEFAULT_INHERIT"                        }, // 199
+            { NonterminalSymbols::TreeConstructor,                         "TreeConstructor"                        }, // 199
             { NonterminalSymbols::ACTION_FINISH_INDEX,                     "ACTION_FINISH_INDEX"                    }, // 199
             { NonterminalSymbols::EPSILON,                                 "EPSILON"                                }, // 199
         };

@@ -12,7 +12,6 @@ VarInfo::VarInfo(const std::string& name, BasicTypeInfo* type):
 {
     llvm::BasicBlock* block = getGlobalModule()->getCurrentContext()->getAllocaBlock();
     llvm::IRBuilder<> irbuilder(block);
-
     m_alloca = irbuilder.CreateAlloca(type->getLLVMType(), nullptr, name);
 }
 

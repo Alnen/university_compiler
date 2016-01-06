@@ -62,6 +62,7 @@ enum NonterminalSymbols {
     LogicOr1,                                // 149
     LoopDirection,                           // 150
     LoopWithParameterOperator,               // 151
+    Statement45,
     Massive,                                 // 152
     Massive1,                                // 153
     OneTypeArgs,                             // 154
@@ -112,6 +113,12 @@ enum NonterminalSymbols {
     VarSection2,                             // 199
     FinalType,
     CreateBlock,
+    LeftHandVar3,
+    RightHandVar3,
+    VarHandlerList,
+    Factor2,
+    BinaryLogicOperatorOr,
+    BinaryLogicOperatorAnd,
     NONTERMINAL_FINISH_INDEX,                // 200
     ACTION_START_INDEX,                      // 201
     ACTION1,                                 // 202
@@ -141,6 +148,57 @@ enum NonterminalSymbols {
     LoopDirectionDT,
     LoopWithParameterAction,
     FinishMainFuntion,
+    ValuePropagation,
+    ExpressionCombiner,
+    SuperExpressionCombiner,
+    BracketValuePropagation,
+    UnaryOPValue,
+    CreateConstComplex1,
+    CreateConstComplex2,
+    CreateConstComplex3,
+    RationalStart,
+    RationalEnd,
+    JFlagTrue,
+    JFlagFalse,
+    LoadRightHandVar,
+    FinalAppendExprList,
+    AppendExprList,
+    InitExprList,
+    UnaryOperatorOPPLUS,
+    UnaryOperatorOPMINUS,
+    UnaryOperatorOPMUL,
+    UnaryOperatorOPDIV,
+    UnaryOperatorRWINTOP,
+    UnaryOperatorRWIR,
+    UnaryOperatorRWSM,
+    UnaryOperatorRWFR,
+    UnaryOperatorRWLN,
+    UnaryOperatorRWIM,
+    UnaryOperatorRWRE,
+    OPPropagation,
+    BinaryRelationOperatorOPGT,
+    BinaryRelationOperatorOPLT,
+    BinaryRelationOperatorOPGE,
+    BinaryRelationOperatorOPLE,
+    BinaryRelationOperatorOPEQ,
+    BinaryRelationOperatorOPNE,
+    PostfixRationalOperatorRWDNN,
+    PostfixRationalOperatorRWDN,
+    PostfixRationalOperatorRWN,
+    AppendIndexVarHandlerList,
+    AppendMemberVarHandlerList,
+    InitVarHandlerList,
+    PropagateLeftHandVarInfo,
+    BinaryLogicOperatorRWLA,
+    BinaryLogicOperatorRWLO,
+    ConditionalOperatorAction,
+    ConditionalOperatorElseAction,
+    ConditionalOperatorNoElseAction,
+    LabelID,
+    GotoLabel,
+    IDPass,
+    IDPass2,
+    LabelStatement,
     ACTION3,                                 // 204
     DEFAULT_SYNTHESIZE,                      // 205
     DEFAULT_INHERIT,                         // 206

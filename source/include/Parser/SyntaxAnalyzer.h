@@ -199,7 +199,22 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
     while (true)
     {
         parse_log << "stack : [";
-        std::copy(m_stack.begin(), m_stack.end(), std::ostream_iterator<TokenType>(parse_log, " "));
+        for (auto token : m_stack)
+        {
+            if (Grammar::isTerminal(token))
+            {
+                parse_log << tokenTypeMapping()[(TerminalType)token];
+            }
+            else if (Grammar::isNonterminal(token))
+            {
+                parse_log << getNonterminalTypeMapping()[(NonterminalType)token];
+            }
+            else
+            {
+                parse_log << token - 200 + 117;
+            }
+            parse_log << " ";
+        }
         parse_log << "]" << std::endl;
 
         if (Grammar::isAction(m_stack.back())) // TODO
@@ -224,7 +239,12 @@ bool SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::readNextToken(
             else
             {
                 auto next_nonterminal = m_valueStack[m_valueStack.size()-2].get();
-                next_nonterminal->getValue() = action_on_back->getValue();
+                auto* next_nonterminal_map = next_nonterminal->getValue().get();
+                auto* action_on_back_map = action_on_back->getValue().get();
+                for (auto pair : *action_on_back_map)
+                {
+                    (*next_nonterminal_map)[pair.first] = pair.second;
+                }
             }
 
             popTokenBack();
