@@ -64,6 +64,11 @@ public:
 
     llvm::BasicBlock* getAllocaBlock();
 
+    llvm::Function* getFunctionLLVMType() const
+    {
+        return m_function;
+    }
+
 private:
     std::string   m_name;
     Context*      m_parentContext;

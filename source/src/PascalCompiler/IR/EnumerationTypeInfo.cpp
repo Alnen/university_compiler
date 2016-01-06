@@ -1,4 +1,4 @@
-source/src/PascalCompiler/IR/CustomTypeInfo.cpp#include "EnumerationTypeInfo.hpp"
+#include "EnumerationTypeInfo.hpp"
 #include "llvm/IR/TypeBuilder.h"
 
 namespace PascalCompiler {

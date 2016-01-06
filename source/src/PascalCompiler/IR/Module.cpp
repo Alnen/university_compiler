@@ -1,4 +1,4 @@
-#include "Module.h"
+source/src/PascalCompiler/IR/EnumerationTypeInfo.cpp#include "Module.h"
 #include "StdFix.h"
 #include "BasicTypeInfo.hpp"
 #include "StructTypeInfo.h"
@@ -280,7 +280,6 @@ Module::Module(std::string name):
 
         return result_codegen;
     };
-
 }
 
 std::pair<llvm::Value*, BasicTypeInfo*> Module::addLoadOperation(

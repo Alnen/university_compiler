@@ -132,6 +132,8 @@ int main (int argc, char** argv)
     auto* currentContext =  PascalCompiler::getGlobalModule()->registerContext("main", mainFunctionType, nullptr);
     PascalCompiler::getGlobalModule()->setContext(currentContext);
 
+    PascalCompiler::getGlobalModule()->initializePrintf();
+
     std::shared_ptr<boost::container::flat_map<std::string, boost::any>> value;
     bool res;
     try

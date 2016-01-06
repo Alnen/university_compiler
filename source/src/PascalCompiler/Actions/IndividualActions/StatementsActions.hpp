@@ -152,6 +152,7 @@ public:
         std::string id = cast_item<std::string>(m_stack[2], "id");
         llvm::IRBuilder<> irBuilder(getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock());
         irBuilder.CreateBr(getGlobalModule()->getCurrentContext()->getBasicBlock(id));
+        getGlobalModule()->getCurrentContext()->getCurrentBlock()->setFinalBlock(getGlobalModule()->getCurrentContext()->registerBasicBlock(getGlobalModule()->getAnonimousName()));
     }
 };
 
@@ -364,8 +365,42 @@ public:
 //  {InputOperator,{RWRD,SRLP,LeftHandVar,InputOperator1,SRRP}, TreeConstructor},
 //  {InputOperator1,{SRCA,LeftHandVar}, TreeConstructor},
 
-//  {OutputOperator,{RWWR,SRLP,Expression,OutputOperator1,SRRP}, TreeConstructor},
+//  {OutputOperator,{RWWR,SRLP,Expression,SRRP}, TreeConstructor},
+class PrintOperatorMain : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        std::vector<std::pair<llvm::Value*, BasicTypeInfo*>> expr_list = cast_item<std::vector<std::pair<llvm::Value*, BasicTypeInfo*>>>(m_stack[3], "expr_list");
+        for (const auto& value: expr_list)
+        {
+            if (value.second->getType() == BasicTypeInfo::INTEGER)
+            {
+                getGlobalModule()->addPrintfIntCall(getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock(),
+                                                    value.first);
+            }
+            else
+            {
+                throw std::runtime_error("Printf not int value");
+            }
+        }
+        getGlobalModule()->addPrintfENDL(getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock());
+    }
+};
 //  {OutputOperator1,{SRCA,Expression}, TreeConstructor},
+class PrintOperatorRest : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        std::pair<llvm::Value*, BasicTypeInfo*> valuePair = cast_item<std::pair<llvm::Value*, BasicTypeInfo*>>(m_stack[2], "Value");
+        if (valuePair.second->getType() == BasicTypeInfo::INTEGER)
+        {
+            throw std::runtime_error("Printf not int value");
+        }
+    }
+};
+
 
 }
 

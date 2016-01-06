@@ -97,7 +97,9 @@ auto ActionContainer = boost::hana::make_tuple(
     boost::hana::make_pair(boost::hana::int_c<GotoLabel>,boost::hana::type_c<PascalCompiler::GotoLabel>),
     boost::hana::make_pair(boost::hana::int_c<IDPass>,boost::hana::type_c<PascalCompiler::IDPass>),
     boost::hana::make_pair(boost::hana::int_c<IDPass2>,boost::hana::type_c<PascalCompiler::IDPass2>),
-    boost::hana::make_pair(boost::hana::int_c<LabelStatement>,boost::hana::type_c<PascalCompiler::LabelStatement>)
+    boost::hana::make_pair(boost::hana::int_c<LabelStatement>,boost::hana::type_c<PascalCompiler::LabelStatement>),
+    boost::hana::make_pair(boost::hana::int_c<PrintOperatorMain>,boost::hana::type_c<PascalCompiler::PrintOperatorMain>),
+    boost::hana::make_pair(boost::hana::int_c<PrintOperatorRest>,boost::hana::type_c<PascalCompiler::PrintOperatorRest>)
 );
 
 #endif // ACTIONCONTAINER_H

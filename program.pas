@@ -10,6 +10,8 @@ var massive_of_int : array [10, 10] of integer;
 label exit;
    
 begin
+      z := 5;
+      k := 1;
       if (k = 10) then
 	    begin
 	       if (z < 5) then goto exit;

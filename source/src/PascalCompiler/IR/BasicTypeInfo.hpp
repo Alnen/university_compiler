@@ -1,4 +1,4 @@
-source/src/PascalCompiler/IR/BasicTypeInfo.cpp#ifndef BASICINFOTYPE_HPP
+#ifndef BASICINFOTYPE_HPP
 #define BASICINFOTYPE_HPP
 
 #include "BasicTypeInfo.hpp"

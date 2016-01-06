@@ -177,7 +177,7 @@ Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
     {ConditionalOperator1,{EPSILON}, ConditionalOperatorNoElseAction},
     {ConditionalOperator1,{RWEL, CreateBlock, Statement2}, ConditionalOperatorElseAction},
     {InputOperator,{RWRD,SRLP,LeftHandVar,SRRP}, TreeConstructor},
-    {OutputOperator,{RWWR,SRLP,ExprList,SRRP}, TreeConstructor},
+    {OutputOperator,{RWWR,SRLP,ExprList,SRRP}, PrintOperatorMain},
     //{OutputOperator1,{SRCA,Expression}, TreeConstructor},
     {CreateBlock, {EPSILON}, CreateBlockAction},
 // OPERATOR OVERLOADING AND FUNCTION DEFINITION

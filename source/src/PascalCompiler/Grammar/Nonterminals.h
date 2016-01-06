@@ -199,6 +199,8 @@ enum NonterminalSymbols {
     IDPass,
     IDPass2,
     LabelStatement,
+    PrintOperatorMain,
+    PrintOperatorRest,
     ACTION3,                                 // 204
     DEFAULT_SYNTHESIZE,                      // 205
     DEFAULT_INHERIT,                         // 206
