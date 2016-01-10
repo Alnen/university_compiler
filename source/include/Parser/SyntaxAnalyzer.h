@@ -126,6 +126,7 @@ SyntaxAnalyzer<TerminalType, NonterminalType, ActionVector>::parse(Lexer::Lexer<
         auto token_type = token->type();
         backup_token = *token;
         parse_log << "NEW TOKEN : " << std::setw(3) << token->type() << "|" << boost::any_cast<std::string>(token->value()) << std::endl;
+        if (token->type() == TerminalType::PASS) continue;
         if (!readNextToken(std::move(token)))
         {
             break;

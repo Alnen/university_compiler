@@ -117,8 +117,9 @@ public:
     void initializePrintf()
     {
         llvm::IRBuilder<> builder(m_currentContext->getAllocaBlock());
-        intFormatString = builder.CreateGlobalStringPtr("%d ");
+        intFormatString = builder.CreateGlobalStringPtr("%d");
         nFormatString = builder.CreateGlobalStringPtr("\n");
+        strFormatString = builder.CreateGlobalStringPtr("%s");
 
         std::vector<llvm::Type *> putsArgs;
         putsArgs.push_back(builder.getInt8Ty()->getPointerTo());
@@ -127,6 +128,8 @@ public:
 
         llvm::FunctionType *putsType = llvm::FunctionType::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), argsRef, true);
         printf = m_llvmModule.getOrInsertFunction("printf", putsType);
+
+        scanf = m_llvmModule.getOrInsertFunction("scanf", putsType);
     }
 
     void addPrintfIntCall(llvm::BasicBlock* block, llvm::Value* value)
@@ -138,12 +141,36 @@ public:
         builder.CreateCall(printf, llvm::ArrayRef<llvm::Value*>(args));
     }
 
+    void addScanfIntCall(llvm::BasicBlock* block, llvm::Value* value)
+    {
+        llvm::IRBuilder<> builder(block);
+        std::vector<llvm::Value*> args;
+        args.push_back(intFormatString);
+        args.push_back(value);
+        builder.CreateCall(scanf, llvm::ArrayRef<llvm::Value*>(args));
+    }
+
     void addPrintfENDL(llvm::BasicBlock* block)
     {
         llvm::IRBuilder<> builder(block);
         std::vector<llvm::Value*> args;
         args.push_back(nFormatString);
         builder.CreateCall(printf, llvm::ArrayRef<llvm::Value*>(args));
+    }
+
+    void addPrintfString(llvm::BasicBlock* block, llvm::Value* str)
+    {
+        llvm::IRBuilder<> builder(block);
+        std::vector<llvm::Value*> args;
+        args.push_back(strFormatString);
+        args.push_back(str);
+        builder.CreateCall(printf, llvm::ArrayRef<llvm::Value*>(args));
+    }
+
+    llvm::Value* getCharStringPtr(const std::string& str)
+    {
+        llvm::IRBuilder<> builder(m_currentContext->getAllocaBlock());
+        return builder.CreateGlobalStringPtr(str.c_str());
     }
 
     ~Module()
@@ -163,9 +190,11 @@ protected:
     boost::container::flat_map<std::string, std::function<llvm::Value*(llvm::BasicBlock*, llvm::Value*, int)>>                 m_unaryBaseOperators;
 
     //
+    llvm::Constant* scanf = nullptr;
     llvm::Constant* printf = nullptr;
     llvm::Value* intFormatString = nullptr;
     llvm::Value* nFormatString = nullptr;
+    llvm::Value* strFormatString = nullptr;
 };
 
 }

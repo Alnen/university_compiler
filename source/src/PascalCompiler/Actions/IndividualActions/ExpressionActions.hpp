@@ -270,8 +270,14 @@ public:
     virtual void executeHandler() override
     {
         TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
-        (*m_value)["id"] = boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1]));
-        (*m_value)["VarHandlerList"] = cast_item<std::vector<VarModificator>>(m_stack[2], "VarHandlerList");
+        std::string id = boost::any_cast<std::string>(TOKEN_VALUE(m_stack[1]));
+        std::vector<VarModificator> modificators = cast_item<std::vector<VarModificator>>(m_stack[2], "VarHandlerList");
+        VarInfo* idInfo = getGlobalModule()->getCurrentContext()->getVariable(id);
+        llvm::BasicBlock* block = getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock();
+        auto valuePair = getGlobalModule()->addSubscription(block,
+                                                            idInfo->getAllocaInst(), idInfo->getType(),
+                                                            modificators);
+        (*m_value)["Value"] = valuePair;
     }
 };
 
@@ -346,10 +352,13 @@ public:
         TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         std::vector<ValuePair> id_list;
         std::vector<ValuePair> id_rest = cast_item<std::vector<ValuePair>>(m_stack[2], "expr_list");
+        std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         ValuePair new_id = cast_item<ValuePair>(m_stack[1], "Value");
         id_list.push_back(new_id);
         std::copy(id_rest.begin(), id_rest.end(), std::back_inserter(id_list));
+        std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["expr_list"] = id_list;
+        std::cout <<  __PRETTY_FUNCTION__ << std::endl;
     }
 };
 // {ExprList1,{SRCA,Expression,ExprList1}},
@@ -551,7 +560,7 @@ public:
     virtual void executeHandler() override
     {
         TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
-        (*m_value)["OP"] = cast_item<ValuePair>(m_stack[1], "OP");
+        (*m_value)["OP"] = cast_item<TokenType>(m_stack[1], "OP");
     }
 };
 

@@ -168,7 +168,7 @@ template <class TokenType, class State>
 typename Lexer<TokenType, State>::TokenPtr
 Lexer<TokenType, State>::getToken()
 {
-    std::vector<char> ignore = {' ', '\t', '\n'};
+    std::vector<char> ignore = {' ', '\t', '\r'};
     Walker<State, std::shared_ptr<IInputChecker>> walker(&m_DFA);
 
     while (m_offset < m_sourceFile.size() && std::find(ignore.begin(), ignore.end(), m_sourceFile.data()[m_offset]) != ignore.end())

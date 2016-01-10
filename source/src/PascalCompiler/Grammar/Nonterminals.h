@@ -201,6 +201,7 @@ enum NonterminalSymbols {
     LabelStatement,
     PrintOperatorMain,
     PrintOperatorRest,
+    ReadLeftHandVarAction,
     ACTION3,                                 // 204
     DEFAULT_SYNTHESIZE,                      // 205
     DEFAULT_INHERIT,                         // 206

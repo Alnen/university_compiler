@@ -28,6 +28,7 @@
 #include <boost/mpl/map.hpp>
 
 #include "PascalCompiler/IR/GlobalContext.h"
+#include "llvm/IR/AssemblyAnnotationWriter.h"
 #include <boost/hana/map.hpp>
 
 std::set<std::string> used_id;
@@ -97,6 +98,7 @@ int main (int argc, char** argv)
 
     //rules
     std::vector<Lexer::Lexer<TokenType>::Rule> rules;
+    rules.emplace_back(TokenType::PASS,     std::string("\n")                     );
     rules.emplace_back(TokenType::OPPLUS,   std::string("+")                     );
     rules.emplace_back(TokenType::OPMINUS,  std::string("-")                     );
     rules.emplace_back(TokenType::OPMUL,    std::string("\\*")                   );
@@ -120,6 +122,7 @@ int main (int argc, char** argv)
     rules.emplace_back(TokenType::SRCA,     std::string(",")                     );
     rules.emplace_back(TokenType::CI,       std::string("[0-9][0-9]*")         , std::make_shared<CIHandler>());
     rules.emplace_back(TokenType::ID,       std::string("[_a-zA-Z][_a-zA-Z0-9]*"), std::make_shared<IDHandler>(reserved_words()));
+    rules.emplace_back(TokenType::TEXT,     std::string("\"[_a-zA-Z :.,+#*]*\""));
 
     std::ofstream lexer_out("lexer.log", std::ofstream::out&std::ofstream::trunc);
     Lexer::Lexer<TokenType> lexer( std::move(rules), &lexer_out, &(tokenTypeMapping()));
@@ -188,5 +191,14 @@ int main (int argc, char** argv)
     {
         lexer_output << id << std::endl;
     }
+
+    std::string type_str;
+    llvm::raw_string_ostream rso(type_str);
+    llvm::AssemblyAnnotationWriter as = llvm::AssemblyAnnotationWriter();
+    PascalCompiler::getGlobalModule()->getModule()->print(rso, &as);
+    std::string src_path = std::string(argv[1]);
+    std::ofstream asm_output(src_path.substr(0, src_path.size()-4) + ".ll", std::ofstream::out&std::ofstream::trunc);
+    asm_output<<rso.str();
+
     return 0;
 }

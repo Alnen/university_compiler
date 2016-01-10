@@ -73,6 +73,8 @@ enum TokenType
     SRCA,                          // 59
     SRLCB,                         // 60
     SRRCB,                         // 61
+    TEXT,
+    PASS,
     ERROR,                         // 62
     ENDOFFILE,                     // 63
     TERMINAL_FINISH_INDEX          // 64

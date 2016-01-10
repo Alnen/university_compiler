@@ -132,6 +132,7 @@ boost::container::flat_map<TokenType, std::string>& tokenTypeMapping()
             { TokenType::SRLCB,     "SRLCB" },      // 60
             { TokenType::SRRCB,     "SRRCB" },      // 61
             { TokenType::ERROR,     "ERROR" },      // 62
+            { TokenType::TEXT,      "TEXT" },      // 62
             { TokenType::ENDOFFILE, "ENDOFFILE" }   // 63
         };
         for (const auto& pair : tokenTypePairsMapping)

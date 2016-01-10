@@ -363,7 +363,25 @@ public:
 };
 
 //  {InputOperator,{RWRD,SRLP,LeftHandVar,InputOperator1,SRRP}, TreeConstructor},
-//  {InputOperator1,{SRCA,LeftHandVar}, TreeConstructor},
+class ReadLeftHandVarAction : public TreeConstructor
+{
+public:
+    virtual void executeHandler() override
+    {
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        std::pair<llvm::Value*, BasicTypeInfo*> value = cast_item<std::pair<llvm::Value*, BasicTypeInfo*>>(m_stack[3], "Value");
+
+        if (value.second->getType() == BasicTypeInfo::INTEGER)
+        {
+            getGlobalModule()->addScanfIntCall(getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock(),
+                                                value.first);
+        }
+        else
+        {
+            throw std::runtime_error("Printf not int value");
+        }
+    }
+};
 
 //  {OutputOperator,{RWWR,SRLP,Expression,SRRP}, TreeConstructor},
 class PrintOperatorMain : public TreeConstructor
@@ -371,7 +389,20 @@ class PrintOperatorMain : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
-        std::vector<std::pair<llvm::Value*, BasicTypeInfo*>> expr_list = cast_item<std::vector<std::pair<llvm::Value*, BasicTypeInfo*>>>(m_stack[3], "expr_list");
+        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
+        std::vector<std::pair<llvm::Value*, BasicTypeInfo*>> expr_list = cast_item<std::vector<std::pair<llvm::Value*, BasicTypeInfo*>>>(m_stack[4], "expr_list");
+        std::string text = boost::any_cast<std::string>(TOKEN_VALUE(m_stack[3]));
+        if (text.size() == 2)
+        {
+            getGlobalModule()->addPrintfENDL(getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock());
+            return;
+        }
+        else
+        {
+            getGlobalModule()->addPrintfString(getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock(),
+                                                getGlobalModule()->getCharStringPtr(text.substr(1, text.size()-2).c_str()));
+        }
+        std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         for (const auto& value: expr_list)
         {
             if (value.second->getType() == BasicTypeInfo::INTEGER)
@@ -384,7 +415,6 @@ public:
                 throw std::runtime_error("Printf not int value");
             }
         }
-        getGlobalModule()->addPrintfENDL(getGlobalModule()->getCurrentContext()->getCurrentBlock()->getFinalBlock());
     }
 };
 //  {OutputOperator1,{SRCA,Expression}, TreeConstructor},

@@ -1,4 +1,4 @@
-source/src/PascalCompiler/IR/EnumerationTypeInfo.cpp#include "Module.h"
+#include "Module.h"
 #include "StdFix.h"
 #include "BasicTypeInfo.hpp"
 #include "StructTypeInfo.h"
