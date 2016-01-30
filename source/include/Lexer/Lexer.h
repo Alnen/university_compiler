@@ -7,8 +7,11 @@
 #include <fstream>
 
 #include <boost/container/flat_map.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
-
+#ifdef BOOST_OS_MACOS
+    #include <boost/iostreams/device/mapped_file.hpp>
+#else
+    #include <fstream>
+#endif
 #include "Token.h"
 #include "RuleImpl.h"
 #include "TokenHandler.h"
@@ -98,7 +101,11 @@ protected:
     boost::container::flat_map<State, TokenInfo>    m_finalStatesHandlers;
     ErrorHandlerPtr                                 m_errorHandler;
     // File
+#ifdef BOOST_OS_MACOS
     boost::iostreams::mapped_file_source            m_sourceFile;
+#else
+	std::string                                     m_sourceFile;
+#endif	
     size_t                                          m_offset;
     size_t                                          m_len;
     // Log
@@ -215,11 +222,17 @@ Lexer<TokenType, State>::getToken()
 template <class _TokenType, class _State>
 void Lexer<_TokenType, _State>::openInput(const std::string& path)
 {
+#ifdef BOOST_OS_MACOS
     if (m_sourceFile.is_open())
     {
         m_sourceFile.close();
     }
     m_sourceFile.open(path);
+#else
+	std::ifstream sourceFile(path);
+    m_sourceFile = std::string((std::istreambuf_iterator<char>(sourceFile)), std::istreambuf_iterator<char>());
+	std::cout << "[LEXER] Path: " << path << "\n [LEXER] Sources: " << m_sourceFile << std::endl;
+#endif
     m_offset = 0;
     m_len = 0;
 
@@ -229,10 +242,12 @@ void Lexer<_TokenType, _State>::openInput(const std::string& path)
 template <class _TokenType, class _State>
 Lexer<_TokenType, _State>::~Lexer()
 {
+#ifdef BOOST_OS_MACOS
     if (m_sourceFile.is_open())
     {
         m_sourceFile.close();
     }
+#endif
 }
 
 }
