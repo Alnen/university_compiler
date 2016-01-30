@@ -1,4 +1,4 @@
-#! usr/bin/bash
+#! /bin/bash
 # -DHANA_INCLUDE_DIR = path to boost hana include dir
 # -DHANA_INCLUDE_DIR = path to llvm include dir
 # -DHANA_INCLUDE_DIR = path to llvm-c include dir
