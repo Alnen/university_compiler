@@ -21,6 +21,7 @@ begin
 	    end
       else
 	    begin
+	       z := z * 10;
 	       write("Z value is:", z);
 	       z := 1;
 	    end;
