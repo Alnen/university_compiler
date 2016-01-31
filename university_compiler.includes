@@ -1,0 +1,8 @@
+source/include
+source/include/FiniteAutomata
+source/include/InputChecker
+source/include/Lexer
+source/include/Parser
+source/include/RegexAST
+source/include/RegexAST/Node
+source/src

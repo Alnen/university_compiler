@@ -20,7 +20,7 @@ enum NonterminalSymbols {
     CompoundStatement,                       // 106
     CompoundStatement1,                      // 107
     CompoundStatement2,                      // 108
-    ConcreteType,                            // 109
+    BuiltInType,                            // 109
     ConditionalOperator,                     // 110
     ConditionalOperator1,                    // 111
     ConstDefinition,                         // 113
@@ -30,8 +30,8 @@ enum NonterminalSymbols {
     ConstExpr3,                              // 117
     ConstSection,                            // 118
     ConstSection1,                           // 119
-    DescriptionSection,                      // 120
-    DescriptionSection1,                     // 121
+    GlobalDeclaration,                       // 120
+    GlobalDeclaration1,                      // 121
     EnumType,                                // 122
     ExprList,                                // 123
     ExprList1,                               // 124
@@ -45,7 +45,7 @@ enum NonterminalSymbols {
     FunctionArgs1,                           // 132
     IdList,                                  // 133
     IdList1,                                 // 134
-    IndexType,                               // 135
+    Index,                                   // 135
     InputOperator,                           // 136
     InputOperator1,                          // 137
     Label,                                   // 138
@@ -64,7 +64,7 @@ enum NonterminalSymbols {
     LoopWithParameterOperator,               // 151
     Statement45,
     Massive,                                 // 152
-    Massive1,                                // 153
+    IndexList,                                // 153
     OneTypeArgs,                             // 154
     OneTypeArgs1,                            // 155
     OperatorOverloadSection,                 // 156
@@ -83,6 +83,7 @@ enum NonterminalSymbols {
     Program1,                                // 169
     RatianalType1,                           // 170
     RatianalType2,                           // 171
+    RecordType,
     Relation,                                // 172
     Relation1,                               // 173
     ResultArgs,                              // 174
@@ -111,7 +112,9 @@ enum NonterminalSymbols {
     VarSection,                              // 197
     VarSection1,                             // 198
     VarSection2,                             // 199
-    FinalType,
+    RecordFieldDefinition,
+    RecordFieldDefinition1,
+    DefiniteType,
     CreateBlock,
     LeftHandVar3,
     RightHandVar3,
@@ -126,8 +129,8 @@ enum NonterminalSymbols {
     EnumTypeConstruction,
     IndexTypeIDCase,
     IndexTypeCXSize,
-    Massive1AppendAtStart,
-    Massive1InitVec,
+    IndexListAppendAtStart,
+    IndexListInit,
     ArrayCreationAction,
     ComplexPass,
     RationalPass,

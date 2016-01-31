@@ -111,6 +111,8 @@ boost::container::flat_map<NonterminalSymbols, std::string>& getNonterminalTypeM
             { NonterminalSymbols::VarSection,                              "VarSection"                             }, // 197
             { NonterminalSymbols::VarSection1,                             "VarSection1"                            }, // 198
             { NonterminalSymbols::VarSection2,                             "VarSection2"                            }, // 199
+            { NonterminalSymbols::RecordFieldDefinition,                   "RecordFieldDefinition"                  }, // 198
+            { NonterminalSymbols::RecordFieldDefinition1,                  "RecordFieldDefinition1"                 }, // 199
             { NonterminalSymbols::NONTERMINAL_FINISH_INDEX,                "NONTERMINAL_FINISH_INDEX"               }, // 199
             { NonterminalSymbols::ACTION_START_INDEX,                      "ACTION_START_INDEX"                     }, // 199
             { NonterminalSymbols::DEFAULT_SYNTHESIZE,                      "DEFAULT_SYNTHESIZE"                     }, // 199

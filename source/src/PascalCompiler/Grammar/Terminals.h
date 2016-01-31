@@ -47,37 +47,37 @@ enum TokenType
     RWCX,                          // 33
     RWFUN,                         // 34
     RWIM,                          // 35
-    RWRE,                          // 36
-    RWINTOP,                       // 37
-    RWPRC,                         // 38
-    RWDN,                          // 39
-    RWN,                           // 40
-    OPPLUS,                        // 41
-    OPMINUS,                       // 42
-    OPMUL,                         // 43
-    OPDIV,                         // 44
-    OPGT,                          // 45
-    OPLT,                          // 46
-    OPGE,                          // 47
-    OPLE,                          // 48
-    OPEQ,                          // 49
-    OPNE,                          // 50
-    OPAS,                          // 51
-    SRLP,                          // 52
-    SRRP,                          // 53
-    SRLB,                          // 54
-    SRRB,                          // 55
-    SRSM,                          // 56
-    SRCN,                          // 57
-    SRSP,                          // 58
-    SRCA,                          // 59
-    SRLCB,                         // 60
-    SRRCB,                         // 61
-    TEXT,
-    PASS,
-    ERROR,                         // 62
-    ENDOFFILE,                     // 63
-    TERMINAL_FINISH_INDEX          // 64
+    RWRD,                          // 36
+    RWRC,                          // 37
+    RWRE,                          // 37
+    RWINTOP,                       // 38
+    RWPRC,                         // 39
+    OPPLUS,                        // 40
+    OPMINUS,                       // 41
+    OPMUL,                         // 42
+    OPDIV,                         // 43
+    OPGT,                          // 44
+    OPLT,                          // 45
+    OPGE,                          // 46
+    OPLE,                          // 47
+    OPEQ,                          // 48
+    OPNE,                          // 49
+    OPAS,                          // 50
+    SRLP,                          // 51
+    SRRP,                          // 52
+    SRLB,                          // 53
+    SRRB,                          // 54
+    SRSM,                          // 55
+    SRCN,                          // 56
+    SRSP,                          // 57
+    SRCA,                          // 58
+    SRLCB,                         // 59
+    SRRCB,                         // 60
+    TEXT,                          // 61
+    PASS,                          // 62
+    ERROR,                         // 63
+    ENDOFFILE,                     // 64
+    TERMINAL_FINISH_INDEX          // 65
 };
 
 
