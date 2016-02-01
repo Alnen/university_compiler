@@ -1,0 +1,5 @@
+@startuml
+state "RWPR" as RWPR_1
+RWPR_1 : Program
+[*] --> RWPR_1
+@enduml

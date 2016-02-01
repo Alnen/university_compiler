@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+   <FileVersion major="1" minor="6" />
+   <Project>
+      <Option title="Compiler" />
+      <Option makefile_is_custom="1" />
+      <Option compiler="gcc" />
+      <Option virtualFolders="CMake Files\;CMake Files\source\;" />
+      <Build>
+      <Target title="all">
+         <Option working_dir="/home/alexandr/Desktop/cprojects/compiler/university_compiler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 all" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="edit_cache">
+         <Option working_dir="/home/alexandr/Desktop/cprojects/compiler/university_compiler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 edit_cache" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="rebuild_cache">
+         <Option working_dir="/home/alexandr/Desktop/cprojects/compiler/university_compiler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 rebuild_cache" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="compiler">
+         <Option output="/home/alexandr/Desktop/cprojects/compiler/university_compiler/bin/compiler" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="bin" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/Users/alnen/Desktop/Coding/C++ projects/hana/include" />
+            <Add directory="/home/alexandr/Desktop/cprojects/compiler/university_compiler/external_libs/googletest/googletest" />
+            <Add directory="/home/alexandr/Desktop/cprojects/compiler/university_compiler/external_libs/googletest/googletest/include" />
+            <Add directory="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/include" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 compiler" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="compiler/fast">
+         <Option output="/home/alexandr/Desktop/cprojects/compiler/university_compiler/bin/compiler" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="bin" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/Users/alnen/Desktop/Coding/C++ projects/hana/include" />
+            <Add directory="/home/alexandr/Desktop/cprojects/compiler/university_compiler/external_libs/googletest/googletest" />
+            <Add directory="/home/alexandr/Desktop/cprojects/compiler/university_compiler/external_libs/googletest/googletest/include" />
+            <Add directory="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/include" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 compiler/fast" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/alexandr/Desktop/cprojects/compiler/university_compiler/Makefile&quot;  VERBOSE=1 clean" />
+         </MakeCommands>
+      </Target>
+      </Build>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/Grammar/Nonterminals.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/Grammar/Terminals.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/ArrayTypeInfo.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/BasicTypeInfo.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/Context.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/CustomTypeInfo.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/EnumerationTypeInfo.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/GlobalContext.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/IntegerTypeInfo.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/LabelInfo.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/Module.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/StructTypeInfo.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/VarInfo.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/RegexAST/RegexASTAnnotationEvaluator.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/RegexAST/RegexASTNode.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/RegexAST/RegexASTParser.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/main.cpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/Grammar/Nonterminals.h">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/Grammar/Terminals.h">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/ArrayTypeInfo.hpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/BasicTypeInfo.hpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/Context.hpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/CustomTypeInfo.hpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/EnumerationTypeInfo.hpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/GlobalContext.h">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/IntegerTypeInfo.h">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/LabelInfo.hpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/Module.h">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/StructTypeInfo.h">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/src/PascalCompiler/IR/VarInfo.hpp">
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\" />
+      </Unit>
+      <Unit filename="/home/alexandr/Desktop/cprojects/compiler/university_compiler/source/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\source\" />
+      </Unit>
+   </Project>
+</CodeBlocks_project_file>
