@@ -137,7 +137,7 @@ public:
 protected:
 };
    // {Massive1,{EPSILON}}, OK
-class Massive1InitVec : public TreeConstructor
+class IndexListInit : public TreeConstructor
 {
 public:
     virtual void executeHandler() override
@@ -149,7 +149,7 @@ public:
 protected:
 };
    // {Massive1,{SRCA,IndexType,Massive1}}, OK
-class Massive1AppendAtStart : public TreeConstructor
+class IndexListAppendAtStart : public TreeConstructor
 {
 public:
     virtual void executeHandler() override

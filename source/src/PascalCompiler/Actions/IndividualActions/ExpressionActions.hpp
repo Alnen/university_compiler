@@ -636,27 +636,6 @@ public:
     }
 };
 
-// {PostfixRationalOperator1,{RWDN}},
-class PostfixRationalOperatorRWDN : public TreeConstructor
-{
-public:
-    virtual void executeHandler() override
-    {
-        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
-        (*m_value)["OP"] = RWDN;
-    }
-};
-// {PostfixRationalOperator1,{RWN}},
-class PostfixRationalOperatorRWN : public TreeConstructor
-{
-public:
-    virtual void executeHandler() override
-    {
-        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
-        (*m_value)["OP"] = RWN;
-    }
-};
-
 // {BinaryLogicOperatorAnd,{RWLA}, BinaryLogicOperatorRWLA},
 class BinaryLogicOperatorRWLA : public TreeConstructor
 {
