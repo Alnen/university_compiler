@@ -52,19 +52,13 @@ Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
     {Massive, {RWAR, SRLB, Index, IndexList, SRRB, RWOF, DefiniteType}, ArrayCreationAction},
     {IndexList, {EPSILON}, IndexListInit},
     {IndexList, {SRCA, Index, IndexList}, IndexListAppendAtStart},
-    {Index, {CI}, IndexTypeCXSize},
+    {Index, {CI}, IndexTypeCXSize}, // TODO: Index -> Expression (with var = CI | ID)
     {Index, {ID}, IndexTypeIDCase},
     {EnumType, {SRLP, IdList, SRRP}, EnumTypeConstruction},
     {RecordType, {RWRC, RecordFieldDefinition, SRSM, RecordFieldDefinition1, RWEND}, TreeConstructor}, // TODO RECORD
     {RecordFieldDefinition, {IdList, SRCN, Type}, TreeConstructor},
     {RecordFieldDefinition1, {EPSILON}, TreeConstructor}, // TODO RECORD
     {RecordFieldDefinition1, {RecordFieldDefinition, SRSM, RecordFieldDefinition1}, TreeConstructor}, // TODO RECORD
-
-// BUILD-IN TYPE CONSTANTS
-    {IntegerConst, {CI}, TreeConstructor},
-    {RationalConst, {CI, SRSP, CI}, TreeConstructor},
-    {ComplexConst, {ComplexConstPart, CJ}, TreeConstructor},
-    {ComplexConst, {SRLCB, ComplexConstPart, SRCA, ComplexConstPart, SRRCB}, TreeConstructor},
 
 // VAR (DONE)
     {VarSection, {RWV, VarSection1, VarSection2}, TreeConstructor},
@@ -109,6 +103,7 @@ Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
 
     {UnsignedFactor, {RightHandVar}, ValuePropagation},
     {UnsignedFactor, {NumericConstant}, TreeConstructor},
+    //{UnsignedFactor, {ID, SRLP, FunctionArgs, SRRP}, TreeConstructor}, // TODO: FunctionCall
 
     {NumericConstant, {CI, NumericConstant1}, CreateConstComplex1},
     {NumericConstant, {SRLCB, ComplexConstPart, SRCA, ComplexConstPart, SRRCB}, CreateConstComplex3},
@@ -156,35 +151,36 @@ Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
     {BinaryLogicOperatorOr, {RWLO}, BinaryLogicOperatorRWLO},
 
 // STATEMENT
-    {CompoundStatement, {RWB, Statement, CompoundStatement1}, TreeConstructor},
-    {CompoundStatement1, {SRSM, CompoundStatement2}, TreeConstructor},
-    {CompoundStatement1, {RWEND}, TreeConstructor},
-    {CompoundStatement2, {RWEND}, TreeConstructor},
-    {CompoundStatement2, {SRSM, CompoundStatement2}, TreeConstructor},
-    {CompoundStatement2, {Statement2, CompoundStatement1}, TreeConstructor},
+    {CompoundStatement, {RWB, Statement, StatementList, CompoundStatementEnd}, TreeConstructor},
+    {CompoundStatementEnd, {RWEND}, TreeConstructor},
+    {CompoundStatementEnd, {SRSM, RWEND}, TreeConstructor},
+    {StatementList, {EPSILON}, TreeConstructor},
+    {StatementList, {SRSM, Statement, StatementList}, TreeConstructor},
 
     {Statement, {EPSILON}, TreeConstructor},
-    {Statement, {Statement2}, TreeConstructor},
-    {Statement2, {ConditionalOperator}, TreeConstructor},
-    {Statement2, {CompoundStatement}, TreeConstructor},
-    {Statement2, {InputOperator}, TreeConstructor},
-    {Statement2, {OutputOperator}, TreeConstructor},
-    {Statement2, {UnconditionalJumpOperator}, TreeConstructor},
-    {Statement2, {LoopWithParameterOperator}, TreeConstructor},
-    {Statement2, {ID, IDPass, Statement1}, LabelOrAssignmentAction},
-    {Statement45, {EPSILON}, LabelStatement},
-    {Statement1, {IDPass2, Statement45, SRCN, Statement}, LabelAction},
-    {Statement1, {VarHandlerList,OPAS,Expression}, AssignmentAction},
-    {LoopWithParameterOperator, {RWFOR,ID,OPAS,Expression,LoopDirection,Expression,RWDO, CreateBlock, Statement}, LoopWithParameterAction},
+    {Statement, {Statement1}, TreeConstructor},
+    {Statement1, {CompoundStatement}, TreeConstructor},
+    {Statement1, {ConditionalOperator}, TreeConstructor},
+    {Statement1, {InputOperator}, TreeConstructor},
+    {Statement1, {OutputOperator}, TreeConstructor},
+    {Statement1, {UnconditionalJumpOperator}, TreeConstructor},
+    {Statement1, {LoopWithParameterOperator}, TreeConstructor},
+    {Statement1, {ID, IDPass, Statement2}, LabelOrAssignmentAction},
+
+    {Statement2, {VarHandlerList, OPAS, Expression}, AssignmentAction},
+    {Statement2, {IDPass2, Statement3, SRCN, Statement}, LabelAction},
+    {Statement3, {EPSILON}, LabelStatement},
+
+    {LoopWithParameterOperator, {RWFOR, ID, OPAS, Expression, LoopDirection, Expression, RWDO, CreateBlock, Statement}, LoopWithParameterAction},
     {LoopDirection, {RWDT}, LoopDirectionDT},
     {LoopDirection, {RWTO}, LoopDirectionTO},
-    {UnconditionalJumpOperator, {RWGT,Label}, GotoLabel},
-    {ConditionalOperator, {RWIF,Expression,RWTH, CreateBlock, Statement2,ConditionalOperator1}, ConditionalOperatorAction},
+    {UnconditionalJumpOperator, {RWGT, Label}, GotoLabel},
+    {AssignmentOperator, {LeftHandVar, OPAS, Expression}, TreeConstructor},
+    {ConditionalOperator, {RWIF, Expression, RWTH, CreateBlock, Statement1, ConditionalOperator1}, ConditionalOperatorAction},
     {ConditionalOperator1, {EPSILON}, ConditionalOperatorNoElseAction},
-    {ConditionalOperator1, {RWEL, CreateBlock, Statement2}, ConditionalOperatorElseAction},
-    {InputOperator, {RWRD,SRLP,LeftHandVar,SRRP}, ReadLeftHandVarAction},
-    {OutputOperator, {RWWR, SRLP, TEXT, ExprList1,SRRP}, PrintOperatorMain},
-    //{OutputOperator1, {SRCA,Expression}, TreeConstructor},
+    {ConditionalOperator1, {RWEL, CreateBlock, Statement1}, ConditionalOperatorElseAction},
+    {InputOperator, {RWRD, SRLP, LeftHandVar, SRRP}, ReadLeftHandVarAction},
+    {OutputOperator, {RWWR, SRLP, TEXT, ExprList1, SRRP}, PrintOperatorMain},
     {CreateBlock, {EPSILON}, CreateBlockAction},
 
     {ExprList, {Expression, ExprList1}, FinalAppendExprList},
@@ -235,7 +231,7 @@ Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
     {ProcedureParameters, {OneTypeParameters, FunctionParameters1, ResultParameters1}, TreeConstructor},
     {ResultParameters, {RWV, FunctionParameters}, TreeConstructor},
     {ResultParameters1, {EPSILON}, TreeConstructor},
-    {ResultParameters1, {ResultParameters}, TreeConstructor},
+    {ResultParameters1, {ResultParameters}, TreeConstructor}
 };
 
 #endif // #define PASCALRULES_H

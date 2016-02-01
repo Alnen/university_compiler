@@ -47,7 +47,6 @@ enum TokenType
     RWCX,                          // 33
     RWFUN,                         // 34
     RWIM,                          // 35
-    RWRD,                          // 36
     RWRC,                          // 37
     RWRE,                          // 37
     RWINTOP,                       // 38

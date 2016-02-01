@@ -20,7 +20,7 @@ enum NonterminalSymbols {
     CompoundStatement,                       // 106
     CompoundStatement1,                      // 107
     CompoundStatement2,                      // 108
-    BuiltInType,                            // 109
+    BuiltInType,                             // 109
     ConditionalOperator,                     // 110
     ConditionalOperator1,                    // 111
     ConstDefinition,                         // 113
@@ -75,14 +75,12 @@ enum NonterminalSymbols {
     OutputOperator1,                         // 161
     OverloadBinaryOperation,                 // 162
     OverloadBinaryOperation1,                // 163
-    PostfixRationalOperator,                 // 164
-    PostfixRationalOperator1,                // 165
+    FunctionDeclaration,
+    ProcedureDeclaration,
     Procedure,                               // 166
     ProcedureFunctions,                      // 167
     Program,                                 // 168
     Program1,                                // 169
-    RatianalType1,                           // 170
-    RatianalType2,                           // 171
     RecordType,
     Relation,                                // 172
     Relation1,                               // 173
@@ -93,6 +91,7 @@ enum NonterminalSymbols {
     Statement,                               // 178
     Statement1,                              // 179
     Statement2,                              // 180
+    Statement3,
     Summand,                                 // 181
     Summand1,                                // 182
     Type,                                    // 183
@@ -112,6 +111,31 @@ enum NonterminalSymbols {
     VarSection,                              // 197
     VarSection1,                             // 198
     VarSection2,                             // 199
+    AdditiveExpression,
+    AdditiveExpression1,
+    MulExpression,
+    MulExpression1,
+    GcdExpression,
+    GcdExpression1,
+    UnsignedFactor,
+    NumericConstant,
+    NumericConstant1,
+    NumericConstant2,
+    ComplexConstPart,
+    ComplexConstPart1,
+    CompoundStatementEnd,
+    StatementList,
+    OverloadOperator,
+    OverloadOperator1,
+    LocalDeclaration,
+    LocalDeclaration1,
+    FunctionParameters,
+    FunctionParameters1,
+    OneTypeParameters,
+    FunctionCall,
+    ProcedureParameters,
+    ResultParameters,
+    ResultParameters1,
     RecordFieldDefinition,
     RecordFieldDefinition1,
     DefiniteType,

@@ -46,7 +46,6 @@ boost::container::flat_map<NonterminalSymbols, std::string>& getNonterminalTypeM
             { NonterminalSymbols::FunctionArgs1,                           "FunctionArgs1"                          }, // 132
             { NonterminalSymbols::IdList,                                  "IdList"                                 }, // 133
             { NonterminalSymbols::IdList1,                                 "IdList1"                                }, // 134
-            { NonterminalSymbols::IndexType,                               "IndexType"                              }, // 135
             { NonterminalSymbols::InputOperator,                           "InputOperator"                          }, // 136
             { NonterminalSymbols::InputOperator1,                          "InputOperator1"                         }, // 137
             { NonterminalSymbols::Label,                                   "Label"                                  }, // 138
@@ -64,7 +63,6 @@ boost::container::flat_map<NonterminalSymbols, std::string>& getNonterminalTypeM
             { NonterminalSymbols::LoopDirection,                           "LoopDirection"                          }, // 150
             { NonterminalSymbols::LoopWithParameterOperator,               "LoopWithParameterOperator"              }, // 151
             { NonterminalSymbols::Massive,                                 "Massive"                                }, // 152
-            { NonterminalSymbols::Massive1,                                "Massive1"                               }, // 153
             { NonterminalSymbols::OneTypeArgs,                             "OneTypeArgs"                            }, // 154
             { NonterminalSymbols::OneTypeArgs1,                            "OneTypeArgs1"                           }, // 155
             { NonterminalSymbols::OperatorOverloadSection,                 "OperatorOverloadSection"                }, // 156

@@ -107,8 +107,6 @@ boost::container::flat_map<TokenType, std::string>& tokenTypeMapping()
             { TokenType::RWRE,      "RWRE" }, // 36
             { TokenType::RWINTOP,   "RWINTOP" }, // 37
             { TokenType::RWPRC,     "RWPRC" }, // 38
-            { TokenType::RWDN,      "RWDN" }, // 39
-            { TokenType::RWN,       "RWN" }, // 40
             { TokenType::OPPLUS,    "OPPLUS" }, // 41
             { TokenType::OPMINUS,   "OPMINUS" }, // 42
             { TokenType::OPMUL,     "OPMUL" }, // 43
