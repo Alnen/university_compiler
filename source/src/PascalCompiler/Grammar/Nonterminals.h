@@ -9,7 +9,8 @@
 namespace PascalCompiler {
 namespace Grammar {
 
-enum NonterminalSymbols {
+enum NonterminalSymbols
+{
     NONTERMINAL_START_INDEX                  = 99,
     AssignmentOperator,                      // 100
     BinaryAdditiveOperator,                  // 101
