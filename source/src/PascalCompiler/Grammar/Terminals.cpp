@@ -28,11 +28,9 @@ boost::bimap<std::string, TokenType>& reserved_words()
             { "function",   TokenType::RWFUN  },
             { "goto",       TokenType::RWGT   },
             { "if",         TokenType::RWIF   },
-            { "im",         TokenType::RWIM   },
             { "int",        TokenType::RWINTOP},
             { "integer",    TokenType::RWINT  },
             { "irregular",  TokenType::RWIR   },
-            { "im",         TokenType::RWIM   },
             { "j",          TokenType::CJ     },
             { "label",      TokenType::RWLB   },
             { "not",        TokenType::RWLN   },
@@ -42,7 +40,6 @@ boost::bimap<std::string, TokenType>& reserved_words()
             { "program",    TokenType::RWPR   },
             { "procedure",  TokenType::RWPRC  },
             { "rational",   TokenType::RWRAT  },
-            { "re",         TokenType::RWRE   },
             { "record",     TokenType::RWRC   },
             { "read",       TokenType::RWRD   },
             { "simplify",   TokenType::RWSM   },
@@ -103,8 +100,6 @@ boost::container::flat_map<TokenType, std::string>& tokenTypeMapping()
             { TokenType::RWWR,      "RWWR" }, // 32
             { TokenType::RWCX,      "RWCX" }, // 33
             { TokenType::RWFUN,     "RWFUN" }, // 34
-            { TokenType::RWIM,      "RWIM" }, // 35
-            { TokenType::RWRE,      "RWRE" }, // 36
             { TokenType::RWINTOP,   "RWINTOP" }, // 37
             { TokenType::RWPRC,     "RWPRC" }, // 38
             { TokenType::OPPLUS,    "OPPLUS" }, // 41

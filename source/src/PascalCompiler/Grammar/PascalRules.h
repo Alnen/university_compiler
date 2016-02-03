@@ -54,10 +54,10 @@ Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
     {Index, {CI}, IndexTypeCXSize}, // TODO: Index -> Expression (with var = CI | ID)
     {Index, {ID}, IndexTypeIDCase},
     {EnumType, {SRLP, NotEmptyIdList, SRRP}, EnumTypeConstruction},
-    {RecordType, {RWRC, RecordFieldDefinition, SRSM, RecordFieldDefinition1, RWEND}, TreeConstructor}, // TODO RECORD
+    {RecordType, {RWRC, RecordFieldDefinition, SRSM, NextRecordFieldDefinition, RWEND}, TreeConstructor}, // TODO RECORD
     {RecordFieldDefinition, {NotEmptyIdList, SRCN, Type}, TreeConstructor},
-    {RecordFieldDefinition1, {EPSILON}, TreeConstructor}, // TODO RECORD
-    {RecordFieldDefinition1, {RecordFieldDefinition, SRSM, RecordFieldDefinition1}, TreeConstructor}, // TODO RECORD
+    {NextRecordFieldDefinition, {EPSILON}, TreeConstructor}, // TODO RECORD
+    {NextRecordFieldDefinition, {RecordFieldDefinition, SRSM, NextRecordFieldDefinition}, TreeConstructor}, // TODO RECORD
 
 // VAR (DONE)
     {VarSection, {RWV, VarDefinition, NextVarDefinition}, TreeConstructor},
@@ -139,8 +139,6 @@ Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
     {UnaryNotAdditiveOperator, {RWSM}, UnaryOperatorRWSM},
     {UnaryNotAdditiveOperator, {RWFR}, UnaryOperatorRWFR},
     {UnaryNotAdditiveOperator, {RWLN}, UnaryOperatorRWLN},
-    {UnaryNotAdditiveOperator, {RWIM}, UnaryOperatorRWIM},
-    {UnaryNotAdditiveOperator, {RWRE}, UnaryOperatorRWRE},
     {UnaryAdditiveOperator, {BinaryAdditiveOperator}, OPPropagation},
 
     {BinaryRelationOperator, {OPGT}, BinaryRelationOperatorOPGT},
@@ -178,9 +176,9 @@ Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
     {LoopDirection, {RWTO}, LoopDirectionTO},
     {UnconditionalJumpOperator, {RWGT, Label}, GotoLabel},
     {AssignmentOperator, {LeftHandVar, OPAS, Expression}, TreeConstructor},
-    {ConditionalOperator, {RWIF, Expression, RWTH, CreateBlock, NotEmptyStatement, ConditionalOperator1}, ConditionalOperatorAction},
-    {ConditionalOperator1, {EPSILON}, ConditionalOperatorNoElseAction},
-    {ConditionalOperator1, {RWEL, CreateBlock, NotEmptyStatement}, ConditionalOperatorElseAction},
+    {ConditionalOperator, {RWIF, Expression, RWTH, CreateBlock, NotEmptyStatement, ConditionalOperatorEnd}, ConditionalOperatorAction},
+    {ConditionalOperatorEnd, {EPSILON}, ConditionalOperatorNoElseAction},
+    {ConditionalOperatorEnd, {RWEL, CreateBlock, NotEmptyStatement}, ConditionalOperatorElseAction},
     {InputOperator, {RWRD, SRLP, LeftHandVar, SRRP}, ReadLeftHandVarAction},
     {OutputOperator, {RWWR, SRLP, TEXT, ExprListTail, SRRP}, PrintOperatorMain},
     {CreateBlock, {EPSILON}, CreateBlockAction},
@@ -227,7 +225,7 @@ Parser::Grammar<TokenType, NonterminalSymbols>::RuleList grammar_rules = {
     {OneTypeParameters, {NotEmptyIdList, SRCN, Type}, TreeConstructor},
     {FunctionCall, {ID, SRLP, ExprList, SRRP}, TreeConstructor},
 
-    {Procedure, {RWPRC, ID, SRLP, ProcedureParameters, SRRP, SRSM, LocalDeclaration, CompoundStatement, SRSM}, TreeConstructor},
+    {ProcedureDeclaration, {RWPRC, ID, SRLP, ProcedureParameters, SRRP, SRSM, LocalDeclaration, CompoundStatement, SRSM}, TreeConstructor},
     {ProcedureParameters, {EPSILON}, TreeConstructor},
     {ProcedureParameters, {NotEmptyResultParameters}, TreeConstructor},
     {ProcedureParameters, {OneTypeParameters, FunctionParametersTail, ResultParameters}, TreeConstructor},

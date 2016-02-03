@@ -73,8 +73,6 @@ auto ActionContainer = boost::hana::make_tuple(
     boost::hana::make_pair(boost::hana::int_c<UnaryOperatorRWSM>,         boost::hana::type_c<PascalCompiler::UnaryOperatorRWSM>),
     boost::hana::make_pair(boost::hana::int_c<UnaryOperatorRWFR>,         boost::hana::type_c<PascalCompiler::UnaryOperatorRWFR>),
     boost::hana::make_pair(boost::hana::int_c<UnaryOperatorRWLN>,         boost::hana::type_c<PascalCompiler::UnaryOperatorRWLN>),
-    boost::hana::make_pair(boost::hana::int_c<UnaryOperatorRWIM>,         boost::hana::type_c<PascalCompiler::UnaryOperatorRWIM>),
-    boost::hana::make_pair(boost::hana::int_c<UnaryOperatorRWRE>,         boost::hana::type_c<PascalCompiler::UnaryOperatorRWRE>),
     boost::hana::make_pair(boost::hana::int_c<OPPropagation>,             boost::hana::type_c<PascalCompiler::OPPropagation>),
     boost::hana::make_pair(boost::hana::int_c<BinaryRelationOperatorOPGT>,boost::hana::type_c<PascalCompiler::BinaryRelationOperatorOPGT>),
     boost::hana::make_pair(boost::hana::int_c<BinaryRelationOperatorOPLT>,boost::hana::type_c<PascalCompiler::BinaryRelationOperatorOPLT>),
@@ -83,8 +81,6 @@ auto ActionContainer = boost::hana::make_tuple(
     boost::hana::make_pair(boost::hana::int_c<BinaryRelationOperatorOPEQ>,boost::hana::type_c<PascalCompiler::BinaryRelationOperatorOPEQ>),
     boost::hana::make_pair(boost::hana::int_c<BinaryRelationOperatorOPNE>,boost::hana::type_c<PascalCompiler::BinaryRelationOperatorOPNE>),
     boost::hana::make_pair(boost::hana::int_c<PostfixRationalOperatorRWDNN>,boost::hana::type_c<PascalCompiler::PostfixRationalOperatorRWDNN>),
-    boost::hana::make_pair(boost::hana::int_c<PostfixRationalOperatorRWDN>,boost::hana::type_c<PascalCompiler::PostfixRationalOperatorRWDN>),
-    boost::hana::make_pair(boost::hana::int_c<PostfixRationalOperatorRWN>,boost::hana::type_c<PascalCompiler::PostfixRationalOperatorRWN>),
     boost::hana::make_pair(boost::hana::int_c<AppendIndexVarHandlerList>,boost::hana::type_c<PascalCompiler::AppendIndexVarHandlerList>),
     boost::hana::make_pair(boost::hana::int_c<AppendMemberVarHandlerList>,boost::hana::type_c<PascalCompiler::AppendMemberVarHandlerList>),
     boost::hana::make_pair(boost::hana::int_c<InitVarHandlerList>,boost::hana::type_c<PascalCompiler::InitVarHandlerList>),
@@ -102,6 +98,5 @@ auto ActionContainer = boost::hana::make_tuple(
     boost::hana::make_pair(boost::hana::int_c<PrintOperatorRest>,boost::hana::type_c<PascalCompiler::PrintOperatorRest>),
     boost::hana::make_pair(boost::hana::int_c<ReadLeftHandVarAction>,boost::hana::type_c<PascalCompiler::ReadLeftHandVarAction>)
 );
-
 
 #endif // ACTIONCONTAINER_H
