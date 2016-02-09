@@ -9,204 +9,190 @@
 namespace PascalCompiler {
 namespace Grammar {
 
-enum NonterminalSymbols {
-    NONTERMINAL_START_INDEX                  = 99,
-    AssignmentOperator,                      // 100
-    BinaryAdditiveOperator,                  // 101
-    BinaryMulOperator,                       // 102
-    BinaryOperatorOverload,                  // 103
-    BinaryOperatorOverload1,                 // 104
-    BinaryRelationOperator,                  // 105
-    CompoundStatement,                       // 106
-    CompoundStatement1,                      // 107
-    CompoundStatement2,                      // 108
-    ConcreteType,                            // 109
-    ConditionalOperator,                     // 110
-    ConditionalOperator1,                    // 111
-    ConstDefinition,                         // 113
-    ConstExpr,                               // 114
-    ConstExpr1,                              // 115
-    ConstExpr2,                              // 116
-    ConstExpr3,                              // 117
-    ConstSection,                            // 118
-    ConstSection1,                           // 119
-    DescriptionSection,                      // 120
-    DescriptionSection1,                     // 121
-    EnumType,                                // 122
-    ExprList,                                // 123
-    ExprList1,                               // 124
-    Expression,                              // 125
-    Expression1,                             // 126
-    Expression2,                             // 127
-    Factor,                                  // 128
-    Factor1,                                 // 129
-    Function,                                // 130
-    FunctionArgs,                            // 131
-    FunctionArgs1,                           // 132
-    IdList,                                  // 133
-    IdList1,                                 // 134
-    IndexType,                               // 135
-    InputOperator,                           // 136
-    InputOperator1,                          // 137
-    Label,                                   // 138
-    LabelSection,                            // 139
-    LabelSection1,                           // 140
-    LeftHandPostfixRationalOperator,         // 141
-    LeftHandVar,                             // 142
-    LeftHandVar1,                            // 143
-    LocalDefinition,                         // 144
-    LocalDefinition1,                        // 145
-    LogicAnd,                                // 146
-    LogicAnd1,                               // 147
-    LogicOr,                                 // 148
-    LogicOr1,                                // 149
-    LoopDirection,                           // 150
-    LoopWithParameterOperator,               // 151
-    Statement45,
-    Massive,                                 // 152
-    Massive1,                                // 153
-    OneTypeArgs,                             // 154
-    OneTypeArgs1,                            // 155
-    OperatorOverloadSection,                 // 156
-    OperatorOverloadSection1,                // 157
-    OperatorOverloadSection2,                // 158
-    OperatorOverloadSection3,                // 159
-    OutputOperator,                          // 160
-    OutputOperator1,                         // 161
-    OverloadBinaryOperation,                 // 162
-    OverloadBinaryOperation1,                // 163
-    PostfixRationalOperator,                 // 164
-    PostfixRationalOperator1,                // 165
-    Procedure,                               // 166
-    ProcedureFunctions,                      // 167
-    Program,                                 // 168
-    Program1,                                // 169
-    RatianalType1,                           // 170
-    RatianalType2,                           // 171
-    Relation,                                // 172
-    Relation1,                               // 173
-    ResultArgs,                              // 174
-    RightHandPostfixRationalOperator,        // 175
-    RightHandVar,                            // 176
-    RightHandVar1,                           // 177
-    Statement,                               // 178
-    Statement1,                              // 179
-    Statement2,                              // 180
-    Summand,                                 // 181
-    Summand1,                                // 182
-    Type,                                    // 183
-    TypeDefinition,                          // 184
-    TypeSection,                             // 185
-    TypeSection1,                            // 186
-    UnaryAdditiveOperator,                   // 187
-    UnaryOperator,                           // 188
-    UnaryOperator1,                          // 189
-    UnaryOperatorOverload,                   // 190
-    UnconditionalJumpOperator,               // 191
-    Var,                                     // 192
-    Var1,                                    // 193
-    Var2,                                    // 194
-    Var3,                                    // 195
-    Var4,                                    // 196
-    VarSection,                              // 197
-    VarSection1,                             // 198
-    VarSection2,                             // 199
-    FinalType,
-    CreateBlock,
-    LeftHandVar3,
-    RightHandVar3,
-    VarHandlerList,
-    Factor2,
-    BinaryLogicOperatorOr,
-    BinaryLogicOperatorAnd,
-    NONTERMINAL_FINISH_INDEX,                // 200
-    ACTION_START_INDEX,                      // 201
-    ACTION1,                                 // 202
-    TreeConstructor,                         // 203
-    EnumTypeConstruction,
-    IndexTypeIDCase,
-    IndexTypeCXSize,
-    Massive1AppendAtStart,
-    Massive1InitVec,
-    ArrayCreationAction,
-    ComplexPass,
-    RationalPass,
-    IntegerPass,
-    GetTypeAccordingToID,
-    TypePropagation,
-    TypeRegistrationAction,
-    InitIdList,
-    AppendIdList,
-    FinalAppendList,
-    LabelRegistration,
-    VariableDeclarationAction,
-    CreateBlockAction,
-    LabelOrAssignmentAction,
-    LabelAction,
-    AssignmentAction,
-    LoopDirectionTO,
-    LoopDirectionDT,
-    LoopWithParameterAction,
-    FinishMainFuntion,
-    ValuePropagation,
-    ExpressionCombiner,
-    SuperExpressionCombiner,
-    BracketValuePropagation,
-    UnaryOPValue,
-    CreateConstComplex1,
-    CreateConstComplex2,
-    CreateConstComplex3,
-    RationalStart,
-    RationalEnd,
-    JFlagTrue,
-    JFlagFalse,
-    LoadRightHandVar,
-    FinalAppendExprList,
-    AppendExprList,
-    InitExprList,
-    UnaryOperatorOPPLUS,
-    UnaryOperatorOPMINUS,
-    UnaryOperatorOPMUL,
-    UnaryOperatorOPDIV,
-    UnaryOperatorRWINTOP,
-    UnaryOperatorRWIR,
-    UnaryOperatorRWSM,
-    UnaryOperatorRWFR,
-    UnaryOperatorRWLN,
-    UnaryOperatorRWIM,
-    UnaryOperatorRWRE,
-    OPPropagation,
-    BinaryRelationOperatorOPGT,
-    BinaryRelationOperatorOPLT,
-    BinaryRelationOperatorOPGE,
-    BinaryRelationOperatorOPLE,
-    BinaryRelationOperatorOPEQ,
-    BinaryRelationOperatorOPNE,
-    PostfixRationalOperatorRWDNN,
-    PostfixRationalOperatorRWDN,
-    PostfixRationalOperatorRWN,
-    AppendIndexVarHandlerList,
-    AppendMemberVarHandlerList,
-    InitVarHandlerList,
-    PropagateLeftHandVarInfo,
-    BinaryLogicOperatorRWLA,
-    BinaryLogicOperatorRWLO,
-    ConditionalOperatorAction,
-    ConditionalOperatorElseAction,
-    ConditionalOperatorNoElseAction,
-    LabelID,
-    GotoLabel,
-    IDPass,
-    IDPass2,
-    LabelStatement,
-    PrintOperatorMain,
-    PrintOperatorRest,
-    ReadLeftHandVarAction,
-    ACTION3,                                 // 204
-    DEFAULT_SYNTHESIZE,                      // 205
-    DEFAULT_INHERIT,                         // 206
-    ACTION_FINISH_INDEX,                     // 207
-    EPSILON                                  // 208
+enum NonterminalSymbols
+{
+    NONTERMINAL_START_INDEX          = 99,
+    AdditiveExpression,              // 100
+    AssignmentOperator,              // 101
+    BinaryAdditiveOperator,          // 102
+    BinaryLogicOperatorAnd,          // 103
+    BinaryLogicOperatorOr,           // 104
+    BinaryMulOperator,               // 105
+    BinaryNotAdditiveOperator,       // 106
+    BinaryOperatorOverload,          // 107
+    BinaryOperatorOverloadEnd,       // 108
+    BinaryRelationOperator,          // 109
+    BuiltInType,                     // 110
+    ComplexNumberPart,               // 111
+    ComplexNumberSuffix,             // 112
+    CompoundStatement,               // 113
+    CompoundStatementEnd,            // 114
+    ConditionalOperator,             // 115
+    ConditionalOperatorEnd,          // 116
+    ConstDefinition,                 // 117
+    ConstSection,                    // 118
+    CreateBlock,                     // 119
+    DefiniteType,                    // 120
+    EmptyStatement,                  // 121
+    EnumType,                        // 122
+    ExprList,                        // 123
+    ExprListTail,                    // 124
+    Expression,                      // 125
+    Factor,                          // 126
+    FunctionCall,                    // 127
+    FunctionDeclaration,             // 128
+    FunctionParameters,              // 129
+    FunctionParametersTail,          // 130
+    GcdExpression,                   // 131
+    GlobalDeclaration,               // 132
+    IdList,                          // 133
+    IdListTail,                      // 134
+    Index,                           // 135
+    IndexList,                       // 136
+    IndexListTail,                   // 137
+    InputOperator,                   // 138
+    Label,                           // 139
+    LabelOrAssignmentStatement,      // 140
+    LabelSection,                    // 141
+    LeftHandVar,                     // 142
+    LocalDeclaration,                // 143
+    LogicAnd,                        // 144
+    LogicOr,                         // 145
+    LoopDirection,                   // 146
+    LoopWithParameterOperator,       // 147
+    Massive,                         // 148
+    MulExpression,                   // 149
+    NextAdditiveExpression,          // 150
+    NextConstDefinition,             // 151
+    NextGcdExpression,               // 152
+    NextLabel,                       // 153
+    NextLogicAnd,                    // 154
+    NextLogicOr,                     // 155
+    NextMulExpression,               // 156
+    NextRecordFieldDefinition,       // 157
+    NextRelationalExpression,        // 158
+    NextTypeDefinition,              // 159
+    NextVarDefinition,               // 160
+    NotEmptyExprList,                // 161
+    NotEmptyGlobalDeclaration,       // 162
+    NotEmptyIdList,                  // 163
+    NotEmptyIndexList,               // 164
+    NotEmptyLocalDeclaration,        // 165
+    NotEmptyResultParameters,        // 166
+    NotEmptyStatement,               // 167
+    NumericConstant,                 // 168
+    OneTypeParameters,               // 169
+    OperatorOverloadSection,         // 170
+    OutputOperator,                  // 171
+    OverloadBinaryOperator,          // 172
+    OverloadOperator,                // 173
+    OverloadOperatorEnd,             // 174
+    ProcedureDeclaration,            // 175
+    ProcedureParameters,             // 176
+    Program,                         // 177
+    RationalComplexPart,             // 178
+    RationalNumberPart,              // 179
+    RecordFieldDefinition,           // 180
+    RecordType,                      // 181
+    RelationalExpression,            // 182
+    ResultParameters,                // 183
+    RightHandVar,                    // 184
+    Statement,                       // 185
+    StatementList,                   // 186
+    Type,                            // 187
+    TypeDefinition,                  // 188
+    TypeSection,                     // 189
+    UnaryAdditiveOperator,           // 190
+    UnaryNotAdditiveOperator,        // 191
+    UnaryOperator,                   // 192
+    UnaryOperatorOverload,           // 193
+    UnconditionalJumpOperator,       // 194
+    UnsignedFactor,                  // 195
+    VarDefinition,                   // 196
+    VarHandlerList,                  // 197
+    VarSection,                      // 198
+    NONTERMINAL_FINISH_INDEX,        // 199
+    ACTION_START_INDEX,              // 200
+    AppendExprList,                  // 201
+    AppendIdList,                    // 202
+    AppendIndexVarHandlerList,       // 203
+    AppendMemberVarHandlerList,      // 204
+    ArrayCreationAction,             // 205
+    AssignmentAction,                // 206
+    BinaryLogicOperatorRWLA,         // 207
+    BinaryLogicOperatorRWLO,         // 208
+    BinaryRelationOperatorOPEQ,      // 209
+    BinaryRelationOperatorOPGE,      // 210
+    BinaryRelationOperatorOPGT,      // 211
+    BinaryRelationOperatorOPLE,      // 212
+    BinaryRelationOperatorOPLT,      // 213
+    BinaryRelationOperatorOPNE,      // 214
+    BracketValuePropagation,         // 215
+    ComplexPass,                     // 216
+    ConditionalOperatorAction,       // 217
+    ConditionalOperatorElseAction,   // 218
+    ConditionalOperatorNoElseAction, // 219
+    CreateBlockAction,               // 220
+    CreateConstComplex1,             // 221
+    CreateConstComplex2,             // 222
+    CreateConstComplex3,             // 223
+    DEFAULT_INHERIT,                 // 224
+    DEFAULT_SYNTHESIZE,              // 225
+    EnumTypeConstruction,            // 226
+    ExpressionCombiner,              // 227
+    FinalAppendExprList,             // 228
+    FinalAppendList,                 // 229
+    FinishMainFuntion,               // 230
+    GetTypeAccordingToID,            // 231
+    GotoLabel,                       // 232
+    IDPass,                          // 233
+    IDPass2,                         // 234
+    IndexListAppendAtStart,          // 235
+    IndexListInit,                   // 236
+    IndexTypeCXSize,                 // 237
+    IndexTypeIDCase,                 // 238
+    InitExprList,                    // 239
+    InitIdList,                      // 240
+    InitVarHandlerList,              // 241
+    IntegerPass,                     // 242
+    JFlagFalse,                      // 243
+    JFlagTrue,                       // 244
+    LabelAction,                     // 245
+    LabelID,                         // 246
+    LabelOrAssignmentAction,         // 247
+    LabelRegistration,               // 248
+    LabelStatement,                  // 249
+    LoadRightHandVar,                // 250
+    LoopDirectionDT,                 // 251
+    LoopDirectionTO,                 // 252
+    LoopWithParameterAction,         // 253
+    OPPropagation,                   // 254
+    PostfixRationalOperatorRWDNN,    // 255
+    PrintOperatorMain,               // 256
+    PrintOperatorRest,               // 257
+    PropagateLeftHandVarInfo,        // 258
+    RationalEnd,                     // 259
+    RationalPass,                    // 260
+    RationalStart,                   // 261
+    ReadLeftHandVarAction,           // 262
+    SuperExpressionCombiner,         // 263
+    TreeConstructor,                 // 264
+    TypePropagation,                 // 265
+    TypeRegistrationAction,          // 266
+    UnaryOPValue,                    // 267
+    UnaryOperatorOPDIV,              // 268
+    UnaryOperatorOPMINUS,            // 269
+    UnaryOperatorOPMUL,              // 270
+    UnaryOperatorOPPLUS,             // 271
+    UnaryOperatorRWFR,               // 272
+    UnaryOperatorRWINTOP,            // 273
+    UnaryOperatorRWIR,               // 274
+    UnaryOperatorRWLN,               // 275
+    UnaryOperatorRWSM,               // 276
+    ValuePropagation,                // 277
+    VariableDeclarationAction,       // 278
+    ACTION_FINISH_INDEX,             // 279
+    EPSILON                          // 280
 };
 
 boost::container::flat_map<NonterminalSymbols, std::string>& getNonterminalTypeMapping();

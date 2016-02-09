@@ -257,12 +257,6 @@ Module::Module(std::string name):
         case PascalCompiler::Grammar::RWLN: // not
             result_codegen = irBuilder.CreateNot(L, "tempnot");
             break;
-        case PascalCompiler::Grammar::RWRE: // re
-            throw std::runtime_error("re operation in son supported by integer type");
-            break;
-        case PascalCompiler::Grammar::RWIM: // im
-            throw std::runtime_error("im operation in son supported by integer type");
-            break;
 
         case PascalCompiler::Grammar::OPPLUS: // +
             result_codegen = L;

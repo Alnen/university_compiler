@@ -20,7 +20,6 @@ boost::bimap<std::string, TokenType>& reserved_words()
             { "complex",    TokenType::RWCX   },
             { "const",      TokenType::RWCN   },
             { "do",         TokenType::RWDO   },
-            { "denominator",TokenType::RWDN   },
             { "downto",     TokenType::RWDT   },
             { "else",       TokenType::RWEL   },
             { "end",        TokenType::RWEND  },
@@ -29,14 +28,11 @@ boost::bimap<std::string, TokenType>& reserved_words()
             { "function",   TokenType::RWFUN  },
             { "goto",       TokenType::RWGT   },
             { "if",         TokenType::RWIF   },
-            { "im",         TokenType::RWIM   },
             { "int",        TokenType::RWINTOP},
             { "integer",    TokenType::RWINT  },
             { "irregular",  TokenType::RWIR   },
-            { "im",         TokenType::RWIM   },
             { "j",          TokenType::CJ     },
             { "label",      TokenType::RWLB   },
-            { "numerator",  TokenType::RWN    },
             { "not",        TokenType::RWLN   },
             { "of",         TokenType::RWOF   },
             { "operator",   TokenType::RWOP   },
@@ -44,8 +40,8 @@ boost::bimap<std::string, TokenType>& reserved_words()
             { "program",    TokenType::RWPR   },
             { "procedure",  TokenType::RWPRC  },
             { "rational",   TokenType::RWRAT  },
-            { "re",         TokenType::RWRE   },
             { "read",       TokenType::RWRD   },
+            { "record",     TokenType::RWRC   },
             { "simplify",   TokenType::RWSM   },
             { "then",       TokenType::RWTH   },
             { "to",         TokenType::RWTO   },
@@ -104,12 +100,8 @@ boost::container::flat_map<TokenType, std::string>& tokenTypeMapping()
             { TokenType::RWWR,      "RWWR" }, // 32
             { TokenType::RWCX,      "RWCX" }, // 33
             { TokenType::RWFUN,     "RWFUN" }, // 34
-            { TokenType::RWIM,      "RWIM" }, // 35
-            { TokenType::RWRE,      "RWRE" }, // 36
             { TokenType::RWINTOP,   "RWINTOP" }, // 37
             { TokenType::RWPRC,     "RWPRC" }, // 38
-            { TokenType::RWDN,      "RWDN" }, // 39
-            { TokenType::RWN,       "RWN" }, // 40
             { TokenType::OPPLUS,    "OPPLUS" }, // 41
             { TokenType::OPMINUS,   "OPMINUS" }, // 42
             { TokenType::OPMUL,     "OPMUL" }, // 43

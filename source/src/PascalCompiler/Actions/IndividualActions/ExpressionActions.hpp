@@ -526,26 +526,6 @@ public:
         (*m_value)["OP"] = RWLN;
     }
 };
-// {UnaryOperator1,{RWIM}},
-class UnaryOperatorRWIM : public TreeConstructor
-{
-public:
-    virtual void executeHandler() override
-    {
-        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
-        (*m_value)["OP"] = RWIM;
-    }
-};
-// {UnaryOperator1,{RWRE}},
-class UnaryOperatorRWRE : public TreeConstructor
-{
-public:
-    virtual void executeHandler() override
-    {
-        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
-        (*m_value)["OP"] = RWRE;
-    }
-};
 
 // {LeftHandVar1,{LeftHandPostfixRationalOperator}},
 // {RightHandVar1,{RightHandPostfixRationalOperator}},
@@ -633,27 +613,6 @@ public:
     {
         TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         (*m_value)["OP"] = cast_item<TokenType>(m_stack[1], "OP");
-    }
-};
-
-// {PostfixRationalOperator1,{RWDN}},
-class PostfixRationalOperatorRWDN : public TreeConstructor
-{
-public:
-    virtual void executeHandler() override
-    {
-        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
-        (*m_value)["OP"] = RWDN;
-    }
-};
-// {PostfixRationalOperator1,{RWN}},
-class PostfixRationalOperatorRWN : public TreeConstructor
-{
-public:
-    virtual void executeHandler() override
-    {
-        TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
-        (*m_value)["OP"] = RWN;
     }
 };
 
