@@ -77,7 +77,7 @@ private:
 class Module
 {
 public:
-    Module(std::string name);
+    Module(std::string name, llvm::LLVMContext &context);
 
     llvm::Module* getModule();
 
@@ -126,7 +126,8 @@ public:
         //putsArgs.push_back(builder.getInt32Ty());
         llvm::ArrayRef<llvm::Type*>  argsRef(putsArgs);
 
-        llvm::FunctionType *putsType = llvm::FunctionType::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), argsRef, true);
+        auto& context = getGlobalModule()->getLLVMModule().getContext();
+        llvm::FunctionType *putsType = llvm::FunctionType::get(llvm::Type::getInt32Ty(context), argsRef, true);
         printf = m_llvmModule.getOrInsertFunction("printf", putsType);
 
         scanf = m_llvmModule.getOrInsertFunction("scanf", putsType);
@@ -172,6 +173,9 @@ public:
         llvm::IRBuilder<> builder(m_currentContext->getAllocaBlock());
         return builder.CreateGlobalStringPtr(str.c_str());
     }
+
+    const llvm::Module& getLLVMModule() const;
+    llvm::Module& getLLVMModule();
 
     ~Module()
     {

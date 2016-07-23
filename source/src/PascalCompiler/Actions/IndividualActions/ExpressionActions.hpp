@@ -170,7 +170,8 @@ public:
 
         }
         ValuePair result;
-        result.first = llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), first, true);
+        auto& context = PascalCompiler::getGlobalModule()->getLLVMModule().getContext();
+        result.first = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), first, true);
         result.second = getGlobalModule()->getTypeInfo("integer");
         (*m_value)["Value"] = result;
     }

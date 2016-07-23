@@ -162,6 +162,7 @@ class LoopWithParameterAction : public TreeConstructor
 public:
     virtual void executeHandler() override
     {
+        auto& context = getGlobalModule()->getLLVMModule().getContext();
         TreeConstructor::executeHandler();std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         TokenType direction = cast_item<TokenType>(m_stack[5],"direction");
 
@@ -227,7 +228,7 @@ public:
                                                                  );
         }
         irBuilder.SetInsertPoint(checkBlock);
-        llvm::Value* boolPred = irBuilder.CreateIntCast(testValue.first, llvm::Type::getInt1Ty(llvm::getGlobalContext()), true);
+        llvm::Value* boolPred = irBuilder.CreateIntCast(testValue.first, llvm::Type::getInt1Ty(context), true);
         irBuilder.CreateCondBr(boolPred, bodyBlockPack.getFirstBlock(), afterBodyBlock);
         // Add instructions to body
         irBuilder.SetInsertPoint(bodyBlockPack.getFinalBlock());
@@ -244,7 +245,7 @@ public:
         {
                 newCounterValue = getGlobalModule()->addBinaryOperation(bodyBlockPack.getFinalBlock(),
                                                                   counterValueInEndOfBody.first, counterValueInEndOfBody.second,
-                                                                  llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), 1, true), getGlobalModule()->getTypeInfo("integer"),
+                                                                  llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1, true), getGlobalModule()->getTypeInfo("integer"),
                                                                   OPPLUS
                                                                   );
         }
@@ -252,7 +253,7 @@ public:
         {
                 newCounterValue = getGlobalModule()->addBinaryOperation(bodyBlockPack.getFinalBlock(),
                                                                   counterValueInEndOfBody.first, counterValueInEndOfBody.second,
-                                                                  llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), 1, true), getGlobalModule()->getTypeInfo("integer"),
+                                                                  llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1, true), getGlobalModule()->getTypeInfo("integer"),
                                                                   OPMINUS
                                                                   );
         }
@@ -304,6 +305,7 @@ public:
         llvm::IRBuilder<> irBuilder(thenBlockPack.getFinalBlock());
         irBuilder.CreateBr(afterBodyBlock);
 
+        auto& context = getGlobalModule()->getLLVMModule().getContext();
 
         std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         std::pair<llvm::Value*, BasicTypeInfo*> predicateValuePair = cast_item<std::pair<llvm::Value*, BasicTypeInfo*>>(m_stack[2], "Value");
@@ -313,7 +315,7 @@ public:
             throw std::runtime_error("Only integer supported as counter in for statement");
         }
         irBuilder.SetInsertPoint(previousBlock);
-        llvm::Value* boolPred = irBuilder.CreateIntCast(predicateValuePair.first, llvm::Type::getInt1Ty(llvm::getGlobalContext()), true);
+        llvm::Value* boolPred = irBuilder.CreateIntCast(predicateValuePair.first, llvm::Type::getInt1Ty(context), true);
         bool flag = cast_item<bool>(m_stack[6], "ElseFlag");
         std::cout <<  __PRETTY_FUNCTION__ << std::endl;
         // If else exist

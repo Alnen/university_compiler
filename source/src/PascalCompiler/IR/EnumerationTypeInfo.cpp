@@ -1,5 +1,8 @@
 #include "EnumerationTypeInfo.hpp"
 #include "llvm/IR/TypeBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "GlobalContext.h"
+#include "Module.h"
 
 namespace PascalCompiler {
 
@@ -7,7 +10,8 @@ EnumerationTypeInfo::EnumerationTypeInfo(const std::string& name):
     BasicTypeInfo(BasicTypeInfo::Type::ENUMERATION)
 {
     m_name = "enumeration";
-    m_llvmType  = llvm::TypeBuilder<llvm::types::i<32>, false>::get(llvm::getGlobalContext());
+    auto& context = getGlobalModule()->getLLVMModule().getContext();
+    m_llvmType  = llvm::TypeBuilder<llvm::types::i<32>, false>::get(context);
 }
 
 void EnumerationTypeInfo::addItem(const std::string& item)

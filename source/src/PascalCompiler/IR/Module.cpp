@@ -8,9 +8,9 @@
 
 namespace PascalCompiler {
 
-Module::Module(std::string name):
+Module::Module(std::string name, llvm::LLVMContext& context) :
     m_name(name),
-    m_llvmModule(m_name, llvm::getGlobalContext())
+    m_llvmModule(m_name, context)
 {
     // Integer type
     auto integer_typeInfo  = std::make_unique<IntegerTypeInfo>();
@@ -96,7 +96,8 @@ Module::Module(std::string name):
         case PascalCompiler::Grammar::OPAS: // :=
             // L is Alloca, R is Value
         {
-            llvm::Value* lPtr = irBuilder.CreateGEP(L, {llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(llvm::getGlobalContext()), 0)});
+            auto& context = getGlobalModule()->getLLVMModule().getContext();
+            llvm::Value* lPtr = irBuilder.CreateGEP(L, {llvm::ConstantInt::getSigned(llvm::Type::getInt32Ty(context), 0)});
             result_codegen = irBuilder.CreateStore(R, lPtr, "tempas");
             break;
         }
@@ -550,6 +551,14 @@ Context* Module::getContextByName(const std::string& name) const
     {
         throw std::runtime_error("No such function or overload");
     }
+}
+
+const llvm::Module& Module::getLLVMModule() const {
+    return m_llvmModule;
+}
+
+llvm::Module& Module::getLLVMModule() {
+    return m_llvmModule;
 }
 
 }

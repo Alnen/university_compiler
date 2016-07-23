@@ -1,6 +1,3 @@
-#define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_LIMIT_MAP_SIZE 50
-
 #include <memory>
 #include <boost/bimap.hpp>
 
@@ -128,10 +125,10 @@ int main (int argc, char** argv)
     Lexer::Lexer<TokenType> lexer( std::move(rules), &lexer_out, &(tokenTypeMapping()));
     lexer.openInput(argv[1]);
 
-
-    PascalCompiler::initModule("nodule");
+    llvm::LLVMContext context;
+    PascalCompiler::initModule("nodule", context);
     // Creating Global Context
-    llvm::FunctionType* mainFunctionType = llvm::FunctionType::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), false);
+    llvm::FunctionType* mainFunctionType = llvm::FunctionType::get(llvm::Type::getInt32Ty(context), false);
     auto* currentContext =  PascalCompiler::getGlobalModule()->registerContext("main", mainFunctionType, nullptr);
     PascalCompiler::getGlobalModule()->setContext(currentContext);
 

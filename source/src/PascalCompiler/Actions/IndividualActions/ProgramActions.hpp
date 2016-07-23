@@ -17,9 +17,10 @@ public:
     virtual void executeHandler() override
     {
         std::cout << "***asasadasd****" << std::endl;
+        auto& context = PascalCompiler::getGlobalModule()->getLLVMModule().getContext();
         TreeConstructor::executeHandler();
         BlockPack* mainBlockPack = getGlobalModule()->getCurrentContext()->getCurrentBlock();
-        llvm::Value* returnValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm::getGlobalContext()), 0, true);
+        llvm::Value* returnValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0, true);
         llvm::IRBuilder<> irBuilder(getGlobalModule()->getCurrentContext()->getAllocaBlock());
         irBuilder.CreateBr(mainBlockPack->getFirstBlock());
         irBuilder.SetInsertPoint(mainBlockPack->getFinalBlock());

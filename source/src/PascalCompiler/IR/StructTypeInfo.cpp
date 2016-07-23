@@ -2,6 +2,8 @@
 #include "llvm/IR/Type.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/LLVMContext.h"
+#include "GlobalContext.h"
+#include "Module.h"
 
 namespace PascalCompiler {
 
@@ -22,7 +24,8 @@ StructTypeInfo::StructTypeInfo(const MemberVector& members, const std::string& n
         typeVector.emplace_back(member.second->getLLVMType());
     }
 
-    llvm::StructType* llvmType = llvm::StructType::create(llvm::getGlobalContext(), llvm::ArrayRef<llvm::Type*>(typeVector), m_name);
+    auto& context = getGlobalModule()->getLLVMModule().getContext();
+    llvm::StructType* llvmType = llvm::StructType::create(context, llvm::ArrayRef<llvm::Type*>(typeVector), m_name);
     m_llvmType = llvmType;
 }
 

@@ -24,9 +24,10 @@ Context::Context(const std::string& name, llvm::FunctionType* type, Context* par
 
 llvm::BasicBlock* Context::registerBasicBlock(const std::string& name)
 {
+    auto& context = getGlobalModule()->getLLVMModule().getContext();
     if (m_labelMap.find(name) == m_labelMap.end())
     {
-        llvm::BasicBlock* temp = llvm::BasicBlock::Create(llvm::getGlobalContext(), name, m_function);
+        llvm::BasicBlock* temp = llvm::BasicBlock::Create(context, name, m_function);
         m_labelMap[name] = std::make_unique<LabelInfo>(name, temp);
         return temp;
     }
